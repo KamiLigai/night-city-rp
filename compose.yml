@@ -16,7 +16,7 @@ services:
     depends_on:
       - night-city-rp-db
     ports:
-      - "8080:8080"
+      - "10005:8080"
 
   night-city-rp-db:
     image: postgres:15
@@ -31,7 +31,7 @@ services:
     networks:
       - night-city-rp
     ports:
-      - "5432:5432"
+      - "10006:5432"
 
   night-city-rp-frontend:
     image: night-city-rp-frontend:latest
@@ -43,7 +43,7 @@ services:
     restart:
       unless-stopped
     ports:
-      - "80:80"
+      - "10007:80"
 
 networks:
   night-city-rp:
