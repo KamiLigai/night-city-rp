@@ -1,0 +1,21 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2024-05-02-add-users
+      author: kokoligai
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: username
+                  type: varchar
+                  constraints:
+                    unique: true
+                    uniqueConstraintName: USERS_USERNAME_UNIQUE
+                    nullable: false
