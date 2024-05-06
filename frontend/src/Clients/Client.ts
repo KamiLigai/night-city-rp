@@ -7,7 +7,7 @@ import { CreateUserRequest } from '@/dto/CreateUserRequest'
 class Client {
 
   axiosClient = axios.create({
-    baseURL: import.meta.env.VITE_BACKEND_BASE_URL ?? '/api'
+    baseURL: import.meta.env.VITE_BACKEND_BASE_URL || "api"
   })
 
   public login(username: string, password: string): Promise<AxiosResponse<UserDto>> {
