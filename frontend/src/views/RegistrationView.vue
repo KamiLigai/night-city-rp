@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import client from '@/Client'
+import client from '@/Clients/Client'
 import router from '@/router'
 
 const username = ref<string>()

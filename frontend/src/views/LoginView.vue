@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import router from '@/router'
-import client from '@/Client'
+import client from '@/Clients/Client'
 
 const username = ref<string>()
 const password = ref<string>()

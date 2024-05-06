@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useUserStore } from '@/stores/userStore'
 import router from '@/router'
-import client from '@/Client'
+import client from '@/Clients/Client'
 
 const userStore = useUserStore()
 
