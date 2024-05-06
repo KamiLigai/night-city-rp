@@ -27,7 +27,7 @@ public class SecurityConfiguration {
     public SecurityFilterChain filterChain(HttpSecurity http, Customizer<CorsConfigurer<HttpSecurity>> corsCustomizer) {
         return http
             .cors(corsCustomizer)
-            .csrf(AbstractHttpConfigurer::disable)
+            .csrf(AbstractHttpConfigurer::disable)      // todo: enable csrf
             .authorizeHttpRequests(it -> it
                 .requestMatchers(POST, "users").permitAll()
                 .anyRequest().authenticated()

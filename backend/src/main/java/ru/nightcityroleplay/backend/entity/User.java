@@ -32,6 +32,8 @@ public class User implements UserDetails {
     private String username;
     private String password;
 
+    // todo: add audit
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of();
