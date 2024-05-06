@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import router from '@/router'
 import client from '@/Client'
+import router from '@/router'
 
 const username = ref<string>()
 const password = ref<string>()
 
-function enter() {
-  client.login(username.value!, password.value!)
-    .then(() => router.push({ name: 'home' }))
-    .catch(() => console.error('login failed'))
+function register(): void {
+  client.createUser(username.value!, password.value!)
+    .then(() => router.push({name: "login"}))
+    .catch(() => console.error("registration failed"))
 }
 
 const inputIsValid = computed(() => {
@@ -22,10 +22,10 @@ const inputIsValid = computed(() => {
 
 <template>
   <div class="container">
-    <h1>Вход</h1>
+    <h1>Регистрация</h1>
     <input v-model="username" placeholder="логин">
     <input v-model="password" placeholder="пароль">
-    <button v-on:click="enter" :disabled="!inputIsValid">Войти</button>
+    <button v-on:click="register" :disabled="!inputIsValid">Зарегистрироваться</button>
   </div>
 </template>
 
