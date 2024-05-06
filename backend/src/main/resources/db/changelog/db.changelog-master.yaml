@@ -1,3 +1,5 @@
 databaseChangeLog:
   - include:
       file: db/changelog/includes/2024-05-02-add-users.yaml
+  - include:
+      file: db/changelog/includes/2024-05-06-change-users-for-auth.yaml
