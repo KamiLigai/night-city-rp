@@ -1,5 +1,8 @@
 package ru.nightcityroleplay.backend.controller;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.nightcityroleplay.backend.dto.CharacterDTO;
 import ru.nightcityroleplay.backend.dto.CreateCharacterRequest;
@@ -12,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("character")
+@RequestMapping("characters")
 public class CharacterController {
 
     private final CharacterService characterService;
@@ -26,14 +29,14 @@ public class CharacterController {
         return characterService.createCharacter(request);
     }
 
-    @GetMapping
-    public List<CharacterDTO> getCharacters() {
-        return characterService.getCharacter();
+    @GetMapping()
+    public Page<CharacterDTO> getCharacters(Pageable pageable) {
+        return characterService.getCharacterPage(pageable);
     }
 
     @GetMapping("{characterId}")
-    public CharacterDTO getCharacter(@PathVariable UUID dogId) {
-        return characterService.getCharacter(dogId);
+    public CharacterDTO getCharacter(@PathVariable UUID characterId) {
+        return characterService.getCharacter(characterId);
     }
 
 
@@ -49,6 +52,6 @@ public class CharacterController {
     }
 
 
-
-
 }
+
+

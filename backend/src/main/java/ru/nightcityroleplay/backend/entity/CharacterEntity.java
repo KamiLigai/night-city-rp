@@ -11,16 +11,12 @@ import java.util.UUID;
 @Table(name = "characters")
 @Setter
 @Getter
-
-
-public class CharactersEntity {
+public class CharacterEntity {
 
     @Id
     @UuidGenerator
     private UUID id;
 
-    @Id
-    @UuidGenerator
     private UUID owner_id;
 
     @Column
