@@ -1,17 +1,16 @@
 package ru.nightcityroleplay.backend.controller;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import ru.nightcityroleplay.backend.dto.CharacterDTO;
+import ru.nightcityroleplay.backend.dto.CharacterDto;
 import ru.nightcityroleplay.backend.dto.CreateCharacterRequest;
 import ru.nightcityroleplay.backend.dto.UpdateCharacterRequest;
+import ru.nightcityroleplay.backend.dto.UserDto;
 import ru.nightcityroleplay.backend.service.CharacterService;
+import ru.nightcityroleplay.backend.service.UserService;
 
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -19,9 +18,12 @@ import java.util.UUID;
 public class CharacterController {
 
     private final CharacterService characterService;
+    private final UserService userService;
 
-    public CharacterController(CharacterService characterService) {
+
+    public CharacterController(CharacterService characterService, UserService userService) {
         this.characterService = characterService;
+        this.userService = userService;
     }
 
     @PostMapping
@@ -30,19 +32,19 @@ public class CharacterController {
     }
 
     @GetMapping()
-    public Page<CharacterDTO> getCharacters(Pageable pageable) {
+    public Page<CharacterDto> getCharacters(Pageable pageable) {
         return characterService.getCharacterPage(pageable);
     }
 
     @GetMapping("{characterId}")
-    public CharacterDTO getCharacter(@PathVariable UUID characterId) {
+    public CharacterDto getCharacter(@PathVariable UUID characterId) {
         return characterService.getCharacter(characterId);
     }
 
 
     @PutMapping("{characterId}")
-    public void updateCharacter(@RequestBody UpdateCharacterRequest request, @PathVariable UUID characterId) {
-        characterService.updateCharacter(request, characterId);
+    public void updateCharacter(@RequestBody UpdateCharacterRequest request, @PathVariable UUID characterId, Authentication auth) {
+        characterService.updateCharacter(request, characterId, auth);
     }
 
 

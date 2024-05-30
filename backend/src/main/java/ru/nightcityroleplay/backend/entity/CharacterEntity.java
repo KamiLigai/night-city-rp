@@ -17,7 +17,7 @@ public class CharacterEntity {
     @UuidGenerator
     private UUID id;
 
-    private UUID owner_id;
+    private UUID ownerId;
 
     @Column
     private String name;

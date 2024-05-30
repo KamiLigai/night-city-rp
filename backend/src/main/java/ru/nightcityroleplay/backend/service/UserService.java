@@ -36,6 +36,8 @@ public class UserService {
     }
 
     public UserDto getCurrentUser(Authentication auth) {
-        return toDto((User) auth.getPrincipal());
+        Object principal = auth.getPrincipal();
+        User user = (User) principal;
+        return toDto(user);
     }
 }

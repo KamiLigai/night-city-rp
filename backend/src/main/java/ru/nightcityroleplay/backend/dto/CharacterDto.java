@@ -6,7 +6,7 @@ import java.util.UUID;
 
 
 @Data
-public class CharacterDTO {
+public class CharacterDto {
     private UUID id;
     private UUID owner_id;
     private String name;
