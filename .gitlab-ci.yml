@@ -10,10 +10,19 @@ build:
   script:
     - docker-compose -f compose.yml build
 
-deploy:
+deploy-on-test:
   stage: deploy
   script:
-    - docker-compose -f compose.yml down
-    - docker-compose -f compose.yml up -d
+    - docker-compose -f compose.yml --project-name night-city-rp-test --env-file test.env down
+    - docker-compose -f compose.yml --project-name night-city-rp-test --env-file test.env up -d
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+deploy-on-prod:
+  stage: deploy
+  script:
+    - docker-compose -f compose.yml --project-name night-city-rp-prod --env-file prod.env down
+    - docker-compose -f compose.yml --project-name night-city-rp-prod --env-file prod.env up -d
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: manual
