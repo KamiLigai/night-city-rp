@@ -8,7 +8,7 @@ stages:
 build:
   stage: build
   script:
-    - docker-compose -f compose.yml build
+    - docker-compose -f compose.yml --env-file test.env build
 
 deploy-on-test:
   stage: deploy
