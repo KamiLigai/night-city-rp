@@ -27,7 +27,7 @@ services:
       - POSTGRES_PASSWORD=postgres    # todo: сменить и спрятать в секреты
       - PGDATA=/data/postgres
     volumes:
-      - /mnt/pool-1/night-city-rp/db/data/postgres:/data/postgres
+      - /mnt/pool-1/night-city-rp-${ENV_NAME}/db/data/postgres:/data/postgres
     restart: unless-stopped
     networks:
       - night-city-rp
