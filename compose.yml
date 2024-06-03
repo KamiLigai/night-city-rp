@@ -38,6 +38,7 @@ services:
     image: night-city-rp-frontend:latest
     build:
       context: frontend/
+    hostname: night-city-rp-frontend-${ENV_NAME}
     networks:
       - night-city-rp
       - apps_default
