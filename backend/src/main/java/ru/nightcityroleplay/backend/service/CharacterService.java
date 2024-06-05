@@ -1,5 +1,6 @@
 package ru.nightcityroleplay.backend.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -33,7 +34,7 @@ public class CharacterService {
     private CharacterDto toDto(CharacterEntity character) {
         CharacterDto characterDTO = new CharacterDto();
         characterDTO.setId(character.getId());
-        characterDTO.setOwner_id(UUID.randomUUID());
+        characterDTO.setOwnerId(character.getOwnerId());
         characterDTO.setName(character.getName());
         characterDTO.setAge(character.getAge());
         return characterDTO;
@@ -41,10 +42,12 @@ public class CharacterService {
 
 
     @Transactional
-    public UUID createCharacter(CreateCharacterRequest request) {
+    public UUID createCharacter(CreateCharacterRequest request, Authentication auth) {
 
         CharacterEntity character = new CharacterEntity();
-        character.setOwnerId(UUID.randomUUID());
+        Object principal = auth.getPrincipal();
+        User user = (User) principal;
+        character.setOwnerId(user.getId());
         character.setName(request.getName());
         character.setAge(request.getAge());
         character = characterRepository.save(character);
@@ -72,8 +75,7 @@ public class CharacterService {
         if (byId.isEmpty()) {
             return null;
         } else {
-            CharacterDto usDto = toDto(byId.get());
-            return usDto;
+            return toDto(byId.get());
         }
     }
 
@@ -92,8 +94,24 @@ public class CharacterService {
 
 
     @Transactional
-    public void deleteCharacter(UUID characterId) {
-        characterRepository.deleteById(characterId);
+    public void deleteCharacter(UUID characterId, Authentication auth) {
+
+        if (characterRepository.findById(characterId).isEmpty()) {
+            throw new EntityNotFoundException("Персонаж не найден");
+        }
+        CharacterEntity character = characterRepository.findById(characterId).get();
+        Object principal = auth.getPrincipal();
+        User user = (User) principal;
+        UUID userid = user.getId();
+
+        if (!character.getOwnerId().equals(userid)){
+            throw new RuntimeException("Удалить чужого персонажа вздумал? а ты хорош.");
+        }
+        else {
+            characterRepository.deleteById(characterId);
+        }
+
+
     }
 }
 

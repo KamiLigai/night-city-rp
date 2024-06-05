@@ -8,7 +8,7 @@ import java.util.UUID;
 @Data
 public class CharacterDto {
     private UUID id;
-    private UUID owner_id;
+    private UUID ownerId;
     private String name;
     private int age;
 

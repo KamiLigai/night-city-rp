@@ -1,4 +1,5 @@
 package ru.nightcityroleplay.backend.controller;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
@@ -6,10 +7,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.nightcityroleplay.backend.dto.CharacterDto;
 import ru.nightcityroleplay.backend.dto.CreateCharacterRequest;
 import ru.nightcityroleplay.backend.dto.UpdateCharacterRequest;
-import ru.nightcityroleplay.backend.dto.UserDto;
 import ru.nightcityroleplay.backend.service.CharacterService;
 import ru.nightcityroleplay.backend.service.UserService;
-
 
 import java.util.UUID;
 
@@ -18,17 +17,14 @@ import java.util.UUID;
 public class CharacterController {
 
     private final CharacterService characterService;
-    private final UserService userService;
-
 
     public CharacterController(CharacterService characterService, UserService userService) {
         this.characterService = characterService;
-        this.userService = userService;
     }
 
     @PostMapping
-    public UUID createCharacter(@RequestBody CreateCharacterRequest request) {
-        return characterService.createCharacter(request);
+    public UUID createCharacter(@RequestBody CreateCharacterRequest request, Authentication auth) {
+        return characterService.createCharacter(request, auth);
     }
 
     @GetMapping()
@@ -49,9 +45,11 @@ public class CharacterController {
 
 
     @DeleteMapping("{characterId}")
-    public void deleteCharacter(@PathVariable UUID characterId) {
-        characterService.deleteCharacter(characterId);
+    public void deleteCharacter(@PathVariable UUID characterId, Authentication auth) {
+        characterService.deleteCharacter(characterId, auth);
     }
+
+
 
 
 }
