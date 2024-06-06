@@ -12,7 +12,7 @@ import type { CharactersPage } from '@/dto/CharactersPage'
 class Client {
 
     axiosClient = axios.create({
-        baseURL: import.meta.env.VITE_BACKEND_BASE_URL || 'api',
+        baseURL: import.meta.env.VITE_BACKEND_BASE_URL || '/api',
         headers: { 'X-Requested-With': 'XMLHttpRequest' }
     })
 
