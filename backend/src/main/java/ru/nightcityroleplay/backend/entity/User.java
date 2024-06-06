@@ -28,7 +28,6 @@ public class User implements UserDetails {
     @Id
     @UuidGenerator
     private UUID id;
-
     private String username;
     private String password;
 
