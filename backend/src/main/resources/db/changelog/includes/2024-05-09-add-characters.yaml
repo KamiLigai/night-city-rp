@@ -12,18 +12,15 @@ databaseChangeLog:
                   constraints:
                     primaryKey: true
                     nullable: false
-                    unique: true
               - column:
                   name: owner_id
                   type: uuid
                   constraints:
-                    unique: true
                     nullable: false
               - column:
                   name: name
                   type: varchar
                   constraints:
-                    unique: false
                     nullable: false
               - column:
                   name: age

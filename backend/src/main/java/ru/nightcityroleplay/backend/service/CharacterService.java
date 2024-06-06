@@ -1,6 +1,5 @@
 package ru.nightcityroleplay.backend.service;
 
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -12,6 +11,7 @@ import ru.nightcityroleplay.backend.dto.CreateCharacterRequest;
 import ru.nightcityroleplay.backend.dto.UpdateCharacterRequest;
 import ru.nightcityroleplay.backend.entity.CharacterEntity;
 import ru.nightcityroleplay.backend.entity.User;
+import ru.nightcityroleplay.backend.exception.NightCityRpException;
 import ru.nightcityroleplay.backend.repo.CharacterRepository;
 
 import java.util.ArrayList;
@@ -19,15 +19,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-// Решить как сравнить ОвнерАйди и дать доступ для удаление только Владельцу
+
 
 @Service
 public class CharacterService {
 
-    private final CharacterRepository characterRepository;
+    private final CharacterRepository characterRepo;
 
-    public CharacterService(CharacterRepository characterRepository) {
-        this.characterRepository = characterRepository;
+    public CharacterService(CharacterRepository characterRepo) {
+        this.characterRepo = characterRepo;
     }
 
 
@@ -50,28 +50,28 @@ public class CharacterService {
         character.setOwnerId(user.getId());
         character.setName(request.getName());
         character.setAge(request.getAge());
-        character = characterRepository.save(character);
+        character = characterRepo.save(character);
         return character.getId();
 
     }
 
     @Transactional
     public Page<CharacterDto> getCharacterPage(Pageable pageable) {
-        Page<CharacterEntity> characterPage = characterRepository.findAll(pageable);
+        Page<CharacterEntity> characterPage = characterRepo.findAll(pageable);
         List<CharacterEntity> characters = characterPage.toList();
         List<CharacterDto> characterDTOS = new ArrayList<>();
         for (var character : characters) {
             characterDTOS.add(toDto(character));
 
         }
-        return new PageImpl<>(characterDTOS, pageable, characterPage.getTotalPages());
+        return new PageImpl<>(characterDTOS, pageable, characterPage.getTotalElements());
 
 
     }
 
     @Transactional
     public CharacterDto getCharacter(UUID characterId) {
-        Optional<CharacterEntity> byId = characterRepository.findById(characterId);
+        Optional<CharacterEntity> byId = characterRepo.findById(characterId);
         if (byId.isEmpty()) {
             return null;
         } else {
@@ -81,37 +81,43 @@ public class CharacterService {
 
     @Transactional
     public void updateCharacter(UpdateCharacterRequest request, UUID characterId, Authentication auth) {
-        CharacterEntity character = new CharacterEntity();
-        character.setId(characterId);
-        Object principal = auth.getPrincipal();
-        User user = (User) principal;
-        character.setOwnerId(user.getId());
-        character.setName(request.getName());
-        character.setAge(request.getAge());
-        characterRepository.save(character);
-    }
+        CharacterEntity newCharacter = new CharacterEntity();
 
-
-
-    @Transactional
-    public void deleteCharacter(UUID characterId, Authentication auth) {
-
-        if (characterRepository.findById(characterId).isEmpty()) {
-            throw new EntityNotFoundException("Персонаж не найден");
+        if (characterRepo.findById(characterId).isEmpty()) {
+            throw new NightCityRpException("Персонаж не найден");
         }
-        CharacterEntity character = characterRepository.findById(characterId).get();
+        CharacterEntity oldCharacter = characterRepo.findById(characterId).get();
         Object principal = auth.getPrincipal();
         User user = (User) principal;
         UUID userid = user.getId();
 
-        if (!character.getOwnerId().equals(userid)){
-            throw new RuntimeException("Удалить чужого персонажа вздумал? а ты хорош.");
+        if (!oldCharacter.getOwnerId().equals(userid)){
+            throw new NightCityRpException("Изменить чужого персонажа вздумал? а ты хорош.");
         }
         else {
-            characterRepository.deleteById(characterId);
+            newCharacter.setId(characterId);
+            newCharacter.setOwnerId(user.getId());
+            newCharacter.setName(request.getName());
+            newCharacter.setAge(request.getAge());
+            characterRepo.save(newCharacter);
         }
+    }
 
-
+    @Transactional
+    public void deleteCharacter(UUID characterId, Authentication auth) {
+        Optional<CharacterEntity> character = characterRepo.findById(characterId);
+        if (character.isEmpty()) {
+            throw new NightCityRpException("Персонаж не найден");
+        }
+        Object principal = auth.getPrincipal();
+        User user = (User) principal;
+        UUID userid = user.getId();
+        if (!character.get().getOwnerId().equals(userid)){
+            throw new NightCityRpException("Удалить чужого персонажа вздумал? а ты хорош.");
+        }
+        else {
+            characterRepo.deleteById(characterId);
+        }
     }
 }
 

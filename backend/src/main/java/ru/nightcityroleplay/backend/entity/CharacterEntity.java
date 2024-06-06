@@ -16,12 +16,7 @@ public class CharacterEntity {
     @Id
     @UuidGenerator
     private UUID id;
-
     private UUID ownerId;
-
-    @Column
     private String name;
-
-    @Column
     private Integer age;
 }
