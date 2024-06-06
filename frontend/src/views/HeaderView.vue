@@ -9,7 +9,7 @@ const userStore = useUserStore()
 
 function logout() {
     client.logout()
-    router.push('login')
+    router.push({ name: "login" })
 }
 
 </script>
@@ -18,6 +18,7 @@ function logout() {
     <div class="container">
         <h1>Night City RP</h1>
         <router-link :to="{name: 'home'}">Главная</router-link>
+        <router-link v-if="userStore.user?.username" :to="{name: 'characters'}">Персонажи</router-link>
         <router-link v-if="!userStore.user?.username" :to="{name: 'login'}">Войти</router-link>
         <router-link v-if="!userStore.user?.username" :to="{name: 'registration'}">Зарегистрироваться</router-link>
         <p v-if="userStore.user?.username">{{ userStore.user?.username }}</p>

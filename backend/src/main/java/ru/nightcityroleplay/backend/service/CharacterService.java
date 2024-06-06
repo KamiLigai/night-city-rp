@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.nightcityroleplay.backend.dto.CharacterDto;
 import ru.nightcityroleplay.backend.dto.CreateCharacterRequest;
+import ru.nightcityroleplay.backend.dto.CreateCharacterResponse;
 import ru.nightcityroleplay.backend.dto.UpdateCharacterRequest;
 import ru.nightcityroleplay.backend.entity.CharacterEntity;
 import ru.nightcityroleplay.backend.entity.User;
@@ -42,8 +43,7 @@ public class CharacterService {
 
 
     @Transactional
-    public UUID createCharacter(CreateCharacterRequest request, Authentication auth) {
-
+    public CreateCharacterResponse createCharacter(CreateCharacterRequest request, Authentication auth) {
         CharacterEntity character = new CharacterEntity();
         Object principal = auth.getPrincipal();
         User user = (User) principal;
@@ -51,8 +51,7 @@ public class CharacterService {
         character.setName(request.getName());
         character.setAge(request.getAge());
         character = characterRepo.save(character);
-        return character.getId();
-
+        return new CreateCharacterResponse(character.getId());
     }
 
     @Transactional
