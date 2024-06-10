@@ -4,6 +4,7 @@ import client from '@/Clients/Client'
 import { ref } from 'vue'
 import { CreateCharacterRequest } from '@/dto/CreateCharacterRequest'
 import { useRouter } from 'vue-router'
+import { toast } from 'vue3-toastify'
 
 const router = useRouter()
 const request = ref<CreateCharacterRequest>(new CreateCharacterRequest())
@@ -11,7 +12,7 @@ const request = ref<CreateCharacterRequest>(new CreateCharacterRequest())
 function createCharacter() {
     client.createCharacter(request.value!)
         .then(response => router.push({ name: 'character', params: { characterId: response.data.id } }))
-        .catch(() => console.error('request failed'))
+        .catch(() => toast('Не удалось создать персонажа', { type: toast.TYPE.ERROR }))
 }
 </script>
 

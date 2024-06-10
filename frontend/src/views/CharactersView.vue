@@ -3,6 +3,7 @@
 import { onMounted, ref } from 'vue'
 import client from '@/Clients/Client'
 import { CharactersPage } from '@/dto/CharactersPage'
+import { toast } from 'vue3-toastify'
 
 const charactersResponse = ref<CharactersPage>()
 const page = ref(0)
@@ -27,7 +28,7 @@ function goToNextPage() {
 function reloadCharacters() {
     client.getCharacters(page.value, size.value)
         .then(response => charactersResponse.value = response.data)
-        .catch(() => console.error('request failed'))
+        .catch(() => toast('Ошибка запроса персонажей', { type: toast.TYPE.ERROR }))
 }
 
 
