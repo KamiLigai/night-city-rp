@@ -14,10 +14,12 @@ services:
       - spring.datasource.username=night-city-rp
       - spring.datasource.password=postgres          # todo: сменить и спрятать в секреты
       - app.enable-cors=false
+      - springdoc.api-docs.enabled=false
+      - springdoc.swagger-ui.enabled=false
     depends_on:
       - night-city-rp-db
     ports:
-      - "${BACKEND_PORT}:8080"
+      - "10014:8080"
 
   night-city-rp-db:
     image: postgres:15
@@ -27,25 +29,25 @@ services:
       - POSTGRES_PASSWORD=postgres    # todo: сменить и спрятать в секреты
       - PGDATA=/data/postgres
     volumes:
-      - /mnt/pool-1/night-city-rp-${ENV_NAME}/db/data/postgres:/data/postgres
+      - /mnt/pool-1/night-city-rp-prod/db/data/postgres:/data/postgres
     restart: unless-stopped
     networks:
       - night-city-rp
     ports:
-      - "${DB_PORT}:5432"
+      - "10015:5432"
 
   night-city-rp-frontend:
     image: night-city-rp-frontend:latest
     build:
       context: frontend/
-    hostname: night-city-rp-frontend-${ENV_NAME}
+    hostname: night-city-rp-frontend-prod
     networks:
       - night-city-rp
       - apps_default
     restart:
       unless-stopped
     ports:
-      - "${FRONTEND_PORT}:80"
+      - "10016:80"
 
 networks:
   night-city-rp:
