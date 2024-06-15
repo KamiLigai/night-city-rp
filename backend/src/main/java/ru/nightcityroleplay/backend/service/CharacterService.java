@@ -21,7 +21,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 
-
 @Service
 public class CharacterService {
 
@@ -33,12 +32,12 @@ public class CharacterService {
 
 
     private CharacterDto toDto(CharacterEntity character) {
-        CharacterDto characterDTO = new CharacterDto();
-        characterDTO.setId(character.getId());
-        characterDTO.setOwnerId(character.getOwnerId());
-        characterDTO.setName(character.getName());
-        characterDTO.setAge(character.getAge());
-        return characterDTO;
+        CharacterDto characterDto = new CharacterDto();
+        characterDto.setId(character.getId());
+        characterDto.setOwnerId(character.getOwnerId());
+        characterDto.setName(character.getName());
+        characterDto.setAge(character.getAge());
+        return characterDto;
     }
 
 
@@ -58,12 +57,12 @@ public class CharacterService {
     public Page<CharacterDto> getCharacterPage(Pageable pageable) {
         Page<CharacterEntity> characterPage = characterRepo.findAll(pageable);
         List<CharacterEntity> characters = characterPage.toList();
-        List<CharacterDto> characterDTOS = new ArrayList<>();
+        List<CharacterDto> characterDtos = new ArrayList<>();
         for (var character : characters) {
-            characterDTOS.add(toDto(character));
+            characterDtos.add(toDto(character));
 
         }
-        return new PageImpl<>(characterDTOS, pageable, characterPage.getTotalElements());
+        return new PageImpl<>(characterDtos, pageable, characterPage.getTotalElements());
 
 
     }
@@ -90,10 +89,9 @@ public class CharacterService {
         User user = (User) principal;
         UUID userid = user.getId();
 
-        if (!oldCharacter.getOwnerId().equals(userid)){
+        if (!oldCharacter.getOwnerId().equals(userid)) {
             throw new NightCityRpException("Изменить чужого персонажа вздумал? а ты хорош.");
-        }
-        else {
+        } else {
             newCharacter.setId(characterId);
             newCharacter.setOwnerId(user.getId());
             newCharacter.setName(request.getName());
@@ -111,10 +109,9 @@ public class CharacterService {
         Object principal = auth.getPrincipal();
         User user = (User) principal;
         UUID userid = user.getId();
-        if (!character.get().getOwnerId().equals(userid)){
+        if (!character.get().getOwnerId().equals(userid)) {
             throw new NightCityRpException("Удалить чужого персонажа вздумал? а ты хорош.");
-        }
-        else {
+        } else {
             characterRepo.deleteById(characterId);
         }
     }
