@@ -21,5 +21,5 @@ public class CharacterEntity {
     private UUID id;
     private UUID ownerId;
     private String name;
-    private Integer age;
+    private int age;
 }
