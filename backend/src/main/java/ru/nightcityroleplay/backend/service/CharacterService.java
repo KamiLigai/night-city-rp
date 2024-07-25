@@ -27,6 +27,7 @@ public class CharacterService {
     private final CharacterRepository characterRepo;
 
     public CharacterService(CharacterRepository characterRepo) {
+
         this.characterRepo = characterRepo;
     }
 
@@ -39,7 +40,6 @@ public class CharacterService {
         characterDto.setAge(character.getAge());
         return characterDto;
     }
-
 
     @Transactional
     public CreateCharacterResponse createCharacter(CreateCharacterRequest request, Authentication auth) {
@@ -80,7 +80,6 @@ public class CharacterService {
     @Transactional
     public void updateCharacter(UpdateCharacterRequest request, UUID characterId, Authentication auth) {
         CharacterEntity newCharacter = new CharacterEntity();
-
         if (characterRepo.findById(characterId).isEmpty()) {
             throw new NightCityRpException("Персонаж не найден");
         }
