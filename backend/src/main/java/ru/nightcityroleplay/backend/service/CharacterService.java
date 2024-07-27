@@ -38,6 +38,11 @@ public class CharacterService {
         characterDto.setOwnerId(character.getOwnerId());
         characterDto.setName(character.getName());
         characterDto.setAge(character.getAge());
+        characterDto.setReputation(character.getReputation());
+        characterDto.setImplant_points(character.getImplant_points());
+        characterDto.setSpecial_implant_points(character.getSpecial_implant_points());
+        characterDto.setBattle_points(character.getBattle_points());
+        characterDto.setCivil_points(character.getCivil_points());
         return characterDto;
     }
 
@@ -49,6 +54,29 @@ public class CharacterService {
         character.setOwnerId(user.getId());
         character.setName(request.getName());
         character.setAge(request.getAge());
+        character.setReputation(request.getReputation());
+
+        if (request.getReputation() <= 19)
+        {
+        character.setImplant_points(7);
+        } else if (request.getReputation() < 30) {
+            character.setImplant_points(8);
+        } else if (request.getReputation() < 40) {
+            character.setImplant_points(9);
+        } else if (request.getReputation() == 40) {
+            character.setImplant_points(10);
+        }
+        character.setSpecial_implant_points(0);
+        if (request.getAge() <= 25) {
+            character.setBattle_points(13);
+        } else if (request.getAge() <= 40) {
+            character.setBattle_points(15);
+        } else if (request.getAge() > 40) {
+            character.setBattle_points(17);
+        }
+        character.setCivil_points(15);
+
+
         character = characterRepo.save(character);
         return new CreateCharacterResponse(character.getId());
     }
