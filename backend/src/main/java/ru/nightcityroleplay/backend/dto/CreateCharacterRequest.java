@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 public class CreateCharacterRequest {
     private String name;
-    private int age;
+    private Integer age;
     private Integer reputation;
 }

@@ -29,6 +29,8 @@ class CharacterServiceTest {
     CharacterService service;
     CharacterRepository repo;
 
+    CharacterStatsService characterStatsService;
+
 
 
 
@@ -36,7 +38,7 @@ class CharacterServiceTest {
     void setUp() {
 
         repo = mock();
-        service = new CharacterService(repo);
+        service = new CharacterService(repo, characterStatsService);
     }
 
 

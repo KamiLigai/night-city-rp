@@ -15,6 +15,7 @@ import ru.nightcityroleplay.backend.entity.User;
 import ru.nightcityroleplay.backend.exception.NightCityRpException;
 import ru.nightcityroleplay.backend.repo.CharacterRepository;
 
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -24,10 +25,13 @@ import java.util.UUID;
 @Service
 public class CharacterService {
 
+    private final CharacterStatsService characterStatsService;
+
+
     private final CharacterRepository characterRepo;
 
-    public CharacterService(CharacterRepository characterRepo) {
-
+    public CharacterService(CharacterRepository characterRepo, CharacterStatsService characterStatsService ) {
+        this.characterStatsService = characterStatsService;
         this.characterRepo = characterRepo;
     }
 
@@ -39,10 +43,10 @@ public class CharacterService {
         characterDto.setName(character.getName());
         characterDto.setAge(character.getAge());
         characterDto.setReputation(character.getReputation());
-        characterDto.setImplant_points(character.getImplant_points());
-        characterDto.setSpecial_implant_points(character.getSpecial_implant_points());
-        characterDto.setBattle_points(character.getBattle_points());
-        characterDto.setCivil_points(character.getCivil_points());
+        characterDto.setImplantPoints(character.getImplant_points());
+        characterDto.setSpecialImplantPoints(character.getSpecial_implant_points());
+        characterDto.setBattlePoints(character.getBattle_points());
+        characterDto.setCivilPoints(character.getCivil_points());
         return characterDto;
     }
 
@@ -55,27 +59,7 @@ public class CharacterService {
         character.setName(request.getName());
         character.setAge(request.getAge());
         character.setReputation(request.getReputation());
-
-        if (request.getReputation() <= 19)
-        {
-        character.setImplant_points(7);
-        } else if (request.getReputation() < 30) {
-            character.setImplant_points(8);
-        } else if (request.getReputation() < 40) {
-            character.setImplant_points(9);
-        } else if (request.getReputation() == 40) {
-            character.setImplant_points(10);
-        }
-        character.setSpecial_implant_points(0);
-        if (request.getAge() <= 25) {
-            character.setBattle_points(13);
-        } else if (request.getAge() <= 40) {
-            character.setBattle_points(15);
-        } else if (request.getAge() > 40) {
-            character.setBattle_points(17);
-        }
-        character.setCivil_points(15);
-
+        characterStatsService.updateCharacterStats(character);
 
         character = characterRepo.save(character);
         return new CreateCharacterResponse(character.getId());
@@ -118,13 +102,18 @@ public class CharacterService {
 
         if (!oldCharacter.getOwnerId().equals(userid)) {
             throw new NightCityRpException("Изменить чужого персонажа вздумал? а ты хорош.");
-        } else {
-            newCharacter.setId(characterId);
-            newCharacter.setOwnerId(user.getId());
-            newCharacter.setName(request.getName());
-            newCharacter.setAge(request.getAge());
-            characterRepo.save(newCharacter);
         }
+
+        newCharacter.setId(characterId);
+        newCharacter.setOwnerId(user.getId());
+        newCharacter.setName(request.getName());
+        newCharacter.setAge(request.getAge());
+        newCharacter.setReputation(oldCharacter.getReputation());
+        newCharacter.setImplant_points(oldCharacter.getImplant_points());
+        newCharacter.setSpecial_implant_points(oldCharacter.getSpecial_implant_points());
+        newCharacter.setBattle_points(oldCharacter.getBattle_points());
+        newCharacter.setCivil_points(oldCharacter.getCivil_points());
+        characterRepo.save(newCharacter);
     }
 
     @Transactional
