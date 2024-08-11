@@ -14,7 +14,7 @@ build:
     - cp target/backend-*.jar target/app.jar
   artifacts:
     paths:
-      - target/app.jar
+      - backend/target/app.jar
 
 test:
   stage: build
@@ -30,6 +30,9 @@ deploy-on-test:
     - docker-compose -f compose-test.yml --project-name night-city-rp-test up -d
   rules:
     - when: manual
+  needs:
+    - job: build
+      artifacts: true
 
 deploy-on-prod:
   stage: deploy
@@ -39,3 +42,6 @@ deploy-on-prod:
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       when: manual
+  needs:
+    - job: build
+      artifacts: true
