@@ -2,6 +2,7 @@ package ru.nightcityroleplay.backend.controller;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +19,8 @@ import ru.nightcityroleplay.backend.dto.UpdateCharacterRequest;
 import ru.nightcityroleplay.backend.service.CharacterService;
 
 import java.util.UUID;
+
+import static ru.nightcityroleplay.backend.constant.Roles.ADMIN;
 
 @RestController
 @RequestMapping("characters")
@@ -56,9 +59,12 @@ public class CharacterController {
         characterService.deleteCharacter(characterId, auth);
     }
 
-
-
-
+    // todo: удалить этот тестовый эндпоинт после проверки админов
+    @GetMapping("secured")
+    @Secured(ADMIN)
+    public void secured() {
+        System.out.println("works");
+    }
 }
 
 
