@@ -11,7 +11,7 @@ build:
   script:
     - cd backend
     - mvn package -DskipTests --no-transfer-progress
-    - cp target/backend-*.jar target app.jar
+    - cp target/backend-*.jar target/app.jar
   artifacts:
     paths:
       - target/app.jar
