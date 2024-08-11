@@ -15,7 +15,7 @@ checkstyle:
   image: maven:3-eclipse-temurin-17
   script:
     - cd backend
-    - mvn checkstyle:check
+    - mvn checkstyle:check --no-transfer-progress
 
 deploy-on-test:
   stage: deploy

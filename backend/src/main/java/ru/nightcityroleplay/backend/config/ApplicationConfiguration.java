@@ -7,7 +7,4 @@ import org.springframework.context.annotation.Configuration;
 @EnableConfigurationProperties(ApplicationProperties.class)
 public class ApplicationConfiguration {
 
-    public void superLongMethodWhichViolatesCheckstyleRule_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa() {
-
-    }
 }
