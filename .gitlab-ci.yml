@@ -7,8 +7,21 @@ stages:
 
 build:
   stage: build
+  image: maven:3-eclipse-temurin-17
   script:
-    - docker-compose -f compose-test.yml build
+    - cd backend
+    - mvn package -DskipTests --no-transfer-progress
+    - cp target/backend-*.jar target app.jar
+  artifacts:
+    paths:
+      - target/app.jar
+
+test:
+  stage: build
+  image: maven:3-eclipse-temurin-17
+  script:
+    - cd backend
+    - mvn test --no-transfer-progress
 
 deploy-on-test:
   stage: deploy
