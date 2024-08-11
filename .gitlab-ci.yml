@@ -14,6 +14,7 @@ checkstyle:
   stage: build
   image: maven:3-eclipse-temurin-17
   script:
+    - cd backend
     - mvn checkstyle:check
 
 deploy-on-test:
