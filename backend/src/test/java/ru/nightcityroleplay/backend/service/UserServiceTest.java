@@ -16,6 +16,7 @@ import ru.nightcityroleplay.backend.entity.User;
 import ru.nightcityroleplay.backend.repo.UserRepository;
 
 
+import java.util.Set;
 import java.util.UUID;
 
 
@@ -69,7 +70,7 @@ public class UserServiceTest {
     public void testGetCurrentUser() {
         //given
         UUID userId = UUID.randomUUID();
-        User user = new User(userId, "testUser", "password");
+        User user = new User(userId, "testUser", "password", Set.of());
 
         Authentication auth = mock(Authentication.class);
         when(auth.getPrincipal()).thenReturn(user);
