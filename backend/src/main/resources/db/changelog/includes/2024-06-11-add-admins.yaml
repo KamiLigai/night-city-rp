@@ -20,6 +20,16 @@ databaseChangeLog:
                     unique: true
                     uniqueConstraintName: roles_name_unique
 
+        - insert:
+            tableName: roles
+            columns:
+              - column:
+                  name: id
+                  value: 98e07c2d-f112-429b-b2cd-b80209fdc60e
+              - column:
+                  name: name
+                  value: ADMIN
+
         - createTable:
             tableName: users_roles
             columns:
