@@ -33,6 +33,7 @@ checkstyle:
 deploy-on-test:
   stage: deploy
   script:
+    - docker-compose -f compose-test.yml --project-name night-city-rp-test build
     - docker-compose -f compose-test.yml --project-name night-city-rp-test down
     - docker-compose -f compose-test.yml --project-name night-city-rp-test up -d
   rules:
@@ -44,6 +45,7 @@ deploy-on-test:
 deploy-on-prod:
   stage: deploy
   script:
+    - docker-compose -f compose-prod.yml --project-name night-city-rp-prod build
     - docker-compose -f compose-prod.yml --project-name night-city-rp-prod down
     - docker-compose -f compose-prod.yml --project-name night-city-rp-prod up -d
   rules:
