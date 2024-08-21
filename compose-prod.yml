@@ -10,10 +10,12 @@ services:
     restart:
       unless-stopped
     environment:
+      - app.enable-cors=false
+      - spring.profiles.active=json-logging
       - spring.datasource.url=jdbc:postgresql://night-city-rp-db:5432/night-city-rp
       - spring.datasource.username=night-city-rp
       - spring.datasource.password=postgres          # todo: сменить и спрятать в секреты
-      - app.enable-cors=false
+      - spring.main.banner-mode=off
       - springdoc.api-docs.enabled=false
       - springdoc.swagger-ui.enabled=false
     depends_on:

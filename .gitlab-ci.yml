@@ -7,22 +7,50 @@ stages:
 
 build:
   stage: build
+  image: maven:3-eclipse-temurin-17
   script:
-    - docker-compose -f compose-test.yml build
+    - cd backend
+    - mvn package -DskipTests --no-transfer-progress
+    - cp target/backend-*.jar target/app.jar
+  artifacts:
+    paths:
+      - backend/target/app.jar
+
+test:
+  stage: build
+  image: maven:3-eclipse-temurin-17
+  script:
+    - cd backend
+    - mvn test --no-transfer-progress
+
+checkstyle:
+  stage: build
+  image: maven:3-eclipse-temurin-17
+  script:
+    - cd backend
+    - mvn checkstyle:check --no-transfer-progress
 
 deploy-on-test:
   stage: deploy
   script:
+    - docker-compose -f compose-test.yml --project-name night-city-rp-test build
     - docker-compose -f compose-test.yml --project-name night-city-rp-test down
     - docker-compose -f compose-test.yml --project-name night-city-rp-test up -d
   rules:
     - when: manual
+  needs:
+    - job: build
+      artifacts: true
 
 deploy-on-prod:
   stage: deploy
   script:
+    - docker-compose -f compose-prod.yml --project-name night-city-rp-prod build
     - docker-compose -f compose-prod.yml --project-name night-city-rp-prod down
     - docker-compose -f compose-prod.yml --project-name night-city-rp-prod up -d
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       when: manual
+  needs:
+    - job: build
+      artifacts: true
