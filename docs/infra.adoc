@@ -1,0 +1,38 @@
+[[header]]
+= Инфраструктура
+
+Диаграмма развертывания приложения и инфраструктурных сервисов
+
+image::media/deployment-diagram.svg[format=svg,opts=inline]
+
+Сервисы задеплоены на сервере 95.79.97.148.
+Разведены на test и prod среды.
+
+|===
+|Сервис | Адрес
+
+|Prod Frontend
+|https://night-city-rp.ntrubkin.ru
+
+|Prod Backend
+|https://night-city-rp.ntrubkin.ru/api
+
+|Test Frontend
+|https://night-city-rp-test.ntrubkin.ru
+
+|Test Backend
+|https://night-city-rp-test.ntrubkin.ru/api
+
+|Github
+|https://github.com/KamiLigai/night-city-rp
+
+|Gitlab
+|https://gitlab.ntrubkin.ru/ntrubkin/night-city-rp
+
+|OpenSearch
+|https://opensearch.ntrubkin.ru
+
+|Grafana
+|https://grafana.ntrubkin.ru
+
+|===
