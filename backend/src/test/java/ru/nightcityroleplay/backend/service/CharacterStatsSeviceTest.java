@@ -129,6 +129,7 @@ public class CharacterStatsSeviceTest {
         assertThat(result).isEqualTo(17);
     }
 
+
     @Test
     void calculateCivilPoints_isAlwaysThirteen() {
         // When
