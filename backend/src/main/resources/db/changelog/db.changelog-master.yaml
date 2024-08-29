@@ -7,3 +7,5 @@ databaseChangeLog:
       file: db/changelog/includes/2024-05-09-add-characters.yaml
   - include:
       file: db/changelog/includes/2024-08-09-add-weapons.yaml
+  - include:
+      file: db/changelog/includes/2024-08-27-characters-weapons.yaml
