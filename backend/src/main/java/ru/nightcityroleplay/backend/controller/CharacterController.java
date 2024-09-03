@@ -11,10 +11,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.nightcityroleplay.backend.dto.CharacterDto;
-import ru.nightcityroleplay.backend.dto.CreateCharacterRequest;
-import ru.nightcityroleplay.backend.dto.CreateCharacterResponse;
-import ru.nightcityroleplay.backend.dto.UpdateCharacterRequest;
+import ru.nightcityroleplay.backend.dto.*;
 import ru.nightcityroleplay.backend.service.CharacterService;
 
 import java.util.UUID;
@@ -44,21 +41,25 @@ public class CharacterController {
         return characterService.getCharacter(characterId);
     }
 
-
     @PutMapping("{characterId}")
     public void updateCharacter(@RequestBody UpdateCharacterRequest request, @PathVariable UUID characterId, Authentication auth) {
         characterService.updateCharacter(request, characterId, auth);
     }
-
 
     @DeleteMapping("{characterId}")
     public void deleteCharacter(@PathVariable UUID characterId, Authentication auth) {
         characterService.deleteCharacter(characterId, auth);
     }
 
+    @PutMapping("{characterId}/skills")
+    public void updateCharacterSkill(@RequestBody UpdateCharacterSkillRequest request, @PathVariable UUID characterId, Authentication auth) {
+        characterService.updateCharacterSkill(request, characterId, auth);
+    }
 
-
-
+    @DeleteMapping("{characterId}/skills")
+    public void deleteCharacterSkill(@RequestBody UpdateCharacterSkillRequest request, @PathVariable UUID characterId, Authentication auth) {
+        characterService.deleteCharacterSkill(request, characterId, auth);
+    }
 }
 
 

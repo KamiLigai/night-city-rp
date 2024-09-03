@@ -8,22 +8,27 @@ import org.hibernate.annotations.UuidGenerator;
 import java.util.List;
 import java.util.UUID;
 
+// todo: add Many-to-Many
 
 @Entity
-@Table(name = "characters")
 @Setter
 @Getter
-public class CharacterEntity {
+@Table (name = "skills")
+public class Skill {
 
     @Id
     @UuidGenerator
     private UUID id;
-    private UUID ownerId;
     private String name;
-    private int age;
+    private String description;
+    private int level;
+    private String type;
+    private int cost;
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "characters_skills",
             joinColumns = @JoinColumn(name = "char_id"),
             inverseJoinColumns = @JoinColumn(name = "skill_id"))
-    private List<Skill> skillsId;
+    private List<CharacterEntity> charsId;
+
+
 }

@@ -13,6 +13,7 @@ import ru.nightcityroleplay.backend.entity.CharacterEntity;
 import ru.nightcityroleplay.backend.entity.User;
 import ru.nightcityroleplay.backend.exception.NightCityRpException;
 import ru.nightcityroleplay.backend.repo.CharacterRepository;
+import ru.nightcityroleplay.backend.repo.SkillRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +28,8 @@ import static org.mockito.Mockito.*;
 class CharacterServiceTest {
 
     CharacterService service;
-    CharacterRepository repo;
+    CharacterRepository repo1;
+    SkillRepository repo2;
 
 
 
@@ -35,8 +37,9 @@ class CharacterServiceTest {
     @BeforeEach
     void setUp() {
 
-        repo = mock();
-        service = new CharacterService(repo);
+        repo1 = mock();
+        repo2 = mock();
+        service = new CharacterService(repo1, repo2);
     }
 
 
@@ -109,7 +112,7 @@ class CharacterServiceTest {
     void getCharacterWhenCharacterIsAbsent() {
         //given
         UUID id = randomUUID();
-        when(repo.findById(id))
+        when(repo1.findById(id))
             .thenReturn(Optional.empty());
 
         //when
@@ -118,7 +121,7 @@ class CharacterServiceTest {
 
         // then
         assertThat(result).isNull();
-        verify(repo).findById(id);
+        verify(repo1).findById(id);
     }
 
 //    @Test
@@ -158,7 +161,7 @@ class CharacterServiceTest {
         UUID id = randomUUID();
         var character = new CharacterEntity();
         character.setId(id);
-        when(repo.save(any()))
+        when(repo1.save(any()))
             .thenReturn(character);
 
         // when
@@ -167,8 +170,8 @@ class CharacterServiceTest {
         // verify(mock.someMethod()); - не правильно
 
         // then
-        verify(repo).save(any());
-        verify(repo, never()).deleteById(any());
+        verify(repo1).save(any());
+        verify(repo1, never()).deleteById(any());
         Object someObject = mock();
         verifyNoInteractions(someObject);
 
@@ -186,7 +189,7 @@ class CharacterServiceTest {
         character.setName("Vasyatka");
         character.setAge(42);
 
-        when(repo.findById(charId))
+        when(repo1.findById(charId))
             .thenReturn(Optional.of(character));
 
         //when
@@ -214,7 +217,7 @@ class CharacterServiceTest {
 
         Authentication auth = mock(Authentication.class);
 
-        when(repo.findById(characterId)).thenReturn(Optional.empty());
+        when(repo1.findById(characterId)).thenReturn(Optional.empty());
 
         // when/then
         Assertions.assertThrows(
@@ -239,7 +242,7 @@ class CharacterServiceTest {
         Authentication auth = mock(Authentication.class);
         when(auth.getPrincipal()).thenReturn(user);
 
-        when(repo.findById(characterId)).thenReturn(Optional.of(oldCharacter));
+        when(repo1.findById(characterId)).thenReturn(Optional.of(oldCharacter));
 
         // when/then
         Assertions.assertThrows(
@@ -266,13 +269,13 @@ class CharacterServiceTest {
         character.setId(characterId);
         character.setOwnerId(userId);
 
-        when(repo.findById(characterId)).thenReturn(java.util.Optional.of(character));
+        when(repo1.findById(characterId)).thenReturn(java.util.Optional.of(character));
 
         // when
         service.deleteCharacter(characterId, auth);
 
         // then
-        verify(repo, times(1)).deleteById(characterId);
+        verify(repo1, times(1)).deleteById(characterId);
     }
 
     @Test
@@ -282,7 +285,7 @@ class CharacterServiceTest {
         Authentication authentication = mock(Authentication.class);
 
         // when
-        when(repo.findById(characterId)).thenReturn(java.util.Optional.empty());
+        when(repo1.findById(characterId)).thenReturn(java.util.Optional.empty());
 
         // then
         assertThrows(NightCityRpException.class, () -> {
@@ -304,7 +307,7 @@ class CharacterServiceTest {
         character.setId(characterId);
         character.setOwnerId(UUID.randomUUID());
 
-        when(repo.findById(characterId)).thenReturn(java.util.Optional.of(character));
+        when(repo1.findById(characterId)).thenReturn(java.util.Optional.of(character));
 
         // when, then
         assertThrows(NightCityRpException.class, () -> {
@@ -329,7 +332,7 @@ class CharacterServiceTest {
 
         CharacterEntity character = new CharacterEntity();
         character.setOwnerId(user.getId());
-        when(repo.findById(charId))
+        when(repo1.findById(charId))
             .thenReturn(Optional.of(character));
 
         // when
@@ -337,7 +340,7 @@ class CharacterServiceTest {
 
         // then
         ArgumentCaptor<CharacterEntity> charCaptor = ArgumentCaptor.captor();
-        verify(repo).save(charCaptor.capture());
+        verify(repo1).save(charCaptor.capture());
         CharacterEntity savedChar = charCaptor.getValue();
         assertThat(savedChar.getId()).isEqualTo(charId);
         assertThat(savedChar.getOwnerId()).isEqualTo(user.getId());
