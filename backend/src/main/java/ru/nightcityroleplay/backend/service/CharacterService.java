@@ -88,8 +88,7 @@ public class CharacterService {
         UUID userid = user.getId();
 
         if (not(oldCharacter.getOwnerId().equals(userid))) {
-            // todo: Добавить 403
-            throw new NightCityRpException("Изменить чужого персонажа вздумал? а ты хорош.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Изменить чужого персонажа вздумал? а ты хорош."); // 403
         } else {
             newCharacter.setId(characterId);
             newCharacter.setOwnerId(user.getId());
@@ -108,7 +107,7 @@ public class CharacterService {
         UUID userid = user.getId();
 
         if (not(character.getOwnerId().equals(userid))) {
-            throw new NightCityRpException("Нельзя добавлять способности не своему персонажу!");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Нельзя добавлять способности не своему персонажу!"); // 403
         } else {
             Skill skill = skillRepo.findById(request.getSkillId()).orElse(null);
             if (character.getSkillsId() == null) {
@@ -130,7 +129,7 @@ public class CharacterService {
         UUID userid = user.getId();
 
         if (not(character.getOwnerId().equals(userid))) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Нельзя удалять способности не своему персонажу!"); //403
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Нельзя удалять способности не своему персонажу!"); // 403
         } else {
             Skill skill = skillRepo.findById(request.getSkillId()).orElse(null);
             character.getSkillsId().remove(skill);
@@ -148,7 +147,7 @@ public class CharacterService {
         User user = (User) principal;
         UUID userid = user.getId();
         if (not(character.get().getOwnerId().equals(userid))) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Удалить чужого персонажа вздумал? а ты хорош."); //403
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Удалить чужого персонажа вздумал? а ты хорош."); // 403
         } else {
             characterRepo.deleteById(characterId);
         }

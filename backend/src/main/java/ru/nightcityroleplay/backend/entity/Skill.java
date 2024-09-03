@@ -8,8 +8,6 @@ import org.hibernate.annotations.UuidGenerator;
 import java.util.List;
 import java.util.UUID;
 
-// todo: add Many-to-Many
-
 @Entity
 @Setter
 @Getter

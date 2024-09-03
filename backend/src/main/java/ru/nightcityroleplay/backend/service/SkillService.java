@@ -26,11 +26,9 @@ import java.util.UUID;
 public class SkillService {
 
     private final SkillRepository skillRepo;
-    private final CharacterRepository characterRepo;
 
-    public SkillService(SkillRepository skillRepo, CharacterRepository characterRepo) {
+    public SkillService(SkillRepository skillRepo) {
         this.skillRepo = skillRepo;
-        this.characterRepo = characterRepo;
     }
 
     private SkillDto toDto(Skill skill) {
