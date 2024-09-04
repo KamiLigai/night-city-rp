@@ -29,7 +29,7 @@ public class SecurityConfiguration {
             .csrf(AbstractHttpConfigurer::disable)      // todo: enable csrf
             .authorizeHttpRequests(it -> it
                 .requestMatchers(POST, "users").permitAll()
-                .requestMatchers(GET,"/actuator/health").permitAll()
+                .requestMatchers(GET, "/actuator/health").permitAll()
                 .anyRequest().authenticated()
             ).httpBasic(withDefaults())
             .sessionManagement(AbstractHttpConfigurer::disable)

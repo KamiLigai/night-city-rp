@@ -1,19 +1,21 @@
 package ru.nightcityroleplay.backend.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.nightcityroleplay.backend.dto.CharacterDto;
-import ru.nightcityroleplay.backend.dto.CreateCharacterRequest;
-import ru.nightcityroleplay.backend.dto.CreateCharacterResponse;
-import ru.nightcityroleplay.backend.dto.UpdateCharacterRequest;
+import org.springframework.web.server.ResponseStatusException;
+import ru.nightcityroleplay.backend.dto.*;
 import ru.nightcityroleplay.backend.entity.CharacterEntity;
 import ru.nightcityroleplay.backend.entity.User;
+import ru.nightcityroleplay.backend.entity.WeaponEntity;
 import ru.nightcityroleplay.backend.exception.NightCityRpException;
 import ru.nightcityroleplay.backend.repo.CharacterRepository;
+import ru.nightcityroleplay.backend.repo.WeaponRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,15 +24,16 @@ import java.util.UUID;
 
 
 @Service
+@Slf4j
 public class CharacterService {
 
     private final CharacterRepository characterRepo;
+    private final WeaponRepository weaponRepo;
 
-    public CharacterService(CharacterRepository characterRepo) {
-
+    public CharacterService(CharacterRepository characterRepo, WeaponRepository weaponRepo) {
         this.characterRepo = characterRepo;
+        this.weaponRepo = weaponRepo;
     }
-
 
     private CharacterDto toDto(CharacterEntity character) {
         CharacterDto characterDto = new CharacterDto();
@@ -63,8 +66,6 @@ public class CharacterService {
 
         }
         return new PageImpl<>(characterDtos, pageable, characterPage.getTotalElements());
-
-
     }
 
     @Transactional
@@ -87,7 +88,6 @@ public class CharacterService {
         Object principal = auth.getPrincipal();
         User user = (User) principal;
         UUID userid = user.getId();
-
         if (!oldCharacter.getOwnerId().equals(userid)) {
             throw new NightCityRpException("Изменить чужого персонажа вздумал? а ты хорош.");
         } else {
@@ -114,8 +114,28 @@ public class CharacterService {
             characterRepo.deleteById(characterId);
         }
     }
+
+    @Transactional
+    public void updateCharacterWeapon(UpdateCharacterWeaponRequest request, UUID characterId, Authentication auth) {
+        CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж не найден"));
+        Object principal = auth.getPrincipal();
+        User user = (User) principal;
+        UUID userid = user.getId();
+        if (!character.getOwnerId().equals(userid)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Нельзя добавлять оружие не своему персонажу!");
+        }
+        WeaponEntity weapon = weaponRepo.findById(request.getWeaponId()).orElse(null);
+        if (weapon == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Оружие не найдено");
+        }
+        if (character.getWeaponId() == null) {
+            List<WeaponEntity> weapons = new ArrayList<>();
+            weapons.add(weapon);
+            character.setWeaponId(weapons);
+        } else {
+            character.getWeaponId().add(weapon);
+        }
+        characterRepo.save(character);
+    }
 }
-
-
-
-

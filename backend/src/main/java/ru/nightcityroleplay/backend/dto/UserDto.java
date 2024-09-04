@@ -8,7 +8,6 @@ public record UserDto(
     UUID id,
     String username
 ) {
-
     @Builder
     public UserDto {
     }

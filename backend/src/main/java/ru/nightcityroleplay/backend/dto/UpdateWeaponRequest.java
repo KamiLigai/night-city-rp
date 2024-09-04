@@ -7,10 +7,9 @@ import java.util.UUID;
 @Data
 public class UpdateWeaponRequest {
     private UUID id;
-    private Boolean is_melee;
+    private Boolean isMelee;
     private String name;
-    private String weapon_type;
+    private String weaponType;
     private int penetration;
-    private int reputation_requirement;
-
+    private int reputationRequirement;
 }

@@ -13,6 +13,7 @@ import ru.nightcityroleplay.backend.entity.CharacterEntity;
 import ru.nightcityroleplay.backend.entity.User;
 import ru.nightcityroleplay.backend.exception.NightCityRpException;
 import ru.nightcityroleplay.backend.repo.CharacterRepository;
+import ru.nightcityroleplay.backend.repo.WeaponRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +29,7 @@ class CharacterServiceTest {
 
     CharacterService service;
     CharacterRepository repo;
-
+    WeaponRepository weaponRepo;
 
 
 
@@ -36,7 +37,8 @@ class CharacterServiceTest {
     void setUp() {
 
         repo = mock();
-        service = new CharacterService(repo);
+        weaponRepo = mock();
+        service = new CharacterService(repo, weaponRepo);
     }
 
 

@@ -5,6 +5,4 @@ import ru.nightcityroleplay.backend.entity.CharacterEntity;
 
 import java.util.UUID;
 
-public interface CharacterRepository  extends JpaRepository<CharacterEntity, UUID> {
-
-}
+public interface CharacterRepository  extends JpaRepository<CharacterEntity, UUID> {}
