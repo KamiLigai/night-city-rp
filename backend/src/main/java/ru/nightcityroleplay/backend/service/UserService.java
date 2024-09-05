@@ -1,14 +1,20 @@
 package ru.nightcityroleplay.backend.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.nightcityroleplay.backend.dto.CreateUserRequest;
 import ru.nightcityroleplay.backend.dto.UserDto;
+import ru.nightcityroleplay.backend.entity.Role;
 import ru.nightcityroleplay.backend.entity.User;
 import ru.nightcityroleplay.backend.repo.UserRepository;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -29,9 +35,16 @@ public class UserService {
     }
 
     private UserDto toDto(User user) {
+        List<String> roles = new ArrayList<>();
+        for (int i = 0; i < user.getRoles().size(); i++) {
+            Role role = user.getRoles().get(i);
+            roles.add(role.getName());
+        }
+
         return UserDto.builder()
             .id(user.getId())
             .username(user.getUsername())
+            .roles(roles)
             .build();
     }
 

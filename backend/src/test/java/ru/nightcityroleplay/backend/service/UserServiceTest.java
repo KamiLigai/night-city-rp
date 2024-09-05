@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,7 +15,7 @@ import ru.nightcityroleplay.backend.entity.User;
 import ru.nightcityroleplay.backend.repo.UserRepository;
 
 
-import java.util.Set;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -70,7 +69,7 @@ public class UserServiceTest {
     public void testGetCurrentUser() {
         //given
         UUID userId = UUID.randomUUID();
-        User user = new User(userId, "testUser", "password", Set.of());
+        User user = new User(userId, "testUser", "password", List.of());
 
         Authentication auth = mock(Authentication.class);
         when(auth.getPrincipal()).thenReturn(user);
