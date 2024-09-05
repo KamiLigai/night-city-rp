@@ -20,7 +20,6 @@ public class UserService {
 
     private final UserRepository userRepo;
     private final PasswordEncoder passwordEncoder;
-
     // todo: add validation
     @Transactional
     public UserDto createUser(CreateUserRequest request) {
