@@ -7,6 +7,4 @@ import lombok.Data;
 public class CreateCharacterRequest {
     private String name;
     private Integer age;
-
-
 }

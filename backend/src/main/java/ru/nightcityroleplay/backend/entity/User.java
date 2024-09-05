@@ -38,22 +38,14 @@ public class User implements UserDetails {
     private String password;
 
     @ManyToMany(fetch = EAGER)
-    @JoinTable(
-        name = "users_roles",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
+    @JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private List<Role> roles;
 
     // todo: add audit
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles.stream()
-            .map(Role::getName)
-            .map(role -> "ROLE_" + role)
-            .map(SimpleGrantedAuthority::new)
-            .toList();
+        return roles.stream().map(Role::getName).map(role -> "ROLE_" + role).map(SimpleGrantedAuthority::new).toList();
     }
 
     @Override

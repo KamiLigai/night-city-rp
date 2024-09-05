@@ -20,10 +20,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Role {
-
     @Id
     @UuidGenerator
     private UUID id;
-
     private String name;
 }

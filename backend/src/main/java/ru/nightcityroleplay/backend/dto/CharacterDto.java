@@ -11,6 +11,5 @@ public class CharacterDto {
     private UUID ownerId;
     private String name;
     private int age;
-
 }
 
