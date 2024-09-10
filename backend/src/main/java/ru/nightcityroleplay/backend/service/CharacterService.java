@@ -13,7 +13,6 @@ import ru.nightcityroleplay.backend.dto.*;
 import ru.nightcityroleplay.backend.entity.CharacterEntity;
 import ru.nightcityroleplay.backend.entity.Skill;
 import ru.nightcityroleplay.backend.entity.User;
-import ru.nightcityroleplay.backend.exception.NightCityRpException;
 import ru.nightcityroleplay.backend.repo.CharacterRepository;
 import ru.nightcityroleplay.backend.repo.SkillRepository;
 
@@ -55,6 +54,7 @@ public class CharacterService {
         character.setName(request.getName());
         character.setAge(request.getAge());
         character = characterRepo.save(character);
+        log.info("Персонаж {} создан", character.getId());
         return new CreateCharacterResponse(character.getId());
     }
 
@@ -74,83 +74,59 @@ public class CharacterService {
         Optional<CharacterEntity> byId = characterRepo.findById(characterId);
         if (byId.isEmpty()) {
             return null;
-        } else {
-            return toDto(byId.get());
         }
+        return toDto(byId.get());
     }
 
     @Transactional
     public void updateCharacter(UpdateCharacterRequest request, UUID characterId, Authentication auth) {
         CharacterEntity newCharacter = new CharacterEntity();
-        CharacterEntity oldCharacter = characterRepo.findById(characterId).orElseThrow(() -> new NightCityRpException("Персонаж не найден"));
+        CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
         Object principal = auth.getPrincipal();
         User user = (User) principal;
         UUID userid = user.getId();
-
-        if (not(oldCharacter.getOwnerId().equals(userid))) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Изменить чужого персонажа вздумал? а ты хорош."); // 403
-        } else {
-            newCharacter.setId(characterId);
-            newCharacter.setOwnerId(user.getId());
-            newCharacter.setName(request.getName());
-            newCharacter.setAge(request.getAge());
-            characterRepo.save(newCharacter);
-            log.info("Персонажу изменён");
+        if (not(character.getOwnerId().equals(userid))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Изменить чужого персонажа вздумал? а ты хорош.");
         }
+        newCharacter.setId(characterId);
+        newCharacter.setOwnerId(user.getId());
+        newCharacter.setName(request.getName());
+        newCharacter.setAge(request.getAge());
+        characterRepo.save(newCharacter);
+        log.info("Персонаж {} изменён", newCharacter.getId());
     }
+
 
     @Transactional
     public void updateCharacterSkill(UpdateCharacterSkillRequest request, UUID characterId, Authentication auth) {
-        CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж не найден"));
+        log.info("Навыки персонажа {} обновляются", characterId);
+        CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
         Object principal = auth.getPrincipal();
         User user = (User) principal;
         UUID userid = user.getId();
-
         if (not(character.getOwnerId().equals(userid))) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Нельзя добавлять способности не своему персонажу!"); // 403
-        } else {
-            Skill skill = skillRepo.findById(request.getSkillId()).orElse(null);
-            if (character.getSkillsId() == null) {
-                List<Skill> skills = new ArrayList<>();
-                character.setSkillsId(skills);
-            } else {
-                character.getSkillsId().add(skill);
-            }
-            characterRepo.save(character);
-            log.info("Персонажу добавлена способность");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Нельзя добавлять навык не своему персонажу!");
         }
-    }
-
-    @Transactional
-    public void deleteCharacterSkill(UpdateCharacterSkillRequest request, UUID characterId, Authentication auth) {
-        CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж не найден"));
-        Object principal = auth.getPrincipal();
-        User user = (User) principal;
-        UUID userid = user.getId();
-
-        if (not(character.getOwnerId().equals(userid))) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Нельзя удалять способности не своему персонажу!"); // 403
-        } else {
-            Skill skill = skillRepo.findById(request.getSkillId()).orElse(null);
-            character.getSkillsId().remove(skill);
-            log.info("Персонажу убрали способность");
-        }
+        List<Skill> skills = skillRepo.findAllByIdIn(request.getSkillId());
+        character.setSkills(skills);
+        characterRepo.save(character);
+        log.info("Персонажу {} обновлены навыки", character.getId());
     }
 
     @Transactional
     public void deleteCharacter(UUID characterId, Authentication auth) {
         Optional<CharacterEntity> character = characterRepo.findById(characterId);
         if (character.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж не найден");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден");
         }
         Object principal = auth.getPrincipal();
         User user = (User) principal;
         UUID userid = user.getId();
         if (not(character.get().getOwnerId().equals(userid))) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Удалить чужого персонажа вздумал? а ты хорош."); // 403
-        } else {
-            characterRepo.deleteById(characterId);
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Удалить чужого персонажа вздумал? а ты хорош.");
         }
+        characterRepo.deleteById(characterId);
+        log.info("Персонаж {} был удалён", characterId);
     }
 }
 

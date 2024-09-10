@@ -1,6 +1,9 @@
 package ru.nightcityroleplay.backend.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
@@ -22,11 +25,6 @@ public class Skill {
     private int level;
     private String type;
     private int cost;
-    @ManyToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "characters_skills",
-            joinColumns = @JoinColumn(name = "char_id"),
-            inverseJoinColumns = @JoinColumn(name = "skill_id"))
-    private List<CharacterEntity> charsId;
-
-
+    @ManyToMany(mappedBy = "skills")
+    private List<CharacterEntity> characters;
 }

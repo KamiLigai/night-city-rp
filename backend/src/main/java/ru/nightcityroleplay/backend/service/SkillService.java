@@ -13,7 +13,6 @@ import ru.nightcityroleplay.backend.dto.CreateSkillResponse;
 import ru.nightcityroleplay.backend.dto.SkillDto;
 import ru.nightcityroleplay.backend.dto.UpdateSkillRequest;
 import ru.nightcityroleplay.backend.entity.Skill;
-import ru.nightcityroleplay.backend.repo.CharacterRepository;
 import ru.nightcityroleplay.backend.repo.SkillRepository;
 
 import java.util.ArrayList;
@@ -52,7 +51,7 @@ public class SkillService {
         skill.setType(request.getType());
         skill.setCost(request.getCost());
         skill = skillRepo.save(skill);
-        log.info("Способность {} была создана", skill.getName());
+        log.info("Навык {} был создан", skill.getId());
         return new CreateSkillResponse(skill.getId());
     }
 
@@ -72,40 +71,36 @@ public class SkillService {
         Optional<Skill> skillById = skillRepo.findById(skillId);
         if (skillById.isEmpty()) {
             return null;
-        } else {
-            return toDto(skillById.get());
         }
+        return toDto(skillById.get());
     }
 
     @Transactional
     public void updateSkill(UpdateSkillRequest skillDto, UUID skillId) {
-        log.info("Способность {} обновляется", skillDto.getName());
+        log.info("Навык {} обновляется", skillDto.getName());
         Skill newSkill = new Skill();
         if (skillRepo.findById(skillId).isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Способность не найдена");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Навык" + skillId + " не найден");
         }
         newSkill.setId(skillId);
         newSkill.setName(skillDto.getName());
         newSkill.setDescription(skillDto.getDescription());
-        newSkill.setLevel(skillDto.getLevel());
-        newSkill.setType(skillDto.getType());
-        newSkill.setCost(skillDto.getCost());
         skillRepo.save(newSkill);
-        log.info("Способность {} обновлена", skillDto.getName());
+        log.info("Навык {} обновлен", skillDto.getName());
     }
 
     @Transactional
     public void deleteSkill(UUID skillId) {
         Skill skill = skillRepo.findById(skillId).orElse(null);
         if (skill == null) {
-            log.info("Скилл {} не найден", skillId);
+            log.info("Навык {} не найден", skillId);
             return;
         }
-        if (skill.getCharsId().isEmpty()) {
+        if (skill.getCharacters().isEmpty()) {
             skillRepo.delete(skill);
-            log.info("Скилл {} удалён", skillId);
-        } else {
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Запрещено!"); //422
+            log.info("Навык {} удалён", skillId);
+            return;
         }
+        throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Этот навык есть как минимум у одного персонажа!");
     }
 }

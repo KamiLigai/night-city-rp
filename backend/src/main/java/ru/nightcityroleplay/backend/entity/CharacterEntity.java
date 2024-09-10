@@ -21,9 +21,9 @@ public class CharacterEntity {
     private UUID ownerId;
     private String name;
     private int age;
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany
     @JoinTable(name = "characters_skills",
             joinColumns = @JoinColumn(name = "char_id"),
             inverseJoinColumns = @JoinColumn(name = "skill_id"))
-    private List<Skill> skillsId;
+    private List<Skill> skills;
 }

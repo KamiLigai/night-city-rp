@@ -3,14 +3,7 @@ package ru.nightcityroleplay.backend.controller;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.nightcityroleplay.backend.dto.*;
 import ru.nightcityroleplay.backend.service.CharacterService;
 
@@ -54,11 +47,6 @@ public class CharacterController {
     @PutMapping("{characterId}/skills")
     public void updateCharacterSkill(@RequestBody UpdateCharacterSkillRequest request, @PathVariable UUID characterId, Authentication auth) {
         characterService.updateCharacterSkill(request, characterId, auth);
-    }
-
-    @DeleteMapping("{characterId}/skills")
-    public void deleteCharacterSkill(@RequestBody UpdateCharacterSkillRequest request, @PathVariable UUID characterId, Authentication auth) {
-        characterService.deleteCharacterSkill(request, characterId, auth);
     }
 }
 
