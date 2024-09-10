@@ -41,6 +41,7 @@ deploy-on-test:
   needs:
     - job: build
       artifacts: true
+  allow_failure: true
 
 deploy-on-prod:
   stage: deploy
@@ -54,3 +55,4 @@ deploy-on-prod:
   needs:
     - job: build
       artifacts: true
+  allow_failure: true
