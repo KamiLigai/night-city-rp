@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static ru.nightcityroleplay.backend.util.BooleanUtils.not;
+
 @Service
 @Slf4j
 public class SkillService {
@@ -80,7 +82,7 @@ public class SkillService {
         log.info("Навык {} обновляется", skillDto.getName());
         Skill newSkill = new Skill();
         if (skillRepo.findById(skillId).isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Навык" + skillId + " не найден");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Навык " + skillId + " не найден");
         }
         newSkill.setId(skillId);
         newSkill.setName(skillDto.getName());
@@ -93,14 +95,12 @@ public class SkillService {
     public void deleteSkill(UUID skillId) {
         Skill skill = skillRepo.findById(skillId).orElse(null);
         if (skill == null) {
-            log.info("Навык {} не найден", skillId);
-            return;
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Навык " + skillId + " не найден");
         }
-        if (skill.getCharacters().isEmpty()) {
-            skillRepo.delete(skill);
-            log.info("Навык {} удалён", skillId);
-            return;
+        if (not(skill.getCharacters().isEmpty())) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Этот навык есть как минимум у одного персонажа!");
         }
-        throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Этот навык есть как минимум у одного персонажа!");
+        skillRepo.delete(skill);
+        log.info("Навык {} удалён", skillId);
     }
 }

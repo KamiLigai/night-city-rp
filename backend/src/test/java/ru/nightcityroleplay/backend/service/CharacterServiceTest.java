@@ -1,15 +1,15 @@
 package ru.nightcityroleplay.backend.service;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.server.ResponseStatusException;
 import ru.nightcityroleplay.backend.dto.CreateCharacterRequest;
 import ru.nightcityroleplay.backend.dto.UpdateCharacterRequest;
+import ru.nightcityroleplay.backend.dto.UpdateCharacterSkillRequest;
 import ru.nightcityroleplay.backend.entity.CharacterEntity;
 import ru.nightcityroleplay.backend.entity.User;
-import ru.nightcityroleplay.backend.exception.NightCityRpException;
 import ru.nightcityroleplay.backend.repo.CharacterRepository;
 import ru.nightcityroleplay.backend.repo.SkillRepository;
 
@@ -18,7 +18,7 @@ import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 class CharacterServiceTest {
@@ -69,7 +69,7 @@ class CharacterServiceTest {
             .thenReturn(character);
 
         // when
-        var result = service.createCharacter(request, auth);
+        service.createCharacter(request, auth);
 
         // then
         verify(charRepo).save(any());
@@ -115,10 +115,8 @@ class CharacterServiceTest {
         when(charRepo.findById(characterId)).thenReturn(Optional.empty());
 
         // then
-        Assertions.assertThrows(
-            NightCityRpException.class,
-            () -> service.updateCharacter(request, characterId, auth)
-        );
+        assertThatThrownBy(() -> service.updateCharacter(request, characterId, auth)).isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("Персонаж " + characterId + " не найден");
     }
 
     @Test
@@ -140,14 +138,50 @@ class CharacterServiceTest {
         when(charRepo.findById(characterId)).thenReturn(Optional.of(oldCharacter));
 
         // then
-        Assertions.assertThrows(
-            NightCityRpException.class,
-            () -> service.updateCharacter(request, characterId, auth)
-        );
+        assertThatThrownBy(() -> service.updateCharacter(request, characterId, auth)).isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("Изменить чужого персонажа вздумал? а ты хорош.");
     }
 
     @Test
-    public void testDeleteCharacterSuccess() {
+    void updateCharacterSkillNotFound() {
+        // given
+        var request = new UpdateCharacterSkillRequest();
+        UUID characterId = UUID.randomUUID();
+
+        Authentication auth = mock(Authentication.class);
+
+        when(charRepo.findById(characterId)).thenReturn(Optional.empty());
+
+        // then
+        assertThatThrownBy(() -> service.updateCharacterSkill(request, characterId, auth)).isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("Персонаж " + characterId + " не найден");
+    }
+
+    @Test
+    void updateCharacterSkillUnauthorized() {
+        // given
+        var request = new UpdateCharacterSkillRequest();
+        UUID characterId = UUID.randomUUID();
+
+        var oldCharacter = new CharacterEntity();
+        oldCharacter.setId(characterId);
+        oldCharacter.setOwnerId(UUID.randomUUID());
+
+        var user = new User();
+        user.setId(UUID.randomUUID());
+
+        Authentication auth = mock(Authentication.class);
+        when(auth.getPrincipal()).thenReturn(user);
+
+        when(charRepo.findById(characterId)).thenReturn(Optional.of(oldCharacter));
+
+        // then
+        assertThatThrownBy(() -> service.updateCharacterSkill(request, characterId, auth)).isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("Нельзя добавлять навык не своему персонажу!");
+    }
+
+    @Test
+    public void deleteCharacterSuccess() {
         // given
         UUID characterId = UUID.randomUUID();
         Authentication auth = mock(Authentication.class);
@@ -170,7 +204,7 @@ class CharacterServiceTest {
     }
 
     @Test
-    public void testDeleteCharacterNotFound() {
+    public void deleteCharacterNotFound() {
         // given
         UUID characterId = UUID.randomUUID();
         Authentication authentication = mock(Authentication.class);
@@ -179,13 +213,12 @@ class CharacterServiceTest {
         when(charRepo.findById(characterId)).thenReturn(java.util.Optional.empty());
 
         // then
-        assertThrows(NightCityRpException.class, () -> {
-            service.deleteCharacter(characterId, authentication);
-        });
+        assertThatThrownBy(() -> service.deleteCharacter(characterId, authentication)).isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("Персонаж " + characterId + " не найден");
     }
 
     @Test
-    public void testDeleteCharacterUnauthorized() {
+    public void deleteCharacterUnauthorized() {
         // given
         UUID characterId = UUID.randomUUID();
         Authentication authentication = mock(Authentication.class);
@@ -201,9 +234,8 @@ class CharacterServiceTest {
         when(charRepo.findById(characterId)).thenReturn(java.util.Optional.of(character));
 
         // then
-        assertThrows(NightCityRpException.class, () -> {
-            service.deleteCharacter(characterId, authentication);
-        });
+        assertThatThrownBy(() -> service.deleteCharacter(characterId, authentication)).isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("Удалить чужого персонажа вздумал? а ты хорош.");
     }
 
     @Test
