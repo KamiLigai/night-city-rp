@@ -9,7 +9,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import ru.nightcityroleplay.backend.dto.*;
+import ru.nightcityroleplay.backend.dto.UpdateCharacterRequest;
+import ru.nightcityroleplay.backend.dto.CharacterDto;
+import ru.nightcityroleplay.backend.dto.CreateCharacterRequest;
+import ru.nightcityroleplay.backend.dto.CreateCharacterResponse;
+import ru.nightcityroleplay.backend.dto.UpdateCharacterSkillRequest;
 import ru.nightcityroleplay.backend.entity.CharacterEntity;
 import ru.nightcityroleplay.backend.entity.Skill;
 import ru.nightcityroleplay.backend.entity.User;
@@ -81,7 +85,8 @@ public class CharacterService {
     @Transactional
     public void updateCharacter(UpdateCharacterRequest request, UUID characterId, Authentication auth) {
         CharacterEntity newCharacter = new CharacterEntity();
-        CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
+        CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
         Object principal = auth.getPrincipal();
         User user = (User) principal;
         UUID userid = user.getId();
@@ -100,7 +105,8 @@ public class CharacterService {
     @Transactional
     public void updateCharacterSkill(UpdateCharacterSkillRequest request, UUID characterId, Authentication auth) {
         log.info("Навыки персонажа {} обновляются", characterId);
-        CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
+        CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
         Object principal = auth.getPrincipal();
         User user = (User) principal;
         UUID userid = user.getId();
