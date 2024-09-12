@@ -1,36 +1,44 @@
 package ru.nightcityroleplay.backend.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+import ru.nightcityroleplay.backend.dto.UpdateCharacterRequest;
 import ru.nightcityroleplay.backend.dto.CharacterDto;
 import ru.nightcityroleplay.backend.dto.CreateCharacterRequest;
 import ru.nightcityroleplay.backend.dto.CreateCharacterResponse;
-import ru.nightcityroleplay.backend.dto.UpdateCharacterRequest;
+import ru.nightcityroleplay.backend.dto.UpdateCharacterSkillRequest;
 import ru.nightcityroleplay.backend.entity.CharacterEntity;
+import ru.nightcityroleplay.backend.entity.Skill;
 import ru.nightcityroleplay.backend.entity.User;
-import ru.nightcityroleplay.backend.exception.NightCityRpException;
 import ru.nightcityroleplay.backend.repo.CharacterRepository;
+import ru.nightcityroleplay.backend.repo.SkillRepository;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static ru.nightcityroleplay.backend.util.BooleanUtils.not;
+
 
 @Service
+@Slf4j
 public class CharacterService {
 
     private final CharacterRepository characterRepo;
+    private final SkillRepository skillRepo;
 
-    public CharacterService(CharacterRepository characterRepo) {
-
+    public CharacterService(CharacterRepository characterRepo, SkillRepository skillRepo) {
         this.characterRepo = characterRepo;
+        this.skillRepo = skillRepo;
     }
-
 
     private CharacterDto toDto(CharacterEntity character) {
         CharacterDto characterDto = new CharacterDto();
@@ -50,6 +58,7 @@ public class CharacterService {
         character.setName(request.getName());
         character.setAge(request.getAge());
         character = characterRepo.save(character);
+        log.info("Персонаж {} создан", character.getId());
         return new CreateCharacterResponse(character.getId());
     }
 
@@ -60,11 +69,8 @@ public class CharacterService {
         List<CharacterDto> characterDtos = new ArrayList<>();
         for (var character : characters) {
             characterDtos.add(toDto(character));
-
         }
         return new PageImpl<>(characterDtos, pageable, characterPage.getTotalElements());
-
-
     }
 
     @Transactional
@@ -72,47 +78,61 @@ public class CharacterService {
         Optional<CharacterEntity> byId = characterRepo.findById(characterId);
         if (byId.isEmpty()) {
             return null;
-        } else {
-            return toDto(byId.get());
         }
+        return toDto(byId.get());
     }
 
     @Transactional
     public void updateCharacter(UpdateCharacterRequest request, UUID characterId, Authentication auth) {
         CharacterEntity newCharacter = new CharacterEntity();
-        if (characterRepo.findById(characterId).isEmpty()) {
-            throw new NightCityRpException("Персонаж не найден");
-        }
-        CharacterEntity oldCharacter = characterRepo.findById(characterId).get();
+        CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
         Object principal = auth.getPrincipal();
         User user = (User) principal;
         UUID userid = user.getId();
-
-        if (!oldCharacter.getOwnerId().equals(userid)) {
-            throw new NightCityRpException("Изменить чужого персонажа вздумал? а ты хорош.");
-        } else {
-            newCharacter.setId(characterId);
-            newCharacter.setOwnerId(user.getId());
-            newCharacter.setName(request.getName());
-            newCharacter.setAge(request.getAge());
-            characterRepo.save(newCharacter);
+        if (not(character.getOwnerId().equals(userid))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Изменить чужого персонажа вздумал? а ты хорош.");
         }
+        newCharacter.setId(characterId);
+        newCharacter.setOwnerId(user.getId());
+        newCharacter.setName(request.getName());
+        newCharacter.setAge(request.getAge());
+        characterRepo.save(newCharacter);
+        log.info("Персонаж {} изменён", newCharacter.getId());
+    }
+
+
+    @Transactional
+    public void updateCharacterSkill(UpdateCharacterSkillRequest request, UUID characterId, Authentication auth) {
+        log.info("Навыки персонажа {} обновляются", characterId);
+        CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
+        Object principal = auth.getPrincipal();
+        User user = (User) principal;
+        UUID userid = user.getId();
+        if (not(character.getOwnerId().equals(userid))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Нельзя добавлять навык не своему персонажу!");
+        }
+        List<Skill> skills = skillRepo.findAllByIdIn(request.getSkillId());
+        character.setSkills(skills);
+        characterRepo.save(character);
+        log.info("Персонажу {} обновлены навыки", character.getId());
     }
 
     @Transactional
     public void deleteCharacter(UUID characterId, Authentication auth) {
         Optional<CharacterEntity> character = characterRepo.findById(characterId);
         if (character.isEmpty()) {
-            throw new NightCityRpException("Персонаж не найден");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден");
         }
         Object principal = auth.getPrincipal();
         User user = (User) principal;
         UUID userid = user.getId();
-        if (!character.get().getOwnerId().equals(userid)) {
-            throw new NightCityRpException("Удалить чужого персонажа вздумал? а ты хорош.");
-        } else {
-            characterRepo.deleteById(characterId);
+        if (not(character.get().getOwnerId().equals(userid))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Удалить чужого персонажа вздумал? а ты хорош.");
         }
+        characterRepo.deleteById(characterId);
+        log.info("Персонаж {} был удалён", characterId);
     }
 }
 

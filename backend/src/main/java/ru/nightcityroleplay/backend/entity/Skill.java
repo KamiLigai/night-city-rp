@@ -1,7 +1,5 @@
 package ru.nightcityroleplay.backend.entity;
 
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
@@ -13,22 +11,20 @@ import org.hibernate.annotations.UuidGenerator;
 import java.util.List;
 import java.util.UUID;
 
-
 @Entity
-@Table(name = "characters")
 @Setter
 @Getter
-public class CharacterEntity {
+@Table (name = "skills")
+public class Skill {
 
     @Id
     @UuidGenerator
     private UUID id;
-    private UUID ownerId;
     private String name;
-    private int age;
-    @ManyToMany
-    @JoinTable(name = "characters_skills",
-            joinColumns = @JoinColumn(name = "char_id"),
-            inverseJoinColumns = @JoinColumn(name = "skill_id"))
-    private List<Skill> skills;
+    private String description;
+    private int level;
+    private String type;
+    private int cost;
+    @ManyToMany(mappedBy = "skills")
+    private List<CharacterEntity> characters;
 }

@@ -1,10 +1,10 @@
 package ru.nightcityroleplay.backend.dto;
 
-
 import lombok.Data;
 
 @Data
-public class CreateCharacterRequest {
+public class UpdateSkillRequest {
+
     private String name;
-    private Integer age;
+    private String description;
 }
