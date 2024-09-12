@@ -5,6 +5,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.nightcityroleplay.backend.constant.Roles;
 import ru.nightcityroleplay.backend.dto.CreateUserRequest;
 import ru.nightcityroleplay.backend.dto.UserDto;
 import ru.nightcityroleplay.backend.entity.Role;
@@ -23,9 +24,11 @@ public class UserService {
     // todo: add validation
     @Transactional
     public UserDto createUser(CreateUserRequest request) {
+        List<Role> roles = new ArrayList<>();
         var user = User.builder()
             .username(request.username())
             .password(passwordEncoder.encode(request.password()))
+            .roles(roles)
             .build();
         userRepo.save(user);
         return toDto(user);

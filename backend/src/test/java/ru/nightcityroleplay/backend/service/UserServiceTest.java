@@ -8,13 +8,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import ru.nightcityroleplay.backend.constant.Roles;
 import ru.nightcityroleplay.backend.dto.CreateUserRequest;
 import ru.nightcityroleplay.backend.dto.UserDto;
 
+import ru.nightcityroleplay.backend.entity.Role;
 import ru.nightcityroleplay.backend.entity.User;
 import ru.nightcityroleplay.backend.repo.UserRepository;
 
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -47,14 +50,6 @@ public class UserServiceTest {
         //given
         String encodedPassword = "encodedPassword";
         when(passwordEncoder.encode(createUserRequest.password())).thenReturn(encodedPassword);
-
-        User user = User.builder()
-            .id(UUID.randomUUID())
-            .username(createUserRequest.username())
-            .password(encodedPassword)
-            .build();
-
-        when(userRepo.save(any(User.class))).thenReturn(user);
 
         //when
         UserDto result = userService.createUser(createUserRequest);
