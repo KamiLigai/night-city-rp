@@ -14,7 +14,6 @@ import ru.nightcityroleplay.backend.entity.CharacterEntity;
 import ru.nightcityroleplay.backend.entity.User;
 import ru.nightcityroleplay.backend.exception.NightCityRpException;
 import ru.nightcityroleplay.backend.repo.CharacterRepository;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

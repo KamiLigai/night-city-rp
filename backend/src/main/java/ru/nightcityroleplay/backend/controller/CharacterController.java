@@ -47,19 +47,16 @@ public class CharacterController {
         return characterService.getCharacter(characterId);
     }
 
-
     @PutMapping("{characterId}")
     public void updateCharacter(@RequestBody UpdateCharacterRequest request, @PathVariable UUID characterId, Authentication auth) {
         characterService.updateCharacter(request, characterId, auth);
     }
-
 
     @DeleteMapping("{characterId}")
     public void deleteCharacter(@PathVariable UUID characterId, Authentication auth) {
         characterService.deleteCharacter(characterId, auth);
     }
 
-    // todo: удалить этот тестовый эндпоинт после проверки админов
     @GetMapping("secured")
     @Secured(ADMIN)
     public void secured() {
