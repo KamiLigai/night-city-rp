@@ -24,7 +24,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.doNothing;
 
 class SkillServiceTest {
 
@@ -121,7 +120,8 @@ class SkillServiceTest {
         when(skillRepo.findById(skillId)).thenReturn(Optional.empty());
 
         // then
-        assertThatThrownBy(() -> service.updateSkill(request, skillId)).isInstanceOf(ResponseStatusException.class)
+        assertThatThrownBy(() -> service.updateSkill(request, skillId))
+                .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("Навык " + skillId + " не найден");
     }
 
@@ -134,13 +134,13 @@ class SkillServiceTest {
         skill.setId(skillId);
         skill.setCharacters(List.of());
 
-        when(skillRepo.findById(skillId)).thenReturn(Optional.empty());
+        when(skillRepo.findById(skillId)).thenReturn(Optional.of(skill));
 
         // when
-        doNothing().when(skillRepo).deleteById(skillId);
+        service.deleteSkill(skillId);
 
         // then
-        assertThat(skillRepo.findById(skillId)).isEmpty();
+        verify(skillRepo).delete(skill);
     }
 
     @Test
@@ -148,15 +148,12 @@ class SkillServiceTest {
         // given
         UUID skillId = UUID.randomUUID();
 
-        Skill skill = new Skill();
-        skill.setId(skillId);
-        skill.setCharacters(List.of());
-
         // when
         when(skillRepo.findById(skillId)).thenReturn(Optional.empty());
 
         // then
-        assertThatThrownBy(() -> service.deleteSkill(skillId)).isInstanceOf(ResponseStatusException.class)
+        assertThatThrownBy(() -> service.deleteSkill(skillId))
+                .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("Навык " + skillId + " не найден");
     }
 
@@ -172,7 +169,8 @@ class SkillServiceTest {
         when(skillRepo.findById(skillId)).thenReturn(Optional.of(skill));
 
         // then
-        assertThatThrownBy(() -> service.deleteSkill(skillId)).isInstanceOf(ResponseStatusException.class)
+        assertThatThrownBy(() -> service.deleteSkill(skillId))
+                .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("Этот навык есть как минимум у одного персонажа!");
     }
 
