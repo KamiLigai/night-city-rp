@@ -7,3 +7,5 @@ databaseChangeLog:
       file: db/changelog/includes/2024-05-09-add-characters.yaml
   - include:
       file: db/changelog/includes/2024-08-20-add-skills.yaml
+  - include:
+      file: db/changelog/includes/2024-06-11-add-admins.yaml

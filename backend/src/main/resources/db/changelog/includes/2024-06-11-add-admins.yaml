@@ -1,0 +1,64 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2024-06-11-add-admins
+      author: ntrubkin
+      changes:
+        - createTable:
+            tableName: roles
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: roles_name_unique
+
+        - insert:
+            tableName: roles
+            columns:
+              - column:
+                  name: id
+                  value: 98e07c2d-f112-429b-b2cd-b80209fdc60e
+              - column:
+                  name: name
+                  value: ADMIN
+
+        - createTable:
+            tableName: users_roles
+            columns:
+              - column:
+                  name: user_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: role_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+
+        - addUniqueConstraint:
+            tableName: users_roles
+            columnNames: user_id, role_id
+            constraintName: users_roles_user_id_role_id_unique
+
+        - addForeignKeyConstraint:
+            baseTableName: users_roles
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: users_roles_users_fk
+
+        - addForeignKeyConstraint:
+            baseTableName: users_roles
+            baseColumnNames: role_id
+            referencedTableName: roles
+            referencedColumnNames: id
+            constraintName: users_roles_roles_fk
