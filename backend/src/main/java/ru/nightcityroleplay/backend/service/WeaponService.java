@@ -49,7 +49,7 @@ public class WeaponService {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public CreateWeaponResponse createWeapon(CreateWeaponRequest request, Authentication auth) {
         log.info("Администратор {} пытается создать оружие с именем: {}", auth.getName(), request.getName());
-
+        //выдача характеристик оружию
         WeaponEntity weapon = new WeaponEntity();
         weapon.setName(request.getName());
         weapon.setIsMelee(request.getIsMelee());
@@ -57,8 +57,8 @@ public class WeaponService {
         weapon.setPenetration(request.getPenetration());
         weapon.setReputationRequirement(request.getReputationRequirement());
 
+        //Сохранение
         weapon = weaponRepo.save(weapon);
-
         log.info("Оружие с ID {} было успешно создано.", weapon.getId());
         return new CreateWeaponResponse(weapon.getId());
     }
@@ -80,20 +80,31 @@ public class WeaponService {
         return weaponById.map(this::toDto).orElse(null);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void updateWeapon(UpdateWeaponRequest request, UUID weaponId) {
+        log.info("Начато обновление оружия с ID: {}", weaponId);
         WeaponEntity newWeapon = new WeaponEntity();
+
+        // Проверка, существует ли оружие с указанным ID
         if (weaponRepo.findById(weaponId).isEmpty()) {
+            log.error("Оружие с ID: {} не найдено", weaponId);
             throw new NightCityRpException("Оружие не найдено");
         }
+        // Создание нового оружия с указанными характеристиками
         newWeapon.setName(request.getName());
         newWeapon.setIsMelee(request.getIsMelee());
         newWeapon.setWeaponType(request.getWeaponType());
         newWeapon.setPenetration(request.getPenetration());
         newWeapon.setReputationRequirement(request.getReputationRequirement());
+
+        // Сохранение
         weaponRepo.save(newWeapon);
+        log.info("Оружие с ID: {} было успешно обновлено", weaponId);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void deleteWeapon(UUID weaponId) {
+        log.info("Запрос на удаление оружия с ID: {}", weaponId);
         WeaponEntity weapon = weaponRepo.findById(weaponId).orElse(null);
         if (weapon == null) {
             log.info("Оружие {} не найдено", weaponId);
@@ -101,9 +112,10 @@ public class WeaponService {
         }
         if (weapon.getCharsId().isEmpty()) {
             weaponRepo.delete(weapon);
-            log.info("Оружие {} удалено", weaponId);
+            log.info("Оружие с ID {} было успешно удалено", weaponId);
         } else {
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Запрещено!");
+            log.info("Не удалось удалить оружие с ID {}: связано с характеристиками", weaponId);
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Запрещено удаление оружия, так как оно связано с характеристиками!");
         }
     }
 }
