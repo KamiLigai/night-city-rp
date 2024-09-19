@@ -2,10 +2,12 @@ package ru.nightcityroleplay.backend.dto;
 
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import java.util.UUID;
 
 @Data
+@Accessors(chain = true)
 public class WeaponDto {
     private UUID id;
     private Boolean isMelee;
