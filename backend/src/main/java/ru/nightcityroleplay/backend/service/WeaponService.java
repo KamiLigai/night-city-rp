@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,9 +46,11 @@ public class WeaponService {
     }
 
     @Transactional
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public CreateWeaponResponse createWeapon(CreateWeaponRequest request, Authentication auth) {
+        log.info("Администратор {} пытается создать оружие с именем: {}", auth.getName(), request.getName());
+
         WeaponEntity weapon = new WeaponEntity();
-        //todo заменить Юзер на Админа
         weapon.setName(request.getName());
         weapon.setIsMelee(request.getIsMelee());
         weapon.setWeaponType(request.getWeaponType());
@@ -55,6 +58,8 @@ public class WeaponService {
         weapon.setReputationRequirement(request.getReputationRequirement());
 
         weapon = weaponRepo.save(weapon);
+
+        log.info("Оружие с ID {} было успешно создано.", weapon.getId());
         return new CreateWeaponResponse(weapon.getId());
     }
 
