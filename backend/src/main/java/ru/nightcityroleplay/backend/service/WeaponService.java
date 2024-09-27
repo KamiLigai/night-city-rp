@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@SuppressWarnings("checkstyle:CommentsIndentation")
 @Service
 @Slf4j
 public class WeaponService {
@@ -80,25 +81,44 @@ public class WeaponService {
         return weaponById.map(this::toDto).orElse(null);
     }
 
+//    @PreAuthorize("hasRole('ROLE_ADMIN')")
+//    public void updateWeapon(UpdateWeaponRequest request, UUID weaponId) {
+//        log.info("Начато обновление оружия с ID: {}", weaponId);
+//        WeaponEntity newWeapon = new WeaponEntity();
+//
+//        // Проверка, существует ли оружие с указанным ID
+//        if (weaponRepo.findById(weaponId).isEmpty()) {
+//            log.error("Оружие с ID: {} не найдено", weaponId);
+//            throw new NightCityRpException("Оружие не найдено");
+//        }
+//        // Создание нового оружия с указанными характеристиками
+//        newWeapon.setName(request.getName());
+//        newWeapon.setIsMelee(request.getIsMelee());
+//        newWeapon.setWeaponType(request.getWeaponType());
+//        newWeapon.setPenetration(request.getPenetration());
+//        newWeapon.setReputationRequirement(request.getReputationRequirement());
+//
+//        // Сохранение
+//          weaponRepo.save(newWeapon);
+//          log.info("Оружие с ID: {} было успешно обновлено", weaponId);
+
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void updateWeapon(UpdateWeaponRequest request, UUID weaponId) {
         log.info("Начато обновление оружия с ID: {}", weaponId);
-        WeaponEntity newWeapon = new WeaponEntity();
 
         // Проверка, существует ли оружие с указанным ID
-        if (weaponRepo.findById(weaponId).isEmpty()) {
-            log.error("Оружие с ID: {} не найдено", weaponId);
-            throw new NightCityRpException("Оружие не найдено");
-        }
-        // Создание нового оружия с указанными характеристиками
-        newWeapon.setName(request.getName());
-        newWeapon.setIsMelee(request.getIsMelee());
-        newWeapon.setWeaponType(request.getWeaponType());
-        newWeapon.setPenetration(request.getPenetration());
-        newWeapon.setReputationRequirement(request.getReputationRequirement());
+        WeaponEntity existingWeapon = weaponRepo.findById(weaponId).orElseThrow(()
+            -> new NightCityRpException("Оружие не найдено"));
 
-        // Сохранение
-        weaponRepo.save(newWeapon);
+        // Обновление существующего оружия с указанными характеристиками
+        existingWeapon.setName(request.getName());
+        existingWeapon.setIsMelee(request.getIsMelee());
+        existingWeapon.setWeaponType(request.getWeaponType());
+        existingWeapon.setPenetration(request.getPenetration());
+        existingWeapon.setReputationRequirement(request.getReputationRequirement());
+
+        // Сохранение обновленного оружия
+        weaponRepo.save(existingWeapon);
         log.info("Оружие с ID: {} было успешно обновлено", weaponId);
     }
 
