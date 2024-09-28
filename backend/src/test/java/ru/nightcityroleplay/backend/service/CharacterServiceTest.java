@@ -11,8 +11,8 @@ import ru.nightcityroleplay.backend.dto.UpdateCharacterSkillRequest;
 import ru.nightcityroleplay.backend.entity.CharacterEntity;
 import ru.nightcityroleplay.backend.entity.User;
 import ru.nightcityroleplay.backend.repo.CharacterRepository;
-import ru.nightcityroleplay.backend.repo.WeaponRepository;
 import ru.nightcityroleplay.backend.repo.SkillRepository;
+import ru.nightcityroleplay.backend.repo.WeaponRepository;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -36,7 +36,6 @@ class CharacterServiceTest {
         weaponRepo = mock();
         service = new CharacterService(characterRepo, weaponRepo, skillRepo);
     }
-
 
 
     @Test
@@ -119,8 +118,8 @@ class CharacterServiceTest {
 
         // then
         assertThatThrownBy(() -> service.updateCharacter(request, characterId, auth))
-                .isInstanceOf(ResponseStatusException.class)
-                .hasMessageContaining("Персонаж " + characterId + " не найден");
+            .isInstanceOf(ResponseStatusException.class)
+            .hasMessageContaining("Персонаж " + characterId + " не найден");
     }
 
     @Test
@@ -143,8 +142,8 @@ class CharacterServiceTest {
 
         // then
         assertThatThrownBy(() -> service.updateCharacter(request, characterId, auth))
-                .isInstanceOf(ResponseStatusException.class)
-                .hasMessageContaining("Изменить чужого персонажа вздумал? а ты хорош.");
+            .isInstanceOf(ResponseStatusException.class)
+            .hasMessageContaining("Изменить чужого персонажа вздумал? а ты хорош.");
     }
 
     @Test
@@ -159,8 +158,8 @@ class CharacterServiceTest {
 
         // then
         assertThatThrownBy(() -> service.updateCharacterSkill(request, characterId, auth))
-                .isInstanceOf(ResponseStatusException.class)
-                .hasMessageContaining("Персонаж " + characterId + " не найден");
+            .isInstanceOf(ResponseStatusException.class)
+            .hasMessageContaining("Персонаж " + characterId + " не найден");
     }
 
     @Test
@@ -183,8 +182,8 @@ class CharacterServiceTest {
 
         // then
         assertThatThrownBy(() -> service.updateCharacterSkill(request, characterId, auth))
-                .isInstanceOf(ResponseStatusException.class)
-                .hasMessageContaining("Нельзя добавлять навык не своему персонажу!");
+            .isInstanceOf(ResponseStatusException.class)
+            .hasMessageContaining("Нельзя добавлять навык не своему персонажу!");
     }
 
     @Test
@@ -221,8 +220,8 @@ class CharacterServiceTest {
 
         // then
         assertThatThrownBy(() -> service.deleteCharacter(characterId, authentication))
-                .isInstanceOf(ResponseStatusException.class)
-                .hasMessageContaining("Персонаж " + characterId + " не найден");
+            .isInstanceOf(ResponseStatusException.class)
+            .hasMessageContaining("Персонаж " + characterId + " не найден");
     }
 
     @Test
@@ -243,8 +242,8 @@ class CharacterServiceTest {
 
         // then
         assertThatThrownBy(() -> service.deleteCharacter(characterId, authentication))
-                .isInstanceOf(ResponseStatusException.class)
-                .hasMessageContaining("Удалить чужого персонажа вздумал? а ты хорош.");
+            .isInstanceOf(ResponseStatusException.class)
+            .hasMessageContaining("Удалить чужого персонажа вздумал? а ты хорош.");
     }
 
     @Test

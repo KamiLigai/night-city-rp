@@ -55,6 +55,7 @@ public class UserServiceTest {
         verify(passwordEncoder).encode(createUserRequest.password());
         verify(userRepo).save(any(User.class));
     }
+
     @Test
     public void testGetCurrentUser() {
         //given
