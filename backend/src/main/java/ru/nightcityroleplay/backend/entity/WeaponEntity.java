@@ -23,9 +23,9 @@ public class WeaponEntity {
     private String weaponType;
     private int penetration;
     private int reputationRequirement;
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany()
     @JoinTable(name = "characters_weapons",
-        joinColumns = @JoinColumn(name = "char_id"),
+        joinColumns = @JoinColumn(name = "chars"),
         inverseJoinColumns = @JoinColumn(name = "weapon_id"))
     private List<CharacterEntity> charsId;
 }

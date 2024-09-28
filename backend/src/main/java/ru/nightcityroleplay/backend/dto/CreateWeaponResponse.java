@@ -1,4 +1,6 @@
 package ru.nightcityroleplay.backend.dto;
 
-public record CreateWeaponResponse(java.util.UUID id) {
+import java.util.UUID;
+
+public record CreateWeaponResponse(UUID id) {
 }

@@ -111,6 +111,8 @@ public class CharacterService {
         log.info("Навыки персонажа {} обновляются", characterId);
         CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
             new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
+
+        // Получить текущего пользователя
         Object principal = auth.getPrincipal();
         User user = (User) principal;
         UUID userid = user.getId();
@@ -129,9 +131,13 @@ public class CharacterService {
         if (character.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден");
         }
+
+        // Получить текущего пользователя
         Object principal = auth.getPrincipal();
         User user = (User) principal;
         UUID userid = user.getId();
+
+        // Проверка прав доступа
         if (not(character.get().getOwnerId().equals(userid))) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Удалить чужого персонажа вздумал? а ты хорош.");
         }
@@ -140,19 +146,26 @@ public class CharacterService {
     }
 
     @Transactional
-    public void updateCharacterWeapon(UpdateCharacterWeaponRequest request, UUID characterId, Authentication auth) {
+    public void putCharacterWeapon(UpdateCharacterWeaponRequest request, UUID characterId, Authentication auth) {
         CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
             new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж не найден"));
+
+        // Получить текущего пользователя
         Object principal = auth.getPrincipal();
         User user = (User) principal;
         UUID userid = user.getId();
+
+        // Проверка прав доступа
         if (!character.getOwnerId().equals(userid)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Нельзя добавлять оружие не своему персонажу!");
         }
+
+        // Найти оружие по ID
         WeaponEntity weapon = weaponRepo.findById(request.getWeaponId()).orElse(null);
         if (weapon == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Оружие не найдено");
         }
+        // Проверка на наличие оружия и Создание нового списка оружия для персонажа
         if (character.getWeaponId() == null) {
             List<WeaponEntity> weapons = new ArrayList<>();
             weapons.add(weapon);
@@ -162,5 +175,35 @@ public class CharacterService {
         }
         characterRepo.save(character);
     }
+
+    @Transactional
+    public void deleteCharacterWeapon(UUID weaponId, UUID characterId, Authentication auth) {
+        // Найти персонажа по ID
+        CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж не найден"));
+
+        // Получить текущего пользователя
+        Object principal = auth.getPrincipal();
+        User user = (User) principal;
+        UUID userId = user.getId();
+
+        // Проверка прав доступа
+        if (!character.getOwnerId().equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Нельзя удалять оружие не своему персонажу!");
+        }
+
+        // Найти оружие по ID
+        WeaponEntity weapon = weaponRepo.findById(weaponId).orElseThrow(() ->
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Оружие не найдено"));
+
+        // Удалить оружие из списка персонажа
+        if (character.getWeaponId() != null && character.getWeaponId().contains(weapon)) {
+            character.getWeaponId().remove(weapon);
+            characterRepo.save(character);
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Этого оружия нет в списке вашего персонада");
+        }
+    }
+
 }
 
