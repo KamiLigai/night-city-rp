@@ -13,6 +13,7 @@ import ru.nightcityroleplay.backend.dto.UserDto;
 import ru.nightcityroleplay.backend.entity.User;
 import ru.nightcityroleplay.backend.repo.UserRepository;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -45,14 +46,6 @@ public class UserServiceTest {
         String encodedPassword = "encodedPassword";
         when(passwordEncoder.encode(createUserRequest.password())).thenReturn(encodedPassword);
 
-        User user = User.builder()
-            .id(UUID.randomUUID())
-            .username(createUserRequest.username())
-            .password(encodedPassword)
-            .build();
-
-        when(userRepo.save(any(User.class))).thenReturn(user);
-
         //when
         UserDto result = userService.createUser(createUserRequest);
 
@@ -66,7 +59,7 @@ public class UserServiceTest {
     public void testGetCurrentUser() {
         //given
         UUID userId = UUID.randomUUID();
-        User user = new User(userId, "testUser", "password");
+        User user = new User(userId, "testUser", "password", List.of());
 
         Authentication auth = mock(Authentication.class);
         when(auth.getPrincipal()).thenReturn(user);
