@@ -10,6 +10,7 @@ import ru.nightcityroleplay.backend.dto.UpdateCharacterRequest;
 import ru.nightcityroleplay.backend.dto.UpdateCharacterSkillRequest;
 import ru.nightcityroleplay.backend.entity.CharacterEntity;
 import ru.nightcityroleplay.backend.entity.User;
+import ru.nightcityroleplay.backend.exception.NightCityRpException;
 import ru.nightcityroleplay.backend.repo.CharacterRepository;
 import ru.nightcityroleplay.backend.repo.SkillRepository;
 import ru.nightcityroleplay.backend.repo.WeaponRepository;
@@ -130,10 +131,10 @@ class CharacterServiceTest {
 
         var oldCharacter = new CharacterEntity();
         oldCharacter.setId(characterId);
-        oldCharacter.setOwnerId(UUID.randomUUID());
+        oldCharacter.setOwnerId(UUID.randomUUID()); // Должен отличаться от ID пользователя
 
         var user = new User();
-        user.setId(UUID.randomUUID());
+        user.setId(UUID.randomUUID()); // Должен отличаться от ID владельца персонажа
 
         Authentication auth = mock(Authentication.class);
         when(auth.getPrincipal()).thenReturn(user);
@@ -142,8 +143,8 @@ class CharacterServiceTest {
 
         // then
         assertThatThrownBy(() -> service.updateCharacter(request, characterId, auth))
-            .isInstanceOf(ResponseStatusException.class)
-            .hasMessageContaining("Изменить чужого персонажа вздумал? а ты хорош.");
+            .isInstanceOf(NightCityRpException.class)
+            .hasMessageContaining("Изменить чужого персонажа вздумал? а ты хорош."); // Проверяем сообщение
     }
 
     @Test
