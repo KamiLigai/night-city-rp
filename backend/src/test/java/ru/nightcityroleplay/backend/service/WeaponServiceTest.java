@@ -160,7 +160,6 @@ public class WeaponServiceTest {
     @Test
     void updateWeapon_ShouldThrowException_WhenWeaponDoesNotExist() {
         // given
-        UUID weaponId = UUID.randomUUID();
         UUID nonExistentWeaponId = UUID.randomUUID(); // создаем UUID, для которого оружие не будет найдено
         UpdateWeaponRequest request = new UpdateWeaponRequest();
         request.setName("some-name");
@@ -168,16 +167,10 @@ public class WeaponServiceTest {
         // Настройка мока, чтобы findById возвращал пустой Optional
         when(repo.findById(nonExistentWeaponId)).thenReturn(Optional.empty());
 
-        // when
-        service.updateWeapon(request, weaponId);
-
-        // then
+        // when/then
         assertThrows(NightCityRpException.class, () ->
             service.updateWeapon(request, nonExistentWeaponId)
         );
-
-        // Проверяем, что метод findById был вызван
-        verify(repo).findById(nonExistentWeaponId);
     }
 
     @Test
