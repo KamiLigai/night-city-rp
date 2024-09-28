@@ -25,95 +25,25 @@ import static org.mockito.Mockito.*;
 class CharacterServiceTest {
 
     CharacterService service;
-    CharacterRepository repo;
     WeaponRepository weaponRepo;
-
-
-    CharacterRepository charRepo;
+    CharacterRepository characterRepo;
     SkillRepository skillRepo;
 
     @BeforeEach
     void setUp() {
 
-        repo = mock();
+        characterRepo = mock();
         weaponRepo = mock();
-        service = new CharacterService(repo, weaponRepo);
+        service = new CharacterService(characterRepo, weaponRepo, skillRepo);
     }
 
 
-    @Test
-    void test1() {
-        System.out.println("123");
-    }
-
-    @Test
-    @Disabled
-    void test2() {
-        throw new RuntimeException();
-    }
-
-    @Test
-    void test3() {
-        // given
-        int x = 2;
-        int y = 3;
-
-        // when
-        int result = y - x;
-
-        // then
-        assertEquals(result, 1);
-    }
-
-    @Test
-    void test4() {
-        // given
-        int x = 10;
-        int z = 3;
-
-        // when
-        int result = 10 % 3;
-
-        // then
-        assertEquals(result, 1);
-
-    }
-
-    @Test
-    void test5() {
-        //given
-        List<Integer> x = new ArrayList<Integer>();
-        x.add(2);
-
-        //when
-        x.add(42);
-
-        // then
-        assertEquals(x.size(), 2);
-    }
-
-    @Test
-    void test6() {
-        //given
-        List<Integer> x = new ArrayList<Integer>();
-        x.add(2);
-
-        //when
-        x.add(42);
-
-        // then
-        assertThat(x).hasSize(2);
-        assertThat(x).contains(42);
-        charRepo = mock();
-        skillRepo = mock();
-        service = new CharacterService(charRepo, skillRepo);
-    }
 
     @Test
     void getCharacterWhenCharacterIsAbsent() {
         // given
         UUID id = randomUUID();
-        when(charRepo.findById(id))
+        when(characterRepo.findById(id))
             .thenReturn(Optional.empty());
 
         // when
@@ -121,7 +51,7 @@ class CharacterServiceTest {
 
         // then
         assertThat(result).isNull();
-        verify(charRepo).findById(id);
+        verify(characterRepo).findById(id);
     }
 
     @Test
@@ -140,15 +70,15 @@ class CharacterServiceTest {
         UUID id = randomUUID();
         var character = new CharacterEntity();
         character.setId(id);
-        when(charRepo.save(any()))
+        when(characterRepo.save(any()))
             .thenReturn(character);
 
         // when
         service.createCharacter(request, auth);
 
         // then
-        verify(charRepo).save(any());
-        verifyNoMoreInteractions(charRepo);
+        verify(characterRepo).save(any());
+        verifyNoMoreInteractions(characterRepo);
     }
 
 
@@ -163,7 +93,7 @@ class CharacterServiceTest {
         character.setName("Vasyatka");
         character.setAge(42);
 
-        when(charRepo.findById(charId))
+        when(characterRepo.findById(charId))
             .thenReturn(Optional.of(character));
 
         // when
@@ -185,7 +115,7 @@ class CharacterServiceTest {
 
         Authentication auth = mock(Authentication.class);
 
-        when(charRepo.findById(characterId)).thenReturn(Optional.empty());
+        when(characterRepo.findById(characterId)).thenReturn(Optional.empty());
 
         // then
         assertThatThrownBy(() -> service.updateCharacter(request, characterId, auth))
@@ -209,7 +139,7 @@ class CharacterServiceTest {
         Authentication auth = mock(Authentication.class);
         when(auth.getPrincipal()).thenReturn(user);
 
-        when(charRepo.findById(characterId)).thenReturn(Optional.of(oldCharacter));
+        when(characterRepo.findById(characterId)).thenReturn(Optional.of(oldCharacter));
 
         // then
         assertThatThrownBy(() -> service.updateCharacter(request, characterId, auth))
@@ -225,7 +155,7 @@ class CharacterServiceTest {
 
         Authentication auth = mock(Authentication.class);
 
-        when(charRepo.findById(characterId)).thenReturn(Optional.empty());
+        when(characterRepo.findById(characterId)).thenReturn(Optional.empty());
 
         // then
         assertThatThrownBy(() -> service.updateCharacterSkill(request, characterId, auth))
@@ -249,7 +179,7 @@ class CharacterServiceTest {
         Authentication auth = mock(Authentication.class);
         when(auth.getPrincipal()).thenReturn(user);
 
-        when(charRepo.findById(characterId)).thenReturn(Optional.of(oldCharacter));
+        when(characterRepo.findById(characterId)).thenReturn(Optional.of(oldCharacter));
 
         // then
         assertThatThrownBy(() -> service.updateCharacterSkill(request, characterId, auth))
@@ -271,13 +201,13 @@ class CharacterServiceTest {
         character.setId(characterId);
         character.setOwnerId(userId);
 
-        when(charRepo.findById(characterId)).thenReturn(java.util.Optional.of(character));
+        when(characterRepo.findById(characterId)).thenReturn(java.util.Optional.of(character));
 
         // when
         service.deleteCharacter(characterId, auth);
 
         // then
-        verify(charRepo, times(1)).deleteById(characterId);
+        verify(characterRepo, times(1)).deleteById(characterId);
     }
 
     @Test
@@ -287,7 +217,7 @@ class CharacterServiceTest {
         Authentication authentication = mock(Authentication.class);
 
         // when
-        when(charRepo.findById(characterId)).thenReturn(java.util.Optional.empty());
+        when(characterRepo.findById(characterId)).thenReturn(java.util.Optional.empty());
 
         // then
         assertThatThrownBy(() -> service.deleteCharacter(characterId, authentication))
@@ -309,7 +239,7 @@ class CharacterServiceTest {
         character.setId(characterId);
         character.setOwnerId(UUID.randomUUID());
 
-        when(charRepo.findById(characterId)).thenReturn(java.util.Optional.of(character));
+        when(characterRepo.findById(characterId)).thenReturn(java.util.Optional.of(character));
 
         // then
         assertThatThrownBy(() -> service.deleteCharacter(characterId, authentication))
@@ -334,7 +264,7 @@ class CharacterServiceTest {
 
         CharacterEntity character = new CharacterEntity();
         character.setOwnerId(user.getId());
-        when(charRepo.findById(charId))
+        when(characterRepo.findById(charId))
             .thenReturn(Optional.of(character));
 
         // when
@@ -342,7 +272,7 @@ class CharacterServiceTest {
 
         // then
         ArgumentCaptor<CharacterEntity> charCaptor = ArgumentCaptor.captor();
-        verify(charRepo).save(charCaptor.capture());
+        verify(characterRepo).save(charCaptor.capture());
         CharacterEntity savedChar = charCaptor.getValue();
         assertThat(savedChar.getId()).isEqualTo(charId);
         assertThat(savedChar.getOwnerId()).isEqualTo(user.getId());

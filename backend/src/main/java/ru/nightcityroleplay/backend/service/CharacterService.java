@@ -16,8 +16,8 @@ import ru.nightcityroleplay.backend.entity.User;
 import ru.nightcityroleplay.backend.entity.WeaponEntity;
 import ru.nightcityroleplay.backend.exception.NightCityRpException;
 import ru.nightcityroleplay.backend.repo.CharacterRepository;
-import ru.nightcityroleplay.backend.repo.WeaponRepository;
 import ru.nightcityroleplay.backend.repo.SkillRepository;
+import ru.nightcityroleplay.backend.repo.WeaponRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,13 +30,11 @@ import static ru.nightcityroleplay.backend.util.BooleanUtils.not;
 @Service
 @Slf4j
 public class CharacterService {
-
     private final CharacterRepository characterRepo;
     private final WeaponRepository weaponRepo;
     private final SkillRepository skillRepo;
 
-    public CharacterService(CharacterRepository characterRepo, WeaponRepository weaponRepo) {
-    public CharacterService(CharacterRepository characterRepo, SkillRepository skillRepo) {
+    public CharacterService(CharacterRepository characterRepo, WeaponRepository weaponRepo, SkillRepository skillRepo) {
         this.characterRepo = characterRepo;
         this.weaponRepo = weaponRepo;
         this.skillRepo = skillRepo;
@@ -88,7 +86,8 @@ public class CharacterService {
     public void updateCharacter(UpdateCharacterRequest request, UUID characterId, Authentication auth) {
         CharacterEntity newCharacter = new CharacterEntity();
         CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
+        CharacterEntity oldCharacter = characterRepo.findById(characterId).get();
         Object principal = auth.getPrincipal();
         User user = (User) principal;
         UUID userid = user.getId();
@@ -100,72 +99,70 @@ public class CharacterService {
             newCharacter.setName(request.getName());
             newCharacter.setAge(request.getAge());
             characterRepo.save(newCharacter);
-        if (not(character.getOwnerId().equals(userid))) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Изменить чужого персонажа вздумал? а ты хорош.");
+            if (not(character.getOwnerId().equals(userid))) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Изменить чужого персонажа вздумал? а ты хорош.");
+            }
+            log.info("Персонаж {} изменён", newCharacter.getId());
         }
-        newCharacter.setId(characterId);
-        newCharacter.setOwnerId(user.getId());
-        newCharacter.setName(request.getName());
-        newCharacter.setAge(request.getAge());
-        characterRepo.save(newCharacter);
-        log.info("Персонаж {} изменён", newCharacter.getId());
-    }
 
 
-    @Transactional
-    public void updateCharacterSkill(UpdateCharacterSkillRequest request, UUID characterId, Authentication auth) {
-        log.info("Навыки персонажа {} обновляются", characterId);
-        CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
+        @Transactional
+        public void updateCharacterSkill (UpdateCharacterSkillRequest request, UUID characterId, Authentication auth)
+        {
+            log.info("Навыки персонажа {} обновляются", characterId);
+            CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
-        Object principal = auth.getPrincipal();
-        User user = (User) principal;
-        UUID userid = user.getId();
-        if (not(character.getOwnerId().equals(userid))) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Нельзя добавлять навык не своему персонажу!");
+            Object principal = auth.getPrincipal();
+            User user = (User) principal;
+            UUID userid = user.getId();
+            if (not(character.getOwnerId().equals(userid))) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Нельзя добавлять навык не своему персонажу!");
+            }
+            List<Skill> skills = skillRepo.findAllByIdIn(request.getSkillId());
+            character.setSkills(skills);
+            characterRepo.save(character);
+            log.info("Персонажу {} обновлены навыки", character.getId());
         }
-        List<Skill> skills = skillRepo.findAllByIdIn(request.getSkillId());
-        character.setSkills(skills);
-        characterRepo.save(character);
-        log.info("Персонажу {} обновлены навыки", character.getId());
-    }
 
-    @Transactional
-    public void deleteCharacter(UUID characterId, Authentication auth) {
-        Optional<CharacterEntity> character = characterRepo.findById(characterId);
-        if (character.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден");
+        @Transactional
+        public void deleteCharacter (UUID characterId, Authentication auth){
+            Optional<CharacterEntity> character = characterRepo.findById(characterId);
+            if (character.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден");
+            }
+            Object principal = auth.getPrincipal();
+            User user = (User) principal;
+            UUID userid = user.getId();
+            if (not(character.get().getOwnerId().equals(userid))) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Удалить чужого персонажа вздумал? а ты хорош.");
+            }
+            characterRepo.deleteById(characterId);
+            log.info("Персонаж {} был удалён", characterId);
         }
-        Object principal = auth.getPrincipal();
-        User user = (User) principal;
-        UUID userid = user.getId();
-        if (not(character.get().getOwnerId().equals(userid))) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Удалить чужого персонажа вздумал? а ты хорош.");
-        }
-        characterRepo.deleteById(characterId);
-        log.info("Персонаж {} был удалён", characterId);
-    }
 
-    @Transactional
-    public void updateCharacterWeapon(UpdateCharacterWeaponRequest request, UUID characterId, Authentication auth) {
-        CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
-            new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж не найден"));
-        Object principal = auth.getPrincipal();
-        User user = (User) principal;
-        UUID userid = user.getId();
-        if (!character.getOwnerId().equals(userid)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Нельзя добавлять оружие не своему персонажу!");
+        @Transactional
+        public void updateCharacterWeapon (UpdateCharacterWeaponRequest request, UUID characterId, Authentication
+        auth){
+            CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж не найден"));
+            Object principal = auth.getPrincipal();
+            User user = (User) principal;
+            UUID userid = user.getId();
+            if (!character.getOwnerId().equals(userid)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Нельзя добавлять оружие не своему персонажу!");
+            }
+            WeaponEntity weapon = weaponRepo.findById(request.getWeaponId()).orElse(null);
+            if (weapon == null) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Оружие не найдено");
+            }
+            if (character.getWeaponId() == null) {
+                List<WeaponEntity> weapons = new ArrayList<>();
+                weapons.add(weapon);
+                character.setWeaponId(weapons);
+            } else {
+                character.getWeaponId().add(weapon);
+            }
+            characterRepo.save(character);
         }
-        WeaponEntity weapon = weaponRepo.findById(request.getWeaponId()).orElse(null);
-        if (weapon == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Оружие не найдено");
-        }
-        if (character.getWeaponId() == null) {
-            List<WeaponEntity> weapons = new ArrayList<>();
-            weapons.add(weapon);
-            character.setWeaponId(weapons);
-        } else {
-            character.getWeaponId().add(weapon);
-        }
-        characterRepo.save(character);
     }
 }
