@@ -32,7 +32,7 @@ public class CharacterEntity {
     private List<WeaponEntity> weaponId;
     @ManyToMany
     @JoinTable(name = "characters_skills",
-            joinColumns = @JoinColumn(name = "char_id"),
-            inverseJoinColumns = @JoinColumn(name = "skill_id"))
+        joinColumns = @JoinColumn(name = "char_id"),
+        inverseJoinColumns = @JoinColumn(name = "skill_id"))
     private List<Skill> skills;
 }
