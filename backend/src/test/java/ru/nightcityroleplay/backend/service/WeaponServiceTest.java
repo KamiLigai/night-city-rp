@@ -1,19 +1,14 @@
 package ru.nightcityroleplay.backend.service;
 
-import jakarta.persistence.Id;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.server.ResponseStatusException;
 import ru.nightcityroleplay.backend.dto.CreateWeaponRequest;
 import ru.nightcityroleplay.backend.dto.UpdateWeaponRequest;
@@ -26,7 +21,8 @@ import ru.nightcityroleplay.backend.repo.WeaponRepository;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -88,7 +84,7 @@ public class WeaponServiceTest {
             ));
         when(repo.findAll(any(Pageable.class)))
             .thenReturn(weaponPage);
-        UUID id = UUID.randomUUID();
+
 
         // when
         var result = service.getWeaponPage(pageable);
@@ -161,11 +157,10 @@ public class WeaponServiceTest {
     }
 
 
-
-
     @Test
     void updateWeapon_ShouldThrowException_WhenWeaponDoesNotExist() {
         // given
+        UUID weaponId = UUID.randomUUID();
         UUID nonExistentWeaponId = UUID.randomUUID(); // создаем UUID, для которого оружие не будет найдено
         UpdateWeaponRequest request = new UpdateWeaponRequest();
         request.setName("some-name");
@@ -173,10 +168,13 @@ public class WeaponServiceTest {
         // Настройка мока, чтобы findById возвращал пустой Optional
         when(repo.findById(nonExistentWeaponId)).thenReturn(Optional.empty());
 
-        // when & then
-        assertThrows(NightCityRpException.class, () -> {
-            service.updateWeapon(request, nonExistentWeaponId);
-        });
+        // when
+        service.updateWeapon(request, weaponId);
+
+        // then
+        assertThrows(NightCityRpException.class, () ->
+            service.updateWeapon(request, nonExistentWeaponId)
+        );
 
         // Проверяем, что метод findById был вызван
         verify(repo).findById(nonExistentWeaponId);
@@ -225,9 +223,8 @@ public class WeaponServiceTest {
         when(repo.findById(weaponId)).thenReturn(Optional.of(weapon));
 
         // when
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
-            service.deleteWeapon(weaponId);
-        });
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+            () -> service.deleteWeapon(weaponId));
 
         // then
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exception.getStatusCode());
