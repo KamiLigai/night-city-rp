@@ -174,7 +174,7 @@ public class WeaponServiceTest {
     }
 
     @Test
-    void deleteWeapon_ShouldLogInfo_WhenWeaponNotFound() {
+    void deleteWeapon_ShouldDeleteWeapon_WhenWeaponNotExist() {
         // given
         UUID nonexistentWeaponId = UUID.randomUUID();
         when(repo.findById(nonexistentWeaponId)).thenReturn(Optional.empty());
