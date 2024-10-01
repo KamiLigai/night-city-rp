@@ -27,6 +27,14 @@ import static org.mockito.Mockito.verifyNoInteractions;
 
 class SkillServiceTest {
 
+    //todo assertThatThrownBy(() -> yourService.yourMethodThatThrowsException())
+    //            .isInstanceOf(ResponseStatusException.class)
+    //            .hasMessage("Your expected message")
+    //            .extracting(ResponseStatusException::getStatus)
+    //            .isEqualTo(BAD_REQUEST);
+    //            .extracting(ResponseStatusException.class::cast)
+    //              .satisfies(ErrorResponseException::getStatusCode)
+
     SkillService service;
     SkillRepository skillRepo;
 
@@ -173,5 +181,4 @@ class SkillServiceTest {
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("Этот навык есть как минимум у одного персонажа!");
     }
-
 }

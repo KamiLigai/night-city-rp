@@ -1,6 +1,8 @@
 package ru.nightcityroleplay.tests.component;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 import okhttp3.OkHttpClient;
@@ -18,6 +20,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 import static java.util.UUID.randomUUID;
 import static org.jooq.SQLDialect.POSTGRES;
 
@@ -84,7 +87,10 @@ public class AppContext {
     }
 
     private static void createJackson() {
-        put(new ObjectMapper());
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule())
+                .disable(FAIL_ON_UNKNOWN_PROPERTIES);
+        put(objectMapper);
     }
 
     private static void createOkHttp() {

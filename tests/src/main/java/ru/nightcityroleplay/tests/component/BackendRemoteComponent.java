@@ -15,4 +15,8 @@ public record BackendRemoteComponent(BackendRemote remote) {
             }
         }
     }
+
+    public Response makeCreateCharacterRequest(CreateCharacterRequest request) {
+        return remote.createCharacter(request);
+    }
 }

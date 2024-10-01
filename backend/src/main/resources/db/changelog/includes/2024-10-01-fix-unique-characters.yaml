@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2024-10-01-fix-unique-characters
+      author: woomanz
+      changes:
+        - addUniqueConstraint:
+            tableName: characters
+            columnNames: name
+            constraintName: characters_name_unique
