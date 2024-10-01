@@ -1,6 +1,8 @@
 package ru.nightcityroleplay.tests.component;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 import okhttp3.OkHttpClient;
@@ -85,8 +87,9 @@ public class AppContext {
     }
 
     private static void createJackson() {
-        ObjectMapper objectMapper = new ObjectMapper()
-            .disable(FAIL_ON_UNKNOWN_PROPERTIES);
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule())
+                .disable(FAIL_ON_UNKNOWN_PROPERTIES);
         put(objectMapper);
     }
 
