@@ -14,7 +14,7 @@ import ru.nightcityroleplay.backend.dto.CreateWeaponRequest;
 import ru.nightcityroleplay.backend.dto.UpdateWeaponRequest;
 import ru.nightcityroleplay.backend.dto.WeaponDto;
 import ru.nightcityroleplay.backend.entity.CharacterEntity;
-import ru.nightcityroleplay.backend.entity.WeaponEntity;
+import ru.nightcityroleplay.backend.entity.Weapon;
 import ru.nightcityroleplay.backend.exception.NightCityRpException;
 import ru.nightcityroleplay.backend.repo.WeaponRepository;
 
@@ -47,7 +47,7 @@ public class WeaponServiceTest {
         request.setPenetration(2);
         request.setReputationRequirement(40);
 
-        var weapon = new WeaponEntity();
+        var weapon = new Weapon();
         when(repo.save(any()))
             .thenReturn(weapon);
         Authentication auth = mock();
@@ -56,9 +56,9 @@ public class WeaponServiceTest {
         service.createWeapon(request, auth);
 
         // then
-        var weaponCaptor = ArgumentCaptor.forClass(WeaponEntity.class);
+        var weaponCaptor = ArgumentCaptor.forClass(Weapon.class);
         verify(repo).save(weaponCaptor.capture());
-        WeaponEntity savedWeapon = weaponCaptor.getValue();
+        Weapon savedWeapon = weaponCaptor.getValue();
         assertThat(savedWeapon.getName())
             .isEqualTo("test-name");
         assertThat(savedWeapon.getIsMelee())
@@ -76,10 +76,10 @@ public class WeaponServiceTest {
     void getWeaponPageTest() {
         // given
         Pageable pageable = mock();
-        Page<WeaponEntity> weaponPage = mock();
+        Page<Weapon> weaponPage = mock();
         when(weaponPage.toList())
             .thenReturn(List.of(
-                new WeaponEntity()
+                new Weapon()
                     .setName("test-weapon")
             ));
         when(repo.findAll(any(Pageable.class)))
@@ -102,7 +102,7 @@ public class WeaponServiceTest {
     void getWeapon_ShouldReturnWeaponDto_WhenWeaponExists() {
         // given
         UUID weaponId = UUID.randomUUID();
-        WeaponEntity weaponEntity = new WeaponEntity();
+        Weapon weaponEntity = new Weapon();
         weaponEntity.setId(weaponId);
         weaponEntity.setName("test-name");
         weaponEntity.setIsMelee(true);
@@ -136,7 +136,7 @@ public class WeaponServiceTest {
         request.setPenetration(5);
         request.setReputationRequirement(50);
 
-        WeaponEntity existingWeapon = new WeaponEntity();
+        Weapon existingWeapon = new Weapon();
         existingWeapon.setId(weaponId); // Солформация ID существующего оружия
 
         // Настройка мока, чтобы findById возвращал существующее оружие
@@ -191,7 +191,7 @@ public class WeaponServiceTest {
     void deleteWeapon_ShouldDeleteWeapon_WhenWeaponHasNoChars() {
         // given
         UUID weaponId = UUID.randomUUID();
-        WeaponEntity weapon = new WeaponEntity();
+        Weapon weapon = new Weapon();
         weapon.setCharsId(Collections.emptyList()); // Оружие без характеристик
 
         when(repo.findById(weaponId)).thenReturn(Optional.of(weapon));
@@ -208,7 +208,7 @@ public class WeaponServiceTest {
     void deleteWeapon_ShouldThrowException_WhenWeaponHasChars() {
         // given
         UUID weaponId = UUID.randomUUID();
-        WeaponEntity weapon = new WeaponEntity();
+        Weapon weapon = new Weapon();
 
         List<CharacterEntity> chars = new ArrayList<>();
         chars.add(new CharacterEntity());

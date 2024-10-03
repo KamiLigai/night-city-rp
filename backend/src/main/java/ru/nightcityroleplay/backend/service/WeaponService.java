@@ -15,7 +15,7 @@ import ru.nightcityroleplay.backend.dto.CreateWeaponRequest;
 import ru.nightcityroleplay.backend.dto.CreateWeaponResponse;
 import ru.nightcityroleplay.backend.dto.UpdateWeaponRequest;
 import ru.nightcityroleplay.backend.dto.WeaponDto;
-import ru.nightcityroleplay.backend.entity.WeaponEntity;
+import ru.nightcityroleplay.backend.entity.Weapon;
 import ru.nightcityroleplay.backend.exception.NightCityRpException;
 import ru.nightcityroleplay.backend.repo.WeaponRepository;
 
@@ -35,7 +35,7 @@ public class WeaponService {
         this.weaponRepo = weaponRepo;
     }
 
-    private WeaponDto toDto(WeaponEntity weapon) {
+    private WeaponDto toDto(Weapon weapon) {
         WeaponDto weaponDto = new WeaponDto();
         weaponDto.setId(weapon.getId());
         weaponDto.setName(weapon.getName());
@@ -51,7 +51,7 @@ public class WeaponService {
     public CreateWeaponResponse createWeapon(CreateWeaponRequest request, Authentication auth) {
         log.info("Администратор {} пытается создать оружие с именем: {}", auth.getName(), request.getName());
         //выдача характеристик оружию
-        WeaponEntity weapon = new WeaponEntity();
+        Weapon weapon = new Weapon();
         weapon.setName(request.getName());
         weapon.setIsMelee(request.getIsMelee());
         weapon.setWeaponType(request.getWeaponType());
@@ -66,10 +66,10 @@ public class WeaponService {
 
     @Transactional
     public Page<WeaponDto> getWeaponPage(Pageable pageable) {
-        Page<WeaponEntity> weaponPage = weaponRepo.findAll(pageable);
-        List<WeaponEntity> weapons = weaponPage.toList();
+        Page<Weapon> weaponPage = weaponRepo.findAll(pageable);
+        List<Weapon> weapons = weaponPage.toList();
         List<WeaponDto> weaponDtos = new ArrayList<>();
-        for (WeaponEntity weapon : weapons) {
+        for (Weapon weapon : weapons) {
             weaponDtos.add(toDto(weapon));
         }
         return new PageImpl<>(weaponDtos, pageable, weaponPage.getTotalElements());
@@ -77,7 +77,7 @@ public class WeaponService {
 
     @Transactional
     public WeaponDto getWeapon(UUID weaponId) {
-        Optional<WeaponEntity> weaponById = weaponRepo.findById(weaponId);
+        Optional<Weapon> weaponById = weaponRepo.findById(weaponId);
         return weaponById.map(this::toDto).orElse(null);
     }
 
@@ -86,7 +86,7 @@ public class WeaponService {
         log.info("Начато обновление оружия с ID: {}", weaponId);
 
         // Проверка, существует ли оружие с указанным ID
-        WeaponEntity existingWeapon = weaponRepo.findById(weaponId).orElseThrow(()
+        Weapon existingWeapon = weaponRepo.findById(weaponId).orElseThrow(()
             -> new NightCityRpException("Оружие не найдено"));
 
         // Обновление существующего оружия с указанными характеристиками
@@ -104,7 +104,7 @@ public class WeaponService {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void deleteWeapon(UUID weaponId) {
         log.info("Запрос на удаление оружия с ID: {}", weaponId);
-        WeaponEntity weapon = weaponRepo.findById(weaponId).orElse(null);
+        Weapon weapon = weaponRepo.findById(weaponId).orElse(null);
         if (weapon == null) {
             log.info("Оружие {} не найдено", weaponId);
             return;

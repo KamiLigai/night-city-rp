@@ -13,7 +13,7 @@ import ru.nightcityroleplay.backend.dto.*;
 import ru.nightcityroleplay.backend.entity.CharacterEntity;
 import ru.nightcityroleplay.backend.entity.Skill;
 import ru.nightcityroleplay.backend.entity.User;
-import ru.nightcityroleplay.backend.entity.WeaponEntity;
+import ru.nightcityroleplay.backend.entity.Weapon;
 import ru.nightcityroleplay.backend.exception.NightCityRpException;
 import ru.nightcityroleplay.backend.repo.CharacterRepository;
 import ru.nightcityroleplay.backend.repo.SkillRepository;
@@ -161,17 +161,17 @@ public class CharacterService {
         }
 
         // Найти оружие по ID
-        WeaponEntity weapon = weaponRepo.findById(request.getWeaponId()).orElse(null);
+        Weapon weapon = weaponRepo.findById(request.getWeaponId()).orElse(null);
         if (weapon == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Оружие не найдено");
         }
         // Проверка на наличие оружия и Создание нового списка оружия для персонажа
-        if (character.getWeaponId() == null) {
-            List<WeaponEntity> weapons = new ArrayList<>();
+        if (character.getWeapons() == null) {
+            List<Weapon> weapons = new ArrayList<>();
             weapons.add(weapon);
-            character.setWeaponId(weapons);
+            character.setWeapons(weapons);
         } else {
-            character.getWeaponId().add(weapon);
+            character.getWeapons().add(weapon);
         }
         characterRepo.save(character);
     }
@@ -193,12 +193,12 @@ public class CharacterService {
         }
 
         // Найти оружие по ID
-        WeaponEntity weapon = weaponRepo.findById(weaponId).orElseThrow(() ->
+        Weapon weapon = weaponRepo.findById(weaponId).orElseThrow(() ->
             new ResponseStatusException(HttpStatus.NOT_FOUND, "Оружие не найдено"));
 
         // Удалить оружие из списка персонажа
-        if (character.getWeaponId() != null && character.getWeaponId().contains(weapon)) {
-            character.getWeaponId().remove(weapon);
+        if (character.getWeapons() != null && character.getWeapons().contains(weapon)) {
+            character.getWeapons().remove(weapon);
             characterRepo.save(character);
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Этого оружия нет в списке вашего персонада");

@@ -28,8 +28,8 @@ public class CharacterEntity {
     @ManyToMany
     @JoinTable(name = "characters_weapons",
         joinColumns = @JoinColumn(name = "char_id"),
-        inverseJoinColumns = @JoinColumn(name = "weapons_id"))
-    private List<WeaponEntity> weaponId;
+        inverseJoinColumns = @JoinColumn(name = "weapon_id"))
+    private List<Weapon> weapons;
     @ManyToMany
     @JoinTable(name = "characters_skills",
         joinColumns = @JoinColumn(name = "char_id"),

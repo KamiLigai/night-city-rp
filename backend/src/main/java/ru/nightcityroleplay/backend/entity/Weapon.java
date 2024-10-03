@@ -14,7 +14,7 @@ import java.util.UUID;
 @Setter
 @Getter
 @Accessors(chain = true)
-public class WeaponEntity {
+public class Weapon {
     @Id
     @UuidGenerator
     private UUID id;
