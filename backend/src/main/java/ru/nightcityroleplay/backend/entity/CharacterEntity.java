@@ -8,6 +8,7 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.UUID;
 @Table(name = "characters")
 @Setter
 @Getter
+@Accessors(chain = true)
 public class CharacterEntity {
     @Id
     @UuidGenerator

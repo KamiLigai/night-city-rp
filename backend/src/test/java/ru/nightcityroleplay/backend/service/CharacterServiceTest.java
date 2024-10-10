@@ -1,24 +1,32 @@
 package ru.nightcityroleplay.backend.service;
 
+import org.assertj.core.api.ThrowableAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.ErrorResponseException;
 import org.springframework.web.server.ResponseStatusException;
 import ru.nightcityroleplay.backend.dto.CreateCharacterRequest;
 import ru.nightcityroleplay.backend.dto.UpdateCharacterRequest;
 import ru.nightcityroleplay.backend.dto.UpdateCharacterSkillRequest;
+import ru.nightcityroleplay.backend.dto.UpdateCharacterWeaponRequest;
 import ru.nightcityroleplay.backend.entity.CharacterEntity;
 import ru.nightcityroleplay.backend.entity.User;
-import ru.nightcityroleplay.backend.exception.NightCityRpException;
+import ru.nightcityroleplay.backend.entity.Weapon;
 import ru.nightcityroleplay.backend.repo.CharacterRepository;
 import ru.nightcityroleplay.backend.repo.SkillRepository;
 import ru.nightcityroleplay.backend.repo.WeaponRepository;
+import ru.nightcityroleplay.backend.util.Call;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
+import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.*;
@@ -88,10 +96,13 @@ class CharacterServiceTest {
         UUID owId = randomUUID();
         UUID charId = randomUUID();
         CharacterEntity character = new CharacterEntity();
+        //Weapon someWeapon = mock();
+        List<Weapon> weapons = List.of(Mockito.<Weapon>mock());
         character.setOwnerId(owId);
         character.setId(charId);
         character.setName("Vasyatka");
         character.setAge(42);
+        character.setWeapons(weapons);
 
         when(characterRepo.findById(charId))
             .thenReturn(Optional.of(character));
@@ -105,6 +116,7 @@ class CharacterServiceTest {
         assertThat(result.getId()).isEqualTo(charId);
         assertThat(result.getName()).isEqualTo("Vasyatka");
         assertThat(result.getAge()).isEqualTo(42);
+        assertThat(result.getWeaponIds()).isNotEmpty();
     }
 
     @Test
@@ -143,7 +155,7 @@ class CharacterServiceTest {
 
         // then
         assertThatThrownBy(() -> service.updateCharacter(request, characterId, auth))
-            .isInstanceOf(NightCityRpException.class)
+            .isInstanceOf(ResponseStatusException.class)
             .hasMessageContaining("Изменить чужого персонажа вздумал? а ты хорош."); // Проверяем сообщение
     }
 
@@ -241,10 +253,16 @@ class CharacterServiceTest {
 
         when(characterRepo.findById(characterId)).thenReturn(java.util.Optional.of(character));
 
+        // when
+        Call call = () -> service.deleteCharacter(characterId, authentication);
+
         // then
-        assertThatThrownBy(() -> service.deleteCharacter(characterId, authentication))
+        assertThatThrownBy(call)
             .isInstanceOf(ResponseStatusException.class)
-            .hasMessageContaining("Удалить чужого персонажа вздумал? а ты хорош.");
+            .hasMessageContaining("Удалить чужого персонажа вздумал? а ты хорош.")
+            .extracting(ResponseStatusException.class::cast)
+            .extracting(ErrorResponseException::getStatusCode)
+            .isEqualTo(HttpStatus.FORBIDDEN);
     }
 
     @Test
@@ -279,4 +297,78 @@ class CharacterServiceTest {
         assertThat(savedChar.getName()).isEqualTo("test-name");
         assertThat(savedChar.getAge()).isEqualTo(42);
     }
+
+    @Test
+    void putCharacterWeapon_CharacterNotFound() {
+        //given
+        UUID characterId = randomUUID();
+        UUID wheaponId = randomUUID();
+        Authentication auth = mock(Authentication.class);
+        when(characterRepo.findById(characterId)).thenReturn(Optional.empty());
+        UpdateCharacterWeaponRequest request = new UpdateCharacterWeaponRequest();
+        request.setWeaponId(wheaponId);
+
+        //when
+        Call call = () -> service.putCharacterWeapon(request, characterId, auth);
+
+        //then
+        assertThatThrownBy(call)
+            .isInstanceOf(ResponseStatusException.class)
+            .hasMessageContaining("Персонаж не найден");
+    }
+
+
+    @Test
+    void putCharacterWeapon_UserNotOwner() {
+    //given
+
+        var user = new User();
+        user.setId(UUID.randomUUID()); // Должен отличаться от ID владельца персонажа
+        UUID characterId = randomUUID();
+        UUID notUsersCharacter = randomUUID();
+        Authentication auth = mock(Authentication.class);
+        UpdateCharacterWeaponRequest request = new UpdateCharacterWeaponRequest();
+        when(auth.getPrincipal()).thenReturn(user);
+
+        when(characterRepo.findById(characterId))
+            .thenReturn(Optional.of(new CharacterEntity().setOwnerId(notUsersCharacter)));
+
+    //when
+        Call call = () -> service.putCharacterWeapon(request, characterId, auth);
+    //then
+        assertThatThrownBy(call)
+            .isInstanceOf(ResponseStatusException.class)
+            .hasMessageContaining("Нельзя добавлять оружие не своему персонажу!");
+
+
+    }
+
+    @Test
+    void putCharacterWeapon_WeaponNotExist() {
+        //given
+        UUID characterId = randomUUID();
+        UUID weaponId = randomUUID();
+        UUID userId = randomUUID();
+        Authentication auth = mock(Authentication.class);
+        User user = new User();
+        user.setId(userId);
+        when(auth.getPrincipal()).thenReturn(user);
+
+        CharacterEntity character = new CharacterEntity();
+        character.setId(characterId);
+        character.setOwnerId(userId);
+
+        UpdateCharacterWeaponRequest request = new UpdateCharacterWeaponRequest();
+        request.setWeaponId(weaponId);
+        when(characterRepo.findById(characterId)).thenReturn(Optional.of(character));
+        when(weaponRepo.findById(weaponId)).thenReturn(Optional.empty());
+        //when
+        Call call = () -> service.putCharacterWeapon(request, characterId, auth);
+        //then
+        assertThatThrownBy(call)
+            .isInstanceOf(ResponseStatusException.class)
+            .hasMessageContaining("Оружие не найдено");
+
+    }
 }
+

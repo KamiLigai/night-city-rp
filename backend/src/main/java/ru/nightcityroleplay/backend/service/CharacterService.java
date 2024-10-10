@@ -14,7 +14,6 @@ import ru.nightcityroleplay.backend.entity.CharacterEntity;
 import ru.nightcityroleplay.backend.entity.Skill;
 import ru.nightcityroleplay.backend.entity.User;
 import ru.nightcityroleplay.backend.entity.Weapon;
-import ru.nightcityroleplay.backend.exception.NightCityRpException;
 import ru.nightcityroleplay.backend.repo.CharacterRepository;
 import ru.nightcityroleplay.backend.repo.SkillRepository;
 import ru.nightcityroleplay.backend.repo.WeaponRepository;
@@ -23,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static ru.nightcityroleplay.backend.util.BooleanUtils.not;
 
@@ -46,6 +46,11 @@ public class CharacterService {
         characterDto.setOwnerId(character.getOwnerId());
         characterDto.setName(character.getName());
         characterDto.setAge(character.getAge());
+        List<UUID> weaponIds = character.getWeapons().stream()
+            .map(Weapon::getId) // Для каждого оружия получаем его идентификатор
+            .collect(Collectors.toList()); // Сохраняем в список
+
+        characterDto.setWeaponIds(weaponIds);
         return characterDto;
     }
 
@@ -85,23 +90,19 @@ public class CharacterService {
     @Transactional
     public void updateCharacter(UpdateCharacterRequest request, UUID characterId, Authentication auth) {
         CharacterEntity newCharacter = new CharacterEntity();
-        CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
+        CharacterEntity oldCharacter = characterRepo.findById(characterId).orElseThrow(() ->
             new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
-        CharacterEntity oldCharacter = characterRepo.findById(characterId).get();
         Object principal = auth.getPrincipal();
         User user = (User) principal;
         UUID userid = user.getId();
         if (!oldCharacter.getOwnerId().equals(userid)) {
-            throw new NightCityRpException("Изменить чужого персонажа вздумал? а ты хорош.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Изменить чужого персонажа вздумал? а ты хорош.");
         } else {
             newCharacter.setId(characterId);
             newCharacter.setOwnerId(user.getId());
             newCharacter.setName(request.getName());
             newCharacter.setAge(request.getAge());
             characterRepo.save(newCharacter);
-            if (not(character.getOwnerId().equals(userid))) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Изменить чужого персонажа вздумал? а ты хорош.");
-            }
             log.info("Персонаж {} изменён", newCharacter.getId());
         }
     }
@@ -144,17 +145,6 @@ public class CharacterService {
         characterRepo.deleteById(characterId);
         log.info("Персонаж {} был удалён", characterId);
     }
-
-    @Transactional
-    public void getCharacterWeapon(UUID characterId) {
-        // Проверяем, существует ли персонаж с данным ID
-        CharacterEntity character = characterRepo.findById(characterId)
-            .orElseThrow(() -> new RuntimeException("Character not found"));
-
-        // Возвращаем список оружий, связанных с этим персонажем
-        weaponRepo.findByCharsId(character);
-    }
-
     @Transactional
     public void putCharacterWeapon(UpdateCharacterWeaponRequest request, UUID characterId, Authentication auth) {
         CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
