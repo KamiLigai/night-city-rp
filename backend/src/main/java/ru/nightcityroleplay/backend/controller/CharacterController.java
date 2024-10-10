@@ -38,6 +38,10 @@ public class CharacterController {
     public void deleteCharacter(@PathVariable UUID characterId, Authentication auth) {
         characterService.deleteCharacter(characterId, auth);
     }
+    @GetMapping("{characterId}")
+    public void getCharacterWeapon(@RequestBody UUID characterId){
+        characterService.getCharacterWeapon(characterId);
+    }
     @PutMapping("{characterId}/skills")
     public void updateCharacterSkill(@RequestBody UpdateCharacterSkillRequest request, @PathVariable UUID characterId, Authentication auth) {
         characterService.updateCharacterSkill(request, characterId, auth);

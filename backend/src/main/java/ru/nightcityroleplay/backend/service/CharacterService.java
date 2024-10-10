@@ -146,6 +146,16 @@ public class CharacterService {
     }
 
     @Transactional
+    public void getCharacterWeapon(UUID characterId) {
+        // Проверяем, существует ли персонаж с данным ID
+        CharacterEntity character = characterRepo.findById(characterId)
+            .orElseThrow(() -> new RuntimeException("Character not found"));
+
+        // Возвращаем список оружий, связанных с этим персонажем
+        weaponRepo.findByCharsId(character);
+    }
+
+    @Transactional
     public void putCharacterWeapon(UpdateCharacterWeaponRequest request, UUID characterId, Authentication auth) {
         CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
             new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж не найден"));
