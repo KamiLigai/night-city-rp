@@ -25,6 +25,7 @@ test:
 
 system-test:
   stage: build
+  image: nexus-public-docker-repo.ntrubkin.ru/ntrubkin/java-maven-docker:21
   rules:
     - when: manual
   before_script:
