@@ -19,7 +19,7 @@ services:
     depends_on:
       - night-city-rp-db
     networks:
-      - nrp-ci-cd
+      - night-city-rp-system-tests
 
   night-city-rp-db:
     image: postgres:15
@@ -32,7 +32,7 @@ services:
       - ${NRP_DB_PORT:-5433}:5432
     restart: unless-stopped
     networks:
-      - nrp-ci-cd
+      - night-city-rp-system-tests
 
   night-city-rp-frontend:
     image: night-city-rp-frontend:latest
@@ -41,7 +41,7 @@ services:
     restart:
       unless-stopped
     networks:
-      - nrp-ci-cd
+      - night-city-rp-system-tests
 
 networks:
-  nrp-ci-cd:
+  night-city-rp-system-tests:
