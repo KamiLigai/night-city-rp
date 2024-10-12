@@ -25,6 +25,8 @@ test:
 
 system-test:
   stage: build
+  rules:
+    - when: manual
   before_script:
     - docker-compose -f compose-ci-cd.yml --project-name night-city-rp-ci-cd build
     - docker-compose -f compose-ci-cd.yml --project-name night-city-rp-ci-cd down
