@@ -1,7 +1,7 @@
 datasource:
-  url: jdbc:postgresql://localhost:10038/night_city_rp
+  url: jdbc:postgresql://host.docker.internal:10038/night_city_rp
   username: night-city-rp
   password: postgres
 
 backend:
-  url: http://localhost:10037/
+  url: http://host.docker.internal:10037/
