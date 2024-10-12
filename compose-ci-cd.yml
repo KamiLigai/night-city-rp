@@ -5,51 +5,34 @@ services:
     image: night-city-rp-backend:latest
     build:
       context: backend/
-    networks:
-      - night-city-rp
     restart:
       unless-stopped
+    ports:
+      - ${NRP_BACK_PORT:-8081}:8080
     environment:
       - app.enable-cors=false
       - spring.profiles.active=json-logging
       - spring.datasource.url=jdbc:postgresql://night-city-rp-db:5432/night_city_rp
       - spring.datasource.username=night-city-rp
-      - spring.datasource.password=postgres          # todo: сменить и спрятать в секреты
+      - spring.datasource.password=postgres
       - spring.main.banner-mode=off
     depends_on:
       - night-city-rp-db
-    ports:
-      - "10005:8080"
 
   night-city-rp-db:
     image: postgres:15
     environment:
       - POSTGRES_DB=night_city_rp
       - POSTGRES_USER=night-city-rp
-      - POSTGRES_PASSWORD=postgres    # todo: сменить и спрятать в секреты
+      - POSTGRES_PASSWORD=postgres
       - PGDATA=/data/postgres
-    volumes:
-      - /mnt/pool-1/night-city-rp-test/db/data/postgres:/data/postgres
-    restart: unless-stopped
-    networks:
-      - night-city-rp
     ports:
-      - "10006:5432"
+      - ${NRP_DB_PORT:-5433}:5432
+    restart: unless-stopped
 
   night-city-rp-frontend:
     image: night-city-rp-frontend:latest
     build:
       context: frontend/
-    hostname: night-city-rp-frontend-test
-    networks:
-      - night-city-rp
-      - apps_default
     restart:
       unless-stopped
-    ports:
-      - "10007:80"
-
-networks:
-  night-city-rp:
-  apps_default:
-    external: true

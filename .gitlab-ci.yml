@@ -23,6 +23,24 @@ test:
     - cd backend
     - mvn test --no-transfer-progress
 
+system-test:
+  stage: build
+  before_script:
+    - docker-compose -f compose-ci-cd.yml --project-name night-city-rp-ci-cd build
+    - docker-compose -f compose-ci-cd.yml --project-name night-city-rp-ci-cd down
+    - docker-compose -f compose-ci-cd.yml --project-name night-city-rp-ci-cd up -d
+    - cp tests/src/main/resources/application-ci-cd.yml tests/src/main/resources/application.yml
+    - cp tests/src/main/resources/jooq-config-ci-cd.xml tests/src/main/resources/jooq-config.xml
+  script:
+    - cd tests
+    - ./mvnw clean test
+  after_script:
+    - docker-compose -f compose-ci-cd.yml --project-name night-city-rp-ci-cd down -v
+  needs:
+    - job: build
+      artifacts: true
+  allow_failure: true
+
 checkstyle:
   stage: build
   image: maven:3-eclipse-temurin-17
