@@ -8,7 +8,7 @@ services:
     restart:
       unless-stopped
     ports:
-      - ${NRP_BACK_PORT:-8081}:8080
+      - "10037:8080"
     environment:
       - app.enable-cors=false
       - spring.profiles.active=json-logging
@@ -20,6 +20,7 @@ services:
       - night-city-rp-db
     networks:
       - night-city-rp-system-tests
+      - apps_default
 
   night-city-rp-db:
     image: postgres:15
@@ -29,19 +30,25 @@ services:
       - POSTGRES_PASSWORD=postgres
       - PGDATA=/data/postgres
     ports:
-      - ${NRP_DB_PORT:-5433}:5432
+      - "10038:5432"
     restart: unless-stopped
     networks:
       - night-city-rp-system-tests
+      - apps_default
 
   night-city-rp-frontend:
     image: night-city-rp-frontend:latest
     build:
       context: frontend/
+    ports:
+      - "10039:5432"
     restart:
       unless-stopped
     networks:
       - night-city-rp-system-tests
+      - apps_default
 
 networks:
   night-city-rp-system-tests:
+  apps_default:
+    external: true

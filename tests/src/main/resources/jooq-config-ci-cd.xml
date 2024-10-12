@@ -3,7 +3,7 @@
 
     <jdbc>
         <driver>org.postgresql.Driver</driver>
-        <url>jdbc:postgresql://localhost:5433/night_city_rp</url>
+        <url>jdbc:postgresql://localhost:10038/night_city_rp</url>
         <user>night-city-rp</user>
         <password>postgres</password>
     </jdbc>
