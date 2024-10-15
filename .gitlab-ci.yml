@@ -36,7 +36,7 @@ system-test:
     - cp tests/src/main/resources/jooq-config-ci-cd.xml tests/src/main/resources/jooq-config.xml
   script:
     - cd tests
-    - docker run -network='night-city-rp-system-tests'  --rm $(docker build -f ci-cd-dockerfile -q .)
+    - docker run --network=night-city-rp-system-tests  --rm $(docker build -f ci-cd-dockerfile -q .)
     - echo $?
   after_script:
     - docker-compose -f compose-ci-cd.yml --project-name night-city-rp-ci-cd down -v
