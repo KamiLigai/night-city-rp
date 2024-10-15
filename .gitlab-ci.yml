@@ -29,6 +29,7 @@ system-test:
   rules:
     - when: manual
   before_script:
+    - sleep infinity
     - docker-compose -f compose-ci-cd.yml --project-name night-city-rp-ci-cd build
     - docker-compose -f compose-ci-cd.yml --project-name night-city-rp-ci-cd down
     - docker-compose -f compose-ci-cd.yml --project-name night-city-rp-ci-cd up -d
