@@ -12,18 +12,12 @@ import ru.nightcityroleplay.tests.entity.tables.records.CharactersRecord;
 
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static ru.nightcityroleplay.tests.entity.Tables.CHARACTERS;
 
 public class CharacterTest {
 
     DSLContext dbContext = AppContext.get(DSLContext.class);
     BackendRemoteComponent backendRemote = AppContext.get(BackendRemoteComponent.class);
-
-    @Test
-    void name() {
-        fail();
-    }
 
     @Test
     @SneakyThrows
