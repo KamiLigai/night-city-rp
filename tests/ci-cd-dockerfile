@@ -1,2 +1,5 @@
 FROM maven:3-eclipse-temurin-17
+WORKDIR /app
+COPY pom.xml /app/pom.xml
+COPY src /app/src
 ENTRYPOINT ["mvn", "clean", "test"]
