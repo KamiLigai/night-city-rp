@@ -36,7 +36,6 @@ system-test:
     - cp tests/src/main/resources/jooq-config-ci-cd.xml tests/src/main/resources/jooq-config.xml
   script:
     - cd tests
-    - sleep infinity
     - docker run --network=night-city-rp-ci-cd_system-tests  --rm $(docker build -f ci-cd-dockerfile -q .)
     - echo $?
   after_script:
