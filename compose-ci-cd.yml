@@ -19,7 +19,7 @@ services:
     depends_on:
       - night-city-rp-db
     networks:
-      - night-city-rp-system-tests
+      - system-tests
 
   night-city-rp-db:
     image: postgres:15
@@ -32,7 +32,7 @@ services:
       - "10038:5432"
     restart: unless-stopped
     networks:
-      - night-city-rp-system-tests
+      - system-tests
 
   night-city-rp-frontend:
     image: night-city-rp-frontend:latest
@@ -43,7 +43,7 @@ services:
     restart:
       unless-stopped
     networks:
-      - night-city-rp-system-tests
+      - system-tests
 
 networks:
-  night-city-rp-system-tests:
+  system-tests:
