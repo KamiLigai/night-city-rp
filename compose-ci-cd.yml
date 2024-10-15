@@ -20,7 +20,6 @@ services:
       - night-city-rp-db
     networks:
       - night-city-rp-system-tests
-      - apps_default
 
   night-city-rp-db:
     image: postgres:15
@@ -34,7 +33,6 @@ services:
     restart: unless-stopped
     networks:
       - night-city-rp-system-tests
-      - apps_default
 
   night-city-rp-frontend:
     image: night-city-rp-frontend:latest
@@ -46,9 +44,6 @@ services:
       unless-stopped
     networks:
       - night-city-rp-system-tests
-      - apps_default
 
 networks:
   night-city-rp-system-tests:
-  apps_default:
-    external: true
