@@ -18,6 +18,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 import static java.util.UUID.randomUUID;
 import static org.jooq.SQLDialect.POSTGRES;
 
@@ -84,7 +85,9 @@ public class AppContext {
     }
 
     private static void createJackson() {
-        put(new ObjectMapper());
+        ObjectMapper objectMapper = new ObjectMapper()
+            .disable(FAIL_ON_UNKNOWN_PROPERTIES);
+        put(objectMapper);
     }
 
     private static void createOkHttp() {
