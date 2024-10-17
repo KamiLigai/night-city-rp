@@ -1,27 +1,24 @@
 package ru.nightcityroleplay.backend.service;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.security.core.Authentication;
-import ru.nightcityroleplay.backend.dto.CharacterDto;
+import org.springframework.web.server.ResponseStatusException;
 import ru.nightcityroleplay.backend.dto.CreateCharacterRequest;
 import ru.nightcityroleplay.backend.dto.UpdateCharacterRequest;
+import ru.nightcityroleplay.backend.dto.UpdateCharacterSkillRequest;
 import ru.nightcityroleplay.backend.entity.CharacterEntity;
 import ru.nightcityroleplay.backend.entity.User;
-import ru.nightcityroleplay.backend.exception.NightCityRpException;
 import ru.nightcityroleplay.backend.repo.CharacterRepository;
+import ru.nightcityroleplay.backend.repo.SkillRepository;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 class CharacterServiceTest {
@@ -33,119 +30,34 @@ class CharacterServiceTest {
 
 
 
+    CharacterRepository charRepo;
+    SkillRepository skillRepo;
 
     @BeforeEach
     void setUp() {
-
-        repo = mock();
-        service = new CharacterService(repo, characterStatsService);
-    }
-
-
-    @Test
-    void test1() {
-        System.out.println("123");
-    }
-
-    @Test
-    @Disabled
-    void test2() {
-        throw new RuntimeException();
-    }
-
-    @Test
-    void test3() {
-        // given
-        int x = 2;
-        int y = 3;
-
-        // when
-        int result = y - x;
-
-        // then
-        assertEquals(result, 1);
-    }
-
-    @Test
-    void test4() {
-        // given
-        int x = 10;
-        int z = 3;
-
-        // when
-        int result = 10 % 3;
-
-        // then
-        assertEquals(result, 1);
-
-    }
-
-    @Test
-    void test5() {
-        //given
-        List<Integer> x = new ArrayList<Integer>();
-        x.add(2);
-
-        //when
-        x.add(42);
-
-        // then
-        assertEquals(x.size(), 2);
-    }
-
-    @Test
-    void test6() {
-        //given
-        List<Integer> x = new ArrayList<Integer>();
-        x.add(2);
-
-        //when
-        x.add(42);
-
-        // then
-        assertThat(x).hasSize(2);
-        assertThat(x).contains(42);
+        charRepo = mock();
+        skillRepo = mock();
+        service = new CharacterService(charRepo, skillRepo);
     }
 
     @Test
     void getCharacterWhenCharacterIsAbsent() {
-        //given
+        // given
         UUID id = randomUUID();
-        when(repo.findById(id))
+        when(charRepo.findById(id))
             .thenReturn(Optional.empty());
 
-        //when
+        // when
         var result = service.getCharacter(id);
-
 
         // then
         assertThat(result).isNull();
-        verify(repo).findById(id);
+        verify(charRepo).findById(id);
     }
-
-//    @Test
-//    void getCharacterWhenCharacterIsPresent() {
-//        //given
-//        UUID id = randomUUID();
-//        var character = new CharacterEntity();
-//        character.setId(id);
-//        character.setName("test-name");
-//        when(repo.findById(any()))
-//            .thenReturn(Optional.of(character));
-//
-//
-//        //when
-//        var result = service.getCharacter(id);
-//
-//        // then
-//        assertThat(result).isNotNull();
-//        verify(repo, times(1)).findById(any());
-//    }
 
     @Test
     void createCharacterIsSave() {
         // given
-
         var request = new CreateCharacterRequest();
         request.setName("Илон");
         request.setAge(8);
@@ -156,30 +68,24 @@ class CharacterServiceTest {
         when(auth.getPrincipal())
             .thenReturn(user);
 
-
         UUID id = randomUUID();
         var character = new CharacterEntity();
         character.setId(id);
-        when(repo.save(any()))
+        when(charRepo.save(any()))
             .thenReturn(character);
 
         // when
-        var result = service.createCharacter(request, auth);
-        // verify(mock).someMethod(); - правильно
-        // verify(mock.someMethod()); - не правильно
+        service.createCharacter(request, auth);
 
         // then
-        verify(repo).save(any());
-        verify(repo, never()).deleteById(any());
-        Object someObject = mock();
-        verifyNoInteractions(someObject);
-
+        verify(charRepo).save(any());
+        verifyNoMoreInteractions(charRepo);
     }
 
 
     @Test
     void toDtoIsNotNull() {
-        //given
+        // given
         UUID owId = randomUUID();
         UUID charId = randomUUID();
         CharacterEntity character = new CharacterEntity();
@@ -188,25 +94,19 @@ class CharacterServiceTest {
         character.setName("Vasyatka");
         character.setAge(42);
 
-        when(repo.findById(charId))
+        when(charRepo.findById(charId))
             .thenReturn(Optional.of(character));
 
-        //when
+        // when
         var result = service.getCharacter(charId);
 
-        //then
-
+        // then
         assertThat(result).isNotNull();
         assertThat(result.getOwnerId()).isEqualTo(owId);
         assertThat(result.getId()).isEqualTo(charId);
         assertThat(result.getName()).isEqualTo("Vasyatka");
         assertThat(result.getAge()).isEqualTo(42);
     }
-
-
-
-
-
 
     @Test
     void updateCharacterNotFound() {
@@ -216,13 +116,12 @@ class CharacterServiceTest {
 
         Authentication auth = mock(Authentication.class);
 
-        when(repo.findById(characterId)).thenReturn(Optional.empty());
+        when(charRepo.findById(characterId)).thenReturn(Optional.empty());
 
-        // when/then
-        Assertions.assertThrows(
-            NightCityRpException.class,
-            () -> service.updateCharacter(request, characterId, auth)
-        );
+        // then
+        assertThatThrownBy(() -> service.updateCharacter(request, characterId, auth))
+                .isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("Персонаж " + characterId + " не найден");
     }
 
     @Test
@@ -241,21 +140,56 @@ class CharacterServiceTest {
         Authentication auth = mock(Authentication.class);
         when(auth.getPrincipal()).thenReturn(user);
 
-        when(repo.findById(characterId)).thenReturn(Optional.of(oldCharacter));
+        when(charRepo.findById(characterId)).thenReturn(Optional.of(oldCharacter));
 
-        // when/then
-        Assertions.assertThrows(
-            NightCityRpException.class,
-            () -> service.updateCharacter(request, characterId, auth)
-        );
+        // then
+        assertThatThrownBy(() -> service.updateCharacter(request, characterId, auth))
+                .isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("Изменить чужого персонажа вздумал? а ты хорош.");
     }
 
+    @Test
+    void updateCharacterSkillNotFound() {
+        // given
+        var request = new UpdateCharacterSkillRequest();
+        UUID characterId = UUID.randomUUID();
 
+        Authentication auth = mock(Authentication.class);
 
+        when(charRepo.findById(characterId)).thenReturn(Optional.empty());
 
+        // then
+        assertThatThrownBy(() -> service.updateCharacterSkill(request, characterId, auth))
+                .isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("Персонаж " + characterId + " не найден");
+    }
 
     @Test
-    public void testDeleteCharacterSuccess() {
+    void updateCharacterSkillUnauthorized() {
+        // given
+        var request = new UpdateCharacterSkillRequest();
+        UUID characterId = UUID.randomUUID();
+
+        var oldCharacter = new CharacterEntity();
+        oldCharacter.setId(characterId);
+        oldCharacter.setOwnerId(UUID.randomUUID());
+
+        var user = new User();
+        user.setId(UUID.randomUUID());
+
+        Authentication auth = mock(Authentication.class);
+        when(auth.getPrincipal()).thenReturn(user);
+
+        when(charRepo.findById(characterId)).thenReturn(Optional.of(oldCharacter));
+
+        // then
+        assertThatThrownBy(() -> service.updateCharacterSkill(request, characterId, auth))
+                .isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("Нельзя добавлять навык не своему персонажу!");
+    }
+
+    @Test
+    public void deleteCharacterSuccess() {
         // given
         UUID characterId = UUID.randomUUID();
         Authentication auth = mock(Authentication.class);
@@ -268,32 +202,32 @@ class CharacterServiceTest {
         character.setId(characterId);
         character.setOwnerId(userId);
 
-        when(repo.findById(characterId)).thenReturn(java.util.Optional.of(character));
+        when(charRepo.findById(characterId)).thenReturn(java.util.Optional.of(character));
 
         // when
         service.deleteCharacter(characterId, auth);
 
         // then
-        verify(repo, times(1)).deleteById(characterId);
+        verify(charRepo, times(1)).deleteById(characterId);
     }
 
     @Test
-    public void testDeleteCharacterNotFound() {
+    public void deleteCharacterNotFound() {
         // given
         UUID characterId = UUID.randomUUID();
         Authentication authentication = mock(Authentication.class);
 
         // when
-        when(repo.findById(characterId)).thenReturn(java.util.Optional.empty());
+        when(charRepo.findById(characterId)).thenReturn(java.util.Optional.empty());
 
         // then
-        assertThrows(NightCityRpException.class, () -> {
-            service.deleteCharacter(characterId, authentication);
-        });
+        assertThatThrownBy(() -> service.deleteCharacter(characterId, authentication))
+                .isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("Персонаж " + characterId + " не найден");
     }
 
     @Test
-    public void testDeleteCharacterUnauthorized() {
+    public void deleteCharacterUnauthorized() {
         // given
         UUID characterId = UUID.randomUUID();
         Authentication authentication = mock(Authentication.class);
@@ -306,12 +240,12 @@ class CharacterServiceTest {
         character.setId(characterId);
         character.setOwnerId(UUID.randomUUID());
 
-        when(repo.findById(characterId)).thenReturn(java.util.Optional.of(character));
+        when(charRepo.findById(characterId)).thenReturn(java.util.Optional.of(character));
 
-        // when, then
-        assertThrows(NightCityRpException.class, () -> {
-            service.deleteCharacter(characterId, authentication);
-        });
+        // then
+        assertThatThrownBy(() -> service.deleteCharacter(characterId, authentication))
+                .isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("Удалить чужого персонажа вздумал? а ты хорош.");
     }
 
     @Test
@@ -331,7 +265,7 @@ class CharacterServiceTest {
 
         CharacterEntity character = new CharacterEntity();
         character.setOwnerId(user.getId());
-        when(repo.findById(charId))
+        when(charRepo.findById(charId))
             .thenReturn(Optional.of(character));
 
         // when
@@ -339,7 +273,7 @@ class CharacterServiceTest {
 
         // then
         ArgumentCaptor<CharacterEntity> charCaptor = ArgumentCaptor.captor();
-        verify(repo).save(charCaptor.capture());
+        verify(charRepo).save(charCaptor.capture());
         CharacterEntity savedChar = charCaptor.getValue();
         assertThat(savedChar.getId()).isEqualTo(charId);
         assertThat(savedChar.getOwnerId()).isEqualTo(user.getId());

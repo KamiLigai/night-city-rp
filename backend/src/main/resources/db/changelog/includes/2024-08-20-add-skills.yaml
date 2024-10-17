@@ -1,0 +1,58 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2024-08-20-add-skills
+      author: woomanz
+      changes:
+        - createTable:
+            tableName: skills
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    unique: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar
+                  constraints:
+                    unique: true
+                    nullable: false
+              - column:
+                  name: description
+                  type: varchar
+                  constraints:
+                    nullable: false
+              - column:
+                  name: level
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: type
+                  type: varchar
+                  constraints:
+                    nullable: false
+              - column:
+                  name: cost
+                  type: integer
+                  constraints:
+                    nullable: false
+        - createTable:
+            tableName: characters_skills
+            columns:
+              - column:
+                  name: char_id
+                  type: uuid
+                  constraints:
+                    foreignKeyName: char_id_fk
+                    references: characters(id)
+                    nullable: false
+              - column:
+                  name: skill_id
+                  type: uuid
+                  constraints:
+                    foreignKeyName: skill_id_fk
+                    references: skills(id)
+                    nullable: false

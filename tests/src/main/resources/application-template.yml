@@ -1,0 +1,7 @@
+datasource:
+  url: jdbc:postgresql://localhost:5432/night_city_rp
+  username: postgres
+  password: postgres
+
+backend:
+  url: http://localhost:8080/

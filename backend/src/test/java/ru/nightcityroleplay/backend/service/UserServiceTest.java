@@ -5,21 +5,19 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import ru.nightcityroleplay.backend.dto.CreateUserRequest;
 import ru.nightcityroleplay.backend.dto.UserDto;
-
 import ru.nightcityroleplay.backend.entity.User;
 import ru.nightcityroleplay.backend.repo.UserRepository;
 
-
+import java.util.List;
 import java.util.UUID;
 
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,14 +46,6 @@ public class UserServiceTest {
         String encodedPassword = "encodedPassword";
         when(passwordEncoder.encode(createUserRequest.password())).thenReturn(encodedPassword);
 
-        User user = User.builder()
-            .id(UUID.randomUUID())
-            .username(createUserRequest.username())
-            .password(encodedPassword)
-            .build();
-
-        when(userRepo.save(any(User.class))).thenReturn(user);
-
         //when
         UserDto result = userService.createUser(createUserRequest);
 
@@ -69,7 +59,7 @@ public class UserServiceTest {
     public void testGetCurrentUser() {
         //given
         UUID userId = UUID.randomUUID();
-        User user = new User(userId, "testUser", "password");
+        User user = new User(userId, "testUser", "password", List.of());
 
         Authentication auth = mock(Authentication.class);
         when(auth.getPrincipal()).thenReturn(user);
