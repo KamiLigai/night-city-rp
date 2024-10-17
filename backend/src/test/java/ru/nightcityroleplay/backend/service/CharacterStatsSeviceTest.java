@@ -35,10 +35,10 @@ public class CharacterStatsSeviceTest {
         characterStatsService.updateCharacterStats(character);
 
         // Then
-        assertThat(character.getImplant_points()).isEqualTo(8);
-        assertThat(character.getSpecial_implant_points()).isEqualTo(0);
-        assertThat(character.getBattle_points()).isEqualTo(15);
-        assertThat(character.getCivil_points()).isEqualTo(13);
+        assertThat(character.getImplantPoints()).isEqualTo(8);
+        assertThat(character.getSpecialImplantPoints()).isEqualTo(0);
+        assertThat(character.getBattlePoints()).isEqualTo(15);
+        assertThat(character.getCivilPoints()).isEqualTo(13);
 
     }
 
@@ -55,7 +55,7 @@ public class CharacterStatsSeviceTest {
         characterStatsService.updateCharacterStats(character);
 
         // Then
-        assertThat(character.getImplant_points()).isEqualTo(implantPoints);
+        assertThat(character.getImplantPoints()).isEqualTo(implantPoints);
 
     }
 
