@@ -36,7 +36,6 @@ public class UserServiceTest {
 
     @BeforeEach
     public void setUp() {
-//        MockitoAnnotations.openMocks(this);
         createUserRequest = new CreateUserRequest("testUser", "testPassword");
     }
 
@@ -55,6 +54,7 @@ public class UserServiceTest {
         verify(passwordEncoder).encode(createUserRequest.password());
         verify(userRepo).save(any(User.class));
     }
+
     @Test
     public void testGetCurrentUser() {
         //given

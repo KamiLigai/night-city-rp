@@ -27,10 +27,10 @@ public class CharacterEntity {
     private String name;
     private Integer age;
     private Integer reputation;
-    private Integer implant_points;
-    private Integer special_implant_points;
-    private Integer battle_points;
-    private Integer civil_points;
+    private Integer implantPoints;
+    private Integer specialImplantPoints;
+    private Integer battlePoints;
+    private Integer civilPoints;
     @ManyToMany
     @JoinTable(name = "characters_skills",
             joinColumns = @JoinColumn(name = "char_id"),

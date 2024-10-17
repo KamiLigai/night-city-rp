@@ -16,7 +16,6 @@ import ru.nightcityroleplay.backend.entity.User;
 import ru.nightcityroleplay.backend.repo.CharacterRepository;
 import ru.nightcityroleplay.backend.repo.SkillRepository;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -46,10 +45,10 @@ public class CharacterService {
         characterDto.setName(character.getName());
         characterDto.setAge(character.getAge());
         characterDto.setReputation(character.getReputation());
-        characterDto.setImplantPoints(character.getImplant_points());
-        characterDto.setSpecialImplantPoints(character.getSpecial_implant_points());
-        characterDto.setBattlePoints(character.getBattle_points());
-        characterDto.setCivilPoints(character.getCivil_points());
+        characterDto.setImplantPoints(character.getImplantPoints());
+        characterDto.setSpecialImplantPoints(character.getSpecialImplantPoints());
+        characterDto.setBattlePoints(character.getBattlePoints());
+        characterDto.setCivilPoints(character.getCivilPoints());
         return characterDto;
     }
 
@@ -93,7 +92,7 @@ public class CharacterService {
     public void updateCharacter(UpdateCharacterRequest request, UUID characterId, Authentication auth) {
         CharacterEntity newCharacter = new CharacterEntity();
         CharacterEntity oldCharacter = characterRepo.findById(characterId).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
         Object principal = auth.getPrincipal();
         User user = (User) principal;
         UUID userid = user.getId();
@@ -107,12 +106,13 @@ public class CharacterService {
         newCharacter.setName(request.getName());
         newCharacter.setAge(request.getAge());
         newCharacter.setReputation(oldCharacter.getReputation());
-        newCharacter.setImplant_points(oldCharacter.getImplant_points());
-        newCharacter.setSpecial_implant_points(oldCharacter.getSpecial_implant_points());
-        newCharacter.setBattle_points(oldCharacter.getBattle_points());
-        newCharacter.setCivil_points(oldCharacter.getCivil_points());
+        newCharacter.setImplantPoints(oldCharacter.getImplantPoints());
+        newCharacter.setSpecialImplantPoints(oldCharacter.getSpecialImplantPoints());
+        newCharacter.setBattlePoints(oldCharacter.getBattlePoints());
+        newCharacter.setCivilPoints(oldCharacter.getCivilPoints());
         characterRepo.save(newCharacter);
     }
+
     @Transactional
     public void updateCharacterSkill(UpdateCharacterSkillRequest request, UUID characterId, Authentication auth) {
         log.info("Навыки персонажа {} обновляются", characterId);
