@@ -4,14 +4,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.ErrorResponseException;
 import org.springframework.web.server.ResponseStatusException;
-import ru.nightcityroleplay.backend.dto.CreateCharacterRequest;
-import ru.nightcityroleplay.backend.dto.UpdateCharacterRequest;
-import ru.nightcityroleplay.backend.dto.UpdateCharacterSkillRequest;
-import ru.nightcityroleplay.backend.dto.UpdateCharacterWeaponRequest;
+import ru.nightcityroleplay.backend.dto.*;
 import ru.nightcityroleplay.backend.entity.CharacterEntity;
 import ru.nightcityroleplay.backend.entity.User;
 import ru.nightcityroleplay.backend.entity.Weapon;
@@ -20,10 +20,7 @@ import ru.nightcityroleplay.backend.repo.SkillRepository;
 import ru.nightcityroleplay.backend.repo.WeaponRepository;
 import ru.nightcityroleplay.backend.util.Call;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,10 +33,11 @@ class CharacterServiceTest {
     WeaponRepository weaponRepo;
     CharacterRepository characterRepo;
     SkillRepository skillRepo;
+    private Pageable pageable;
 
     @BeforeEach
     void setUp() {
-
+        pageable = Pageable.ofSize(10);
         characterRepo = mock();
         weaponRepo = mock();
         service = new CharacterService(characterRepo, weaponRepo, skillRepo);
@@ -117,6 +115,49 @@ class CharacterServiceTest {
         assertThat(result.getAge()).isEqualTo(42);
         assertThat(result.getWeaponIds()).isNotEmpty();
     }
+
+    @Test
+    void getCharacterPage_Success() {
+        // given
+        CharacterEntity character1 = new CharacterEntity();
+        character1.setId(UUID.randomUUID());
+        character1.setName("Character 1");
+        character1.setWeapons(new ArrayList<>()); // инициализация пустого списка
+
+        CharacterEntity character2 = new CharacterEntity();
+        character2.setId(UUID.randomUUID());
+        character2.setName("Character 2");
+        character2.setWeapons(new ArrayList<>()); // инициализация пустого списка
+
+        List<CharacterEntity> characterList = List.of(character1, character2);
+        Page<CharacterEntity> characterPage = new PageImpl<>(characterList, pageable, characterList.size());
+
+        when(characterRepo.findAll(pageable)).thenReturn(characterPage);
+
+        // when
+        Page<CharacterDto> result = service.getCharacterPage(pageable);
+
+        // then
+        assertThat(result.getTotalElements()).isEqualTo(2);
+        assertThat(result.getContent()).hasSize(2);
+        assertThat(result.getContent().get(0).getName()).isEqualTo("Character 1");
+        assertThat(result.getContent().get(1).getName()).isEqualTo("Character 2");
+    }
+
+    @Test
+    void getCharacterPage_Empty() {
+        // given
+        Page<CharacterEntity> characterPage = new PageImpl<>(Collections.emptyList(), pageable, 0);
+        when(characterRepo.findAll(pageable)).thenReturn(characterPage);
+
+        // when
+        Page<CharacterDto> result = service.getCharacterPage(pageable);
+
+        // then
+        assertThat(result.getTotalElements()).isEqualTo(0);
+        assertThat(result.getContent()).isEmpty();
+    }
+
 
     @Test
     void updateCharacterNotFound() {
@@ -344,11 +385,12 @@ class CharacterServiceTest {
 
     @Test
     void putCharacterWeapon_WeaponNotExist() {
-        //given
+        // given
         UUID characterId = randomUUID();
         UUID weaponId = randomUUID();
         UUID userId = randomUUID();
         Authentication auth = mock(Authentication.class);
+
         User user = new User();
         user.setId(userId);
         when(auth.getPrincipal()).thenReturn(user);
@@ -359,15 +401,17 @@ class CharacterServiceTest {
 
         UpdateCharacterWeaponRequest request = new UpdateCharacterWeaponRequest();
         request.setWeaponId(weaponId);
+
         when(characterRepo.findById(characterId)).thenReturn(Optional.of(character));
         when(weaponRepo.findById(weaponId)).thenReturn(Optional.empty());
-        //when
+
+        // When
         Call call = () -> service.putCharacterWeapon(request, characterId, auth);
-        //then
+
+        // Then
         assertThatThrownBy(call)
             .isInstanceOf(ResponseStatusException.class)
             .hasMessageContaining("Оружие не найдено");
-
     }
 
     @Test
@@ -413,6 +457,31 @@ class CharacterServiceTest {
         assertThatThrownBy(() -> service.deleteCharacterWeapon(weaponId, characterId, auth))
             .isInstanceOf(ResponseStatusException.class)
             .hasMessageContaining("Персонаж не найден");
+    }
+
+    @Test
+    void deleteWeaponNotFound() {
+        // Given
+        UUID weaponId = UUID.randomUUID();
+        UUID characterId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        Authentication auth = mock(Authentication.class);
+        User user = new User();
+        user.setId(userId);
+        when(auth.getPrincipal()).thenReturn(user);
+
+        CharacterEntity character = new CharacterEntity();
+        character.setId(characterId); // Добавлено для соответствия
+        character.setOwnerId(userId);
+        character.setWeapons(new ArrayList<>());
+
+        when(characterRepo.findById(characterId)).thenReturn(Optional.of(character));
+        when(weaponRepo.findById(weaponId)).thenReturn(Optional.empty()); // Ожидаем, что оружие не найдено
+
+        // When & Then
+        assertThatThrownBy(() -> service.deleteCharacterWeapon(weaponId, characterId, auth))
+            .isInstanceOf(ResponseStatusException.class)
+            .hasMessageContaining("Оружие не найдено"); // Исправлено на правильное сообщение
     }
 
     @Test
