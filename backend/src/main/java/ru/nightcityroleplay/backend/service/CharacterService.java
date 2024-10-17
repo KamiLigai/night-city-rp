@@ -30,11 +30,10 @@ import static ru.nightcityroleplay.backend.util.BooleanUtils.not;
 public class CharacterService {
 
     private final CharacterStatsService characterStatsService;
-
     private final CharacterRepository characterRepo;
     private final SkillRepository skillRepo;
 
-    public CharacterService(CharacterRepository characterRepo, CharacterStatsService characterStatsService ) {
+    public CharacterService(CharacterRepository characterRepo, CharacterStatsService characterStatsService, SkillRepository skillRepo) {
         this.characterStatsService = characterStatsService;
         this.characterRepo = characterRepo;
         this.skillRepo = skillRepo;

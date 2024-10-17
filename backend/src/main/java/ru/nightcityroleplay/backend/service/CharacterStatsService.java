@@ -1,7 +1,6 @@
 package ru.nightcityroleplay.backend.service;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import ru.nightcityroleplay.backend.entity.CharacterEntity;
 
 
@@ -18,7 +17,7 @@ public class CharacterStatsService {
     }
 
 
-     private int calculateImplantPoints(int reputation) {
+    private int calculateImplantPoints(int reputation) {
         if (reputation <= 19) {
             return 7;
         } else if (reputation < 30) {
