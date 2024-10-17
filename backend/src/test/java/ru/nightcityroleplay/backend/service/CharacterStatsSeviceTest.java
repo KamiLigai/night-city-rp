@@ -36,7 +36,7 @@ public class CharacterStatsSeviceTest {
 
         // Then
         assertThat(character.getImplantPoints()).isEqualTo(8);
-        assertThat(character.getSpecialImplantPoints()).isEqualTo(0);
+        assertThat(character.getSpecialImplantPoints()).isEqualTo(1);
         assertThat(character.getBattlePoints()).isEqualTo(15);
         assertThat(character.getCivilPoints()).isEqualTo(13);
 
@@ -72,18 +72,6 @@ public class CharacterStatsSeviceTest {
             Arguments.of(40, 10),
             Arguments.of(100, 10)
         );
-    }
-
-    @Test
-    void calculateSpecialImplantPoint_isAlwaysZero() {
-        // Given
-        int reputation = 45;
-
-        // When
-        int result = characterStatsService.calculateSpecialImplantPoint(reputation);
-
-        // Then
-        assertThat(result).isEqualTo(0);
     }
 
     @Test
