@@ -24,6 +24,11 @@ import static org.mockito.Mockito.*;
 class CharacterServiceTest {
 
     CharacterService service;
+    CharacterRepository repo;
+
+    CharacterStatsService characterStatsService;
+
+
     CharacterRepository charRepo;
     SkillRepository skillRepo;
 
@@ -31,7 +36,8 @@ class CharacterServiceTest {
     void setUp() {
         charRepo = mock();
         skillRepo = mock();
-        service = new CharacterService(charRepo, skillRepo);
+        characterStatsService = mock();
+        service = new CharacterService(charRepo, characterStatsService, skillRepo);
     }
 
     @Test
@@ -114,8 +120,8 @@ class CharacterServiceTest {
 
         // then
         assertThatThrownBy(() -> service.updateCharacter(request, characterId, auth))
-                .isInstanceOf(ResponseStatusException.class)
-                .hasMessageContaining("Персонаж " + characterId + " не найден");
+            .isInstanceOf(ResponseStatusException.class)
+            .hasMessageContaining("Персонаж " + characterId + " не найден");
     }
 
     @Test
@@ -138,8 +144,8 @@ class CharacterServiceTest {
 
         // then
         assertThatThrownBy(() -> service.updateCharacter(request, characterId, auth))
-                .isInstanceOf(ResponseStatusException.class)
-                .hasMessageContaining("Изменить чужого персонажа вздумал? а ты хорош.");
+            .isInstanceOf(ResponseStatusException.class)
+            .hasMessageContaining("Изменить чужого персонажа вздумал? а ты хорош.");
     }
 
     @Test
@@ -154,8 +160,8 @@ class CharacterServiceTest {
 
         // then
         assertThatThrownBy(() -> service.updateCharacterSkill(request, characterId, auth))
-                .isInstanceOf(ResponseStatusException.class)
-                .hasMessageContaining("Персонаж " + characterId + " не найден");
+            .isInstanceOf(ResponseStatusException.class)
+            .hasMessageContaining("Персонаж " + characterId + " не найден");
     }
 
     @Test
@@ -178,8 +184,8 @@ class CharacterServiceTest {
 
         // then
         assertThatThrownBy(() -> service.updateCharacterSkill(request, characterId, auth))
-                .isInstanceOf(ResponseStatusException.class)
-                .hasMessageContaining("Нельзя добавлять навык не своему персонажу!");
+            .isInstanceOf(ResponseStatusException.class)
+            .hasMessageContaining("Нельзя добавлять навык не своему персонажу!");
     }
 
     @Test
@@ -216,8 +222,8 @@ class CharacterServiceTest {
 
         // then
         assertThatThrownBy(() -> service.deleteCharacter(characterId, authentication))
-                .isInstanceOf(ResponseStatusException.class)
-                .hasMessageContaining("Персонаж " + characterId + " не найден");
+            .isInstanceOf(ResponseStatusException.class)
+            .hasMessageContaining("Персонаж " + characterId + " не найден");
     }
 
     @Test
@@ -238,8 +244,8 @@ class CharacterServiceTest {
 
         // then
         assertThatThrownBy(() -> service.deleteCharacter(characterId, authentication))
-                .isInstanceOf(ResponseStatusException.class)
-                .hasMessageContaining("Удалить чужого персонажа вздумал? а ты хорош.");
+            .isInstanceOf(ResponseStatusException.class)
+            .hasMessageContaining("Удалить чужого персонажа вздумал? а ты хорош.");
     }
 
     @Test
