@@ -1,0 +1,61 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2024-10-24-add-implants.yaml
+      author: kokoligai
+      changes:
+        - createTable:
+            tableName: implants
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar
+                  constraints:
+                    nullable: false
+              - column:
+                  name: implantType
+                  type: varchar
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: varchar
+                  constraints:
+                    nullable: true
+              - column:
+                  name: reputationRequirement
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: implantPointsCost
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: specialImplantPointsCost
+                  type: integer
+                  constraints:
+                    nullable: false
+        - createTable:
+            tableName: characters_implants
+            columns:
+              - column:
+                  name: char_id
+                  type: uuid
+                  constraints:
+                    foreignKeyName: char_id_fk
+                    references: characters(id)
+                    nullable: false
+              - column:
+                  name: implant_id
+                  type: uuid
+                  constraints:
+                    foreignKeyName: implant_id_fk
+                    references: implant(id)
+                    nullable: false
