@@ -30,11 +30,14 @@ import static ru.nightcityroleplay.backend.util.BooleanUtils.not;
 @Service
 @Slf4j
 public class CharacterService {
+
+    private final CharacterStatsService characterStatsService;
     private final CharacterRepository characterRepo;
     private final WeaponRepository weaponRepo;
     private final SkillRepository skillRepo;
 
-    public CharacterService(CharacterRepository characterRepo, WeaponRepository weaponRepo, SkillRepository skillRepo) {
+    public CharacterService(CharacterRepository characterRepo, CharacterStatsService characterStatsService, WeaponRepository weaponRepo, SkillRepository skillRepo) {
+        this.characterStatsService = characterStatsService;
         this.characterRepo = characterRepo;
         this.weaponRepo = weaponRepo;
         this.skillRepo = skillRepo;
@@ -46,11 +49,15 @@ public class CharacterService {
         characterDto.setOwnerId(character.getOwnerId());
         characterDto.setName(character.getName());
         characterDto.setAge(character.getAge());
+        characterDto.setWeaponIds(weaponIds);
+        characterDto.setReputation(character.getReputation());
+        characterDto.setImplantPoints(character.getImplantPoints());
+        characterDto.setSpecialImplantPoints(character.getSpecialImplantPoints());
+        characterDto.setBattlePoints(character.getBattlePoints());
+        characterDto.setCivilPoints(character.getCivilPoints());
         List<UUID> weaponIds = character.getWeapons().stream()
             .map(Weapon::getId) // Для каждого оружия получаем его идентификатор
             .collect(Collectors.toList()); // Сохраняем в список
-
-        characterDto.setWeaponIds(weaponIds);
         return characterDto;
     }
 
@@ -62,6 +69,9 @@ public class CharacterService {
         character.setOwnerId(user.getId());
         character.setName(request.getName());
         character.setAge(request.getAge());
+        character.setReputation(request.getReputation());
+        characterStatsService.updateCharacterStats(character);
+
         character = characterRepo.save(character);
         log.info("Персонаж {} создан", character.getId());
         return new CreateCharacterResponse(character.getId());
@@ -97,14 +107,17 @@ public class CharacterService {
         UUID userid = user.getId();
         if (!oldCharacter.getOwnerId().equals(userid)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Изменить чужого персонажа вздумал? а ты хорош.");
-        } else {
-            newCharacter.setId(characterId);
-            newCharacter.setOwnerId(user.getId());
-            newCharacter.setName(request.getName());
-            newCharacter.setAge(request.getAge());
-            characterRepo.save(newCharacter);
-            log.info("Персонаж {} изменён", newCharacter.getId());
         }
+        newCharacter.setId(characterId);
+        newCharacter.setOwnerId(user.getId());
+        newCharacter.setName(request.getName());
+        newCharacter.setAge(request.getAge());
+        newCharacter.setReputation(oldCharacter.getReputation());
+        newCharacter.setImplantPoints(oldCharacter.getImplantPoints());
+        newCharacter.setSpecialImplantPoints(oldCharacter.getSpecialImplantPoints());
+        newCharacter.setBattlePoints(oldCharacter.getBattlePoints());
+        newCharacter.setCivilPoints(oldCharacter.getCivilPoints());
+        characterRepo.save(newCharacter);
     }
 
     @Transactional
@@ -112,8 +125,6 @@ public class CharacterService {
         log.info("Навыки персонажа {} обновляются", characterId);
         CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
             new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
-
-        // Получить текущего пользователя
         Object principal = auth.getPrincipal();
         User user = (User) principal;
         UUID userid = user.getId();

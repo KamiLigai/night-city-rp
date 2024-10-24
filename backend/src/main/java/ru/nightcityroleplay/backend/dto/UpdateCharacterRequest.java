@@ -5,4 +5,6 @@ import lombok.Data;
 public class UpdateCharacterRequest {
     private String name;
     private Integer age;
+    private Integer reputation;
+
 }

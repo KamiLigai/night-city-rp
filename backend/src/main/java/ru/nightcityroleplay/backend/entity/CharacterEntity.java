@@ -26,7 +26,12 @@ public class CharacterEntity {
     private UUID id;
     private UUID ownerId;
     private String name;
-    private int age;
+    private Integer age;
+    private Integer reputation;
+    private Integer implantPoints;
+    private Integer specialImplantPoints;
+    private Integer battlePoints;
+    private Integer civilPoints;
     @ManyToMany
     @JoinTable(name = "characters_weapons",
         joinColumns = @JoinColumn(name = "char_id"),

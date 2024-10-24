@@ -1,0 +1,22 @@
+app.enable-cors: false
+
+server.error.include-message: always
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/night_city_rp
+    username: postgres
+    password: postgres
+  jpa:
+    open-in-view: false
+    hibernate.ddl-auto: none
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  prometheus:
+    metrics:
+      export:
+        enabled: true

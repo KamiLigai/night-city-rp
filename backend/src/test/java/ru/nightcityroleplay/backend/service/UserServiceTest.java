@@ -36,7 +36,6 @@ public class UserServiceTest {
 
     @BeforeEach
     public void setUp() {
-//        MockitoAnnotations.openMocks(this);
         createUserRequest = new CreateUserRequest("testUser", "testPassword");
     }
 
