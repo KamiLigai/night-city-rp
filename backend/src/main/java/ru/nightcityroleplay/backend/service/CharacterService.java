@@ -31,10 +31,12 @@ import static ru.nightcityroleplay.backend.util.BooleanUtils.not;
 public class CharacterService {
 
     private final CharacterRepository characterRepo;
+    private final CharacterStatsService characterStatsService;
     private final SkillRepository skillRepo;
     private final ImplantRepository implantRepo;
 
-    public CharacterService(CharacterRepository characterRepo, SkillRepository skillRepo, ImplantRepository implantRepo) {
+    public CharacterService(CharacterRepository characterRepo, CharacterStatsService characterStatsService, SkillRepository skillRepo, ImplantRepository implantRepo) {
+        this.characterStatsService = characterStatsService;
         this.characterRepo = characterRepo;
         this.skillRepo = skillRepo;
         this.implantRepo = implantRepo;
@@ -46,6 +48,11 @@ public class CharacterService {
         characterDto.setOwnerId(character.getOwnerId());
         characterDto.setName(character.getName());
         characterDto.setAge(character.getAge());
+        characterDto.setReputation(character.getReputation());
+        characterDto.setImplantPoints(character.getImplantPoints());
+        characterDto.setSpecialImplantPoints(character.getSpecialImplantPoints());
+        characterDto.setBattlePoints(character.getBattlePoints());
+        characterDto.setCivilPoints(character.getCivilPoints());
         return characterDto;
     }
 
@@ -57,6 +64,9 @@ public class CharacterService {
         character.setOwnerId(user.getId());
         character.setName(request.getName());
         character.setAge(request.getAge());
+        character.setReputation(request.getReputation());
+        characterStatsService.updateCharacterStats(character);
+
         character = characterRepo.save(character);
         log.info("Персонаж {} создан", character.getId());
         return new CreateCharacterResponse(character.getId());
@@ -97,10 +107,14 @@ public class CharacterService {
         newCharacter.setOwnerId(user.getId());
         newCharacter.setName(request.getName());
         newCharacter.setAge(request.getAge());
+        newCharacter.setReputation(oldCharacter.getReputation());
+        newCharacter.setImplantPoints(oldCharacter.getImplantPoints());
+        newCharacter.setSpecialImplantPoints(oldCharacter.getSpecialImplantPoints());
+        newCharacter.setBattlePoints(oldCharacter.getBattlePoints());
+        newCharacter.setCivilPoints(oldCharacter.getCivilPoints());
         characterRepo.save(newCharacter);
         log.info("Персонаж {} изменён", newCharacter.getId());
     }
-
 
     @Transactional
     public void updateCharacterSkill(UpdateCharacterSkillRequest request, UUID characterId, Authentication auth) {

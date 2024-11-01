@@ -17,7 +17,7 @@ class Client {
     })
 
     public login(username: string, password: string): Promise<AxiosResponse<UserDto>> {
-        let creds = Base64.encode(`${username}:${password}`)
+        const creds = Base64.encode(`${username}:${password}`)
         useUserStore().clearUser()
         this.axiosClient.defaults.headers.common['Authorization'] = null
         return this.axiosClient.get<UserDto>(
@@ -44,7 +44,7 @@ class Client {
     }
 
     createUser(username: string, password: string) {
-        let createUserRequest = new CreateUserRequest(username, password)
+        const createUserRequest = new CreateUserRequest(username, password)
         return this.axiosClient.post('/users', createUserRequest)
     }
 
