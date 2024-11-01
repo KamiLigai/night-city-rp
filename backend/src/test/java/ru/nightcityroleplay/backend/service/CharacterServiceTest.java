@@ -41,6 +41,7 @@ class CharacterServiceTest {
 
     @BeforeEach
     void setUp() {
+        weaponRepo = mock();
         pageable = mock();
         charRepo = mock();
         skillRepo = mock();
