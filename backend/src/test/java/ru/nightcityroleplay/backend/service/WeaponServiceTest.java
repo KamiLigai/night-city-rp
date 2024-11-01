@@ -192,7 +192,7 @@ public class WeaponServiceTest {
         // given
         UUID weaponId = UUID.randomUUID();
         Weapon weapon = new Weapon();
-        weapon.setCharsId(Collections.emptyList()); // Оружие без характеристик
+        weapon.setCharacters(Collections.emptyList()); // Оружие без характеристик
 
         when(repo.findById(weaponId)).thenReturn(Optional.of(weapon));
 
@@ -212,7 +212,7 @@ public class WeaponServiceTest {
 
         List<CharacterEntity> chars = new ArrayList<>();
         chars.add(new CharacterEntity());
-        weapon.setCharsId(chars);
+        weapon.setCharacters(chars);
         when(repo.findById(weaponId)).thenReturn(Optional.of(weapon));
 
         // when

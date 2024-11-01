@@ -30,7 +30,6 @@ import static org.mockito.Mockito.*;
 class CharacterServiceTest {
 
     CharacterService service;
-    CharacterRepository repo;
 
     CharacterStatsService characterStatsService;
 
@@ -42,10 +41,11 @@ class CharacterServiceTest {
 
     @BeforeEach
     void setUp() {
+        pageable = mock();
         charRepo = mock();
         skillRepo = mock();
         characterStatsService = mock();
-        service = new CharacterService(charRepo, characterStatsService, skillRepo);
+        service = new CharacterService(charRepo, characterStatsService, weaponRepo, skillRepo);
     }
 
     @Test

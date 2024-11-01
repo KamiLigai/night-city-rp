@@ -8,5 +8,5 @@ import java.util.List;
 import java.util.UUID;
 
 public interface WeaponRepository  extends JpaRepository<Weapon, UUID> {
-    List<Weapon> findByCharsId(CharacterEntity character);
+    List<Weapon> findByCharactersContaining(CharacterEntity character);
 }

@@ -36,7 +36,12 @@ public class CharacterService {
     private final WeaponRepository weaponRepo;
     private final SkillRepository skillRepo;
 
-    public CharacterService(CharacterRepository characterRepo, CharacterStatsService characterStatsService, WeaponRepository weaponRepo, SkillRepository skillRepo) {
+    public CharacterService(
+        CharacterRepository characterRepo,
+        CharacterStatsService characterStatsService,
+        WeaponRepository weaponRepo,
+        SkillRepository skillRepo
+    ) {
         this.characterStatsService = characterStatsService;
         this.characterRepo = characterRepo;
         this.weaponRepo = weaponRepo;
@@ -49,15 +54,15 @@ public class CharacterService {
         characterDto.setOwnerId(character.getOwnerId());
         characterDto.setName(character.getName());
         characterDto.setAge(character.getAge());
+        List<UUID> weaponIds = character.getWeapons().stream()
+            .map(Weapon::getId) // Для каждого оружия получаем его идентификатор
+            .collect(Collectors.toList()); // Сохраняем в список
         characterDto.setWeaponIds(weaponIds);
         characterDto.setReputation(character.getReputation());
         characterDto.setImplantPoints(character.getImplantPoints());
         characterDto.setSpecialImplantPoints(character.getSpecialImplantPoints());
         characterDto.setBattlePoints(character.getBattlePoints());
         characterDto.setCivilPoints(character.getCivilPoints());
-        List<UUID> weaponIds = character.getWeapons().stream()
-            .map(Weapon::getId) // Для каждого оружия получаем его идентификатор
-            .collect(Collectors.toList()); // Сохраняем в список
         return characterDto;
     }
 

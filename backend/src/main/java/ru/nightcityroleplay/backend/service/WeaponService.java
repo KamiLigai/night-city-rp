@@ -109,7 +109,7 @@ public class WeaponService {
             log.info("Оружие {} не найдено", weaponId);
             return;
         }
-        if (weapon.getCharsId().isEmpty()) {
+        if (weapon.getCharacters().isEmpty()) {
             weaponRepo.delete(weapon);
             log.info("Оружие с ID {} было успешно удалено", weaponId);
         } else {

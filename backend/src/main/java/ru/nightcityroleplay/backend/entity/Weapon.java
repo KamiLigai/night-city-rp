@@ -23,9 +23,6 @@ public class Weapon {
     private String weaponType;
     private int penetration;
     private int reputationRequirement;
-    @ManyToMany()
-    @JoinTable(name = "characters_weapons",
-        joinColumns = @JoinColumn(name = "chars"),
-        inverseJoinColumns = @JoinColumn(name = "weapon_id"))
-    private List<CharacterEntity> charsId;
+    @ManyToMany(mappedBy = "weapons")
+    private List<CharacterEntity> characters;
 }
