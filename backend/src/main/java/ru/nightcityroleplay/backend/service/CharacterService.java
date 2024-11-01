@@ -35,7 +35,12 @@ public class CharacterService {
     private final SkillRepository skillRepo;
     private final ImplantRepository implantRepo;
 
-    public CharacterService(CharacterRepository characterRepo, CharacterStatsService characterStatsService, SkillRepository skillRepo, ImplantRepository implantRepo) {
+    public CharacterService(
+        CharacterRepository characterRepo,
+        CharacterStatsService characterStatsService,
+        SkillRepository skillRepo,
+        ImplantRepository implantRepo
+    ) {
         this.characterStatsService = characterStatsService;
         this.characterRepo = characterRepo;
         this.skillRepo = skillRepo;
@@ -107,11 +112,11 @@ public class CharacterService {
         newCharacter.setOwnerId(user.getId());
         newCharacter.setName(request.getName());
         newCharacter.setAge(request.getAge());
-        newCharacter.setReputation(oldCharacter.getReputation());
-        newCharacter.setImplantPoints(oldCharacter.getImplantPoints());
-        newCharacter.setSpecialImplantPoints(oldCharacter.getSpecialImplantPoints());
-        newCharacter.setBattlePoints(oldCharacter.getBattlePoints());
-        newCharacter.setCivilPoints(oldCharacter.getCivilPoints());
+        newCharacter.setReputation(character.getReputation());
+        newCharacter.setImplantPoints(character.getImplantPoints());
+        newCharacter.setSpecialImplantPoints(character.getSpecialImplantPoints());
+        newCharacter.setBattlePoints(character.getBattlePoints());
+        newCharacter.setCivilPoints(character.getCivilPoints());
         characterRepo.save(newCharacter);
         log.info("Персонаж {} изменён", newCharacter.getId());
     }
@@ -169,6 +174,18 @@ public class CharacterService {
         if (implant == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "имплант не найдено");
         }
+
+        // Проверка наличия у персонажа нужных очков
+        if (character.getImplantPoints() < implant.getImplantPointsCost()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Недостаточно ОИ");
+        }
+
+        if (character.getSpecialImplantPoints() < implant.getSpecialImplantPointsCost()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Недостаточно ОИ*");
+        }
+
+
+
         // Проверка на наличие имплантов и Создание нового списка имплантов для персонажа
         if (character.getImplants() == null) {
             List<Implant> implants = new ArrayList<>();

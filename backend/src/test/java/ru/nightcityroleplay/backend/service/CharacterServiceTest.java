@@ -39,7 +39,8 @@ class CharacterServiceTest {
         charRepo = mock();
         skillRepo = mock();
         characterStatsService = mock();
-        service = new CharacterService(charRepo, skillRepo, characterStatsService, skillRepo);
+        implantRepo = mock();
+        service = new CharacterService(charRepo, characterStatsService, skillRepo, implantRepo);
     }
 
     @Test
