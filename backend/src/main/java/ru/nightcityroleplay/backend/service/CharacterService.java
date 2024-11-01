@@ -86,7 +86,7 @@ public class CharacterService {
     public void updateCharacter(UpdateCharacterRequest request, UUID characterId, Authentication auth) {
         CharacterEntity newCharacter = new CharacterEntity();
         CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
         Object principal = auth.getPrincipal();
         User user = (User) principal;
         UUID userid = user.getId();
@@ -106,7 +106,7 @@ public class CharacterService {
     public void updateCharacterSkill(UpdateCharacterSkillRequest request, UUID characterId, Authentication auth) {
         log.info("Навыки персонажа {} обновляются", characterId);
         CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
         Object principal = auth.getPrincipal();
         User user = (User) principal;
         UUID userid = user.getId();
@@ -134,6 +134,7 @@ public class CharacterService {
         characterRepo.deleteById(characterId);
         log.info("Персонаж {} был удалён", characterId);
     }
+
     @Transactional
     public void putCharacterImplant(UpdateImplantRequest request, UUID characterId, Authentication auth) {
         CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
@@ -163,6 +164,32 @@ public class CharacterService {
             character.getImplants().add(implant);
         }
         characterRepo.save(character);
+    }
+
+
+    @Transactional
+    public void deleteCharacterImplant(UUID implantId, UUID characterId, Authentication auth) {
+        CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж не найден"));
+
+        Object principal = auth.getPrincipal();
+        User user = (User) principal;
+        UUID userid = user.getId();
+
+        if (!character.getOwnerId().equals(userid)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Нельзя добавлять имплант не своему персонажу!");
+        }
+        // Найти оружие по ID
+        Implant implant = implantRepo.findById(implantId).orElseThrow(() ->
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Имлант не найден"));
+        if (character.getImplants() != null && character.getImplants().contains(implant)) {
+            character.getImplants().remove(implant);
+            characterRepo.save(character);
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Этого импланта нет в вашем списке.");
+        }
+
+
     }
 }
 
