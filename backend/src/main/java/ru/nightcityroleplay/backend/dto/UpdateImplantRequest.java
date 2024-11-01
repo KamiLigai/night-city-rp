@@ -6,7 +6,7 @@ import java.util.UUID;
 
 @Data
 public class UpdateImplantRequest {
-    private UUID id;
+    private UUID implantId;
     private String name;
     private String implantType;
     private String description;

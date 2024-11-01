@@ -11,11 +11,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PathVariable;
-import ru.nightcityroleplay.backend.dto.CreateCharacterRequest;
-import ru.nightcityroleplay.backend.dto.CreateCharacterResponse;
-import ru.nightcityroleplay.backend.dto.CharacterDto;
-import ru.nightcityroleplay.backend.dto.UpdateCharacterRequest;
-import ru.nightcityroleplay.backend.dto.UpdateCharacterSkillRequest;
+import ru.nightcityroleplay.backend.dto.*;
 import ru.nightcityroleplay.backend.service.CharacterService;
 
 import java.util.UUID;
@@ -59,8 +55,10 @@ public class CharacterController {
     public void updateCharacterSkill(@RequestBody UpdateCharacterSkillRequest request, @PathVariable UUID characterId, Authentication auth) {
         characterService.updateCharacterSkill(request, characterId, auth);
     }
-
-
+    @PutMapping("{characterId}/implants")
+    public void putCharacterImplant(@RequestBody UpdateImplantRequest request, @PathVariable UUID characterId, Authentication auth) {
+        characterService.putCharacterImplant(request, characterId, auth);
+    }
 }
 
 

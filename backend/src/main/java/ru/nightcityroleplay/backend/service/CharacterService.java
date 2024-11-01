@@ -150,7 +150,7 @@ public class CharacterService {
         }
 
         // Найти оружие по ID
-        Implant implant = implantRepo.findById(request.()).orElse(null);
+        Implant implant = implantRepo.findById(request.getImplantId()).orElse(null);
         if (implant == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "имплант не найдено");
         }
