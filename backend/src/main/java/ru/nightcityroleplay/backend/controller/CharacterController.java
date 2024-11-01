@@ -59,6 +59,8 @@ public class CharacterController {
     public void updateCharacterSkill(@RequestBody UpdateCharacterSkillRequest request, @PathVariable UUID characterId, Authentication auth) {
         characterService.updateCharacterSkill(request, characterId, auth);
     }
+
+
 }
 
 

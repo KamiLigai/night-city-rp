@@ -11,9 +11,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import ru.nightcityroleplay.backend.dto.*;
 import ru.nightcityroleplay.backend.entity.CharacterEntity;
+import ru.nightcityroleplay.backend.entity.Implant;
 import ru.nightcityroleplay.backend.entity.Skill;
 import ru.nightcityroleplay.backend.entity.User;
 import ru.nightcityroleplay.backend.repo.CharacterRepository;
+import ru.nightcityroleplay.backend.repo.ImplantRepository;
 import ru.nightcityroleplay.backend.repo.SkillRepository;
 
 import java.util.ArrayList;
@@ -30,10 +32,12 @@ public class CharacterService {
 
     private final CharacterRepository characterRepo;
     private final SkillRepository skillRepo;
+    private final ImplantRepository implantRepo;
 
-    public CharacterService(CharacterRepository characterRepo, SkillRepository skillRepo) {
+    public CharacterService(CharacterRepository characterRepo, SkillRepository skillRepo, ImplantRepository implantRepo) {
         this.characterRepo = characterRepo;
         this.skillRepo = skillRepo;
+        this.implantRepo = implantRepo;
     }
 
     private CharacterDto toDto(CharacterEntity character) {
@@ -129,6 +133,36 @@ public class CharacterService {
         }
         characterRepo.deleteById(characterId);
         log.info("Персонаж {} был удалён", characterId);
+    }
+    @Transactional
+    public void putCharacterImplant(UpdateImplantRequest request, UUID characterId, Authentication auth) {
+        CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж не найден"));
+
+        // Получить текущего пользователя
+        Object principal = auth.getPrincipal();
+        User user = (User) principal;
+        UUID userid = user.getId();
+
+        // Проверка прав доступа
+        if (!character.getOwnerId().equals(userid)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Нельзя добавлять имплант не своему персонажу!");
+        }
+
+        // Найти оружие по ID
+        Implant implant = implantRepo.findById(request.()).orElse(null);
+        if (implant == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "имплант не найдено");
+        }
+        // Проверка на наличие имплантов и Создание нового списка имплантов для персонажа
+        if (character.getImplants() == null) {
+            List<Implant> implants = new ArrayList<>();
+            implants.add(implant);
+            character.setImplants(implants);
+        } else {
+            character.getImplants().add(implant);
+        }
+        characterRepo.save(character);
     }
 }
 

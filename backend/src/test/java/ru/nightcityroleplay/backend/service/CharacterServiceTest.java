@@ -11,6 +11,7 @@ import ru.nightcityroleplay.backend.dto.UpdateCharacterSkillRequest;
 import ru.nightcityroleplay.backend.entity.CharacterEntity;
 import ru.nightcityroleplay.backend.entity.User;
 import ru.nightcityroleplay.backend.repo.CharacterRepository;
+import ru.nightcityroleplay.backend.repo.ImplantRepository;
 import ru.nightcityroleplay.backend.repo.SkillRepository;
 
 import java.util.Optional;
@@ -26,12 +27,14 @@ class CharacterServiceTest {
     CharacterService service;
     CharacterRepository charRepo;
     SkillRepository skillRepo;
+    ImplantRepository implantRepo;
 
     @BeforeEach
     void setUp() {
         charRepo = mock();
         skillRepo = mock();
-        service = new CharacterService(charRepo, skillRepo);
+        implantRepo = mock();
+        service = new CharacterService(charRepo, skillRepo, implantRepo);
     }
 
     @Test

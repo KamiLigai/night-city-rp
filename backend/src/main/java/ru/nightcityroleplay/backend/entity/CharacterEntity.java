@@ -31,4 +31,9 @@ public class CharacterEntity {
             joinColumns = @JoinColumn(name = "char_id"),
             inverseJoinColumns = @JoinColumn(name = "skill_id"))
     private List<Skill> skills;
+    @ManyToMany
+    @JoinTable(name = "characters_implants",
+        joinColumns = @JoinColumn(name = "char_id"),
+        inverseJoinColumns = @JoinColumn(name = "implant_id"))
+    private List<Implant> implants;
 }
