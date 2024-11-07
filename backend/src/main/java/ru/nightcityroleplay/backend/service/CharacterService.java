@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -119,6 +120,20 @@ public class CharacterService {
         newCharacter.setCivilPoints(character.getCivilPoints());
         characterRepo.save(newCharacter);
         log.info("Персонаж {} изменён", newCharacter.getId());
+    }
+
+
+    @PreAuthorize("hasRole('Role_ADMIN')")
+    public void giveReputation(GiveRewardRequest request, UUID characterId, Authentication auth) {
+        CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж не найден"));
+
+        Object principal = auth.getPrincipal();
+        User user = (User) principal;
+        int rewardReputation = request.getReputation();
+        character.setReputation(character.getReputation() + rewardReputation);
+        log.info("{} выдал персонажу {} репутацию {}", user.getUsername(), characterId, rewardReputation);
+        characterRepo.save(character);
     }
 
     @Transactional

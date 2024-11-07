@@ -79,8 +79,8 @@ public class ImplantService {
     }
 
     @PreAuthorize("hasRole('Role_ADMIN')")
-    public void updateImplant(UpdateImplantRequest request, UUID implantId) {
-        log.info("Начато обновление импланта с ID: {}", implantId);
+    public void updateImplant(UpdateImplantRequest request, UUID implantId, String name) {
+        log.info("Начато обновление импланта с ID: {}. Название {}", implantId, name);
 
         Implant existingImplant = implantRepo.findById(implantId).orElseThrow(()
             -> new NightCityRpException("Имплант не найден"));

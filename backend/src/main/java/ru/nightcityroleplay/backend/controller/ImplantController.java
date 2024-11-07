@@ -38,8 +38,8 @@ public class ImplantController {
     }
 
     @PutMapping("{implantid}")
-    public void updateImplant(@RequestBody UpdateImplantRequest request, @PathVariable UUID implantid) {
-        implantService.updateImplant(request, implantid);
+    public void updateImplant(@RequestBody UpdateImplantRequest request, @PathVariable UUID implantid, String name) {
+        implantService.updateImplant(request, implantid, name);
     }
 
     @DeleteMapping("{implantid}")
