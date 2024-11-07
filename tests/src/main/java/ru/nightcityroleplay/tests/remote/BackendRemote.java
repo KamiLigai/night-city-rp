@@ -86,4 +86,15 @@ public class BackendRemote {
         return call.execute();
     }
 
+    @SneakyThrows
+    public Response deleteCharacter(UUID characterId) {
+        Request httpRequest = new Request.Builder()
+                .url(baseUrl + "characters/" + characterId)
+                .delete()
+                .header(AUTHORIZATION, getBasicAuthorization(username, password))
+                .build();
+        Call call = client.newCall(httpRequest);
+        return call.execute();
+    }
+
 }

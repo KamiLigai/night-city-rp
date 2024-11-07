@@ -21,7 +21,7 @@ function logout() {
         <router-link v-if="userStore.user?.username" :to="{name: 'characters'}">Персонажи</router-link>
         <router-link v-if="!userStore.user?.username" :to="{name: 'login'}">Войти</router-link>
         <router-link v-if="!userStore.user?.username" :to="{name: 'registration'}">Зарегистрироваться</router-link>
-        <p v-if="userStore.user?.username">{{ userStore.user?.username }}</p>
+        <router-link v-if="userStore.user?.username" :to="{name: 'current-user'}">{{ userStore.user?.username }}</router-link>
         <button v-if="userStore.user?.username" v-on:click="logout">Выйти</button>
     </div>
 
