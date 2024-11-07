@@ -155,7 +155,7 @@ public class CharacterService {
     }
 
     @Transactional
-    public void putCharacterImplant(UpdateImplantRequest request, UUID characterId, Authentication auth) {
+    public void putCharacterImplant(UpdateCharacterImplantRequest request, UUID characterId, Authentication auth) {
         CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
             new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж не найден"));
 
@@ -169,31 +169,35 @@ public class CharacterService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Нельзя добавлять имплант не своему персонажу!");
         }
 
-        // Найти оружие по ID
-        Implant implant = implantRepo.findById(request.getImplantId()).orElse(null);
-        if (implant == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "имплант не найдено");
+        // Списки для проверок
+        List<Implant> implants = new ArrayList<>();
+        int totalImplantPointsCost = 0;
+        int totalSpecialImplantPointsCost = 0;
+
+        // Проверка наличия имплантов и суммируем стоимости
+        for (UUID implantId : request.getImplantId()) {
+            Implant implant = implantRepo.findById(implantId).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Имплант с ID " + implantId + " не найден"));
+
+            // попытка добавить имплант в список
+            implants.add(implant);
+            totalImplantPointsCost += implant.getImplantPointsCost();
+            totalSpecialImplantPointsCost += implant.getSpecialImplantPointsCost();
         }
 
         // Проверка наличия у персонажа нужных очков
-        if (character.getImplantPoints() < implant.getImplantPointsCost()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Недостаточно ОИ");
+        if (character.getImplantPoints() < totalImplantPointsCost) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Недостаточно ОИ для обычных имплантов");
+        }
+        if (character.getSpecialImplantPoints() < totalSpecialImplantPointsCost) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Недостаточно ОИ* для специальных имплантов");
         }
 
-        if (character.getSpecialImplantPoints() < implant.getSpecialImplantPointsCost()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Недостаточно ОИ*");
-        }
-
-
-
-        // Проверка на наличие имплантов и Создание нового списка имплантов для персонажа
+        // Создаем или обновляем список имплантов персонажа
         if (character.getImplants() == null) {
-            List<Implant> implants = new ArrayList<>();
-            implants.add(implant);
-            character.setImplants(implants);
-        } else {
-            character.getImplants().add(implant);
+            character.setImplants(new ArrayList<>());
         }
+        character.getImplants().addAll(implants);
         characterRepo.save(character);
     }
 
@@ -210,7 +214,7 @@ public class CharacterService {
         if (!character.getOwnerId().equals(userid)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Нельзя добавлять имплант не своему персонажу!");
         }
-        // Найти оружие по ID
+        // Найти Имплант по ID
         Implant implant = implantRepo.findById(implantId).orElseThrow(() ->
             new ResponseStatusException(HttpStatus.NOT_FOUND, "Имлант не найден"));
         if (character.getImplants() != null && character.getImplants().contains(implant)) {

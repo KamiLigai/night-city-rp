@@ -50,7 +50,7 @@ public class CharacterController {
     }
 
     @PutMapping("{characterId}/implants")
-    public void putCharacterImplant(@RequestBody UpdateImplantRequest request, @PathVariable UUID characterId, Authentication auth) {
+    public void putCharacterImplant(@RequestBody UpdateCharacterImplantRequest request, @PathVariable UUID characterId, Authentication auth) {
         characterService.putCharacterImplant(request, characterId, auth);
     }
 
@@ -60,5 +60,4 @@ public class CharacterController {
     }
 
 }
-
 
