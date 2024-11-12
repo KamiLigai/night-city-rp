@@ -11,6 +11,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,14 +33,16 @@ public class CharacterEntity {
     private Integer specialImplantPoints;
     private Integer battlePoints;
     private Integer civilPoints;
+
     @ManyToMany
     @JoinTable(name = "characters_weapons",
         joinColumns = @JoinColumn(name = "char_id"),
         inverseJoinColumns = @JoinColumn(name = "weapon_id"))
-    private List<Weapon> weapons;
+    private List<Weapon> weapons = new ArrayList<>();
+
     @ManyToMany
     @JoinTable(name = "characters_skills",
         joinColumns = @JoinColumn(name = "char_id"),
         inverseJoinColumns = @JoinColumn(name = "skill_id"))
-    private List<Skill> skills;
+    private List<Skill> skills = new ArrayList<>();
 }

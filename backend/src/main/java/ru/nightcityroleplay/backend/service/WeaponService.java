@@ -21,10 +21,8 @@ import ru.nightcityroleplay.backend.repo.WeaponRepository;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
-@SuppressWarnings("checkstyle:CommentsIndentation")
 @Service
 @Slf4j
 public class WeaponService {
@@ -77,10 +75,12 @@ public class WeaponService {
 
     @Transactional
     public WeaponDto getWeapon(UUID weaponId) {
-        Optional<Weapon> weaponById = weaponRepo.findById(weaponId);
-        return weaponById.map(this::toDto).orElse(null);
+        return weaponRepo.findById(weaponId)
+            .map(this::toDto)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Оружие не найдено"));
     }
 
+    @Transactional
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void updateWeapon(UpdateWeaponRequest request, UUID weaponId) {
         log.info("Начато обновление оружия с ID: {}", weaponId);
@@ -101,6 +101,7 @@ public class WeaponService {
         log.info("Оружие с ID: {} было успешно обновлено", weaponId);
     }
 
+    @Transactional
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void deleteWeapon(UUID weaponId) {
         log.info("Запрос на удаление оружия с ID: {}", weaponId);

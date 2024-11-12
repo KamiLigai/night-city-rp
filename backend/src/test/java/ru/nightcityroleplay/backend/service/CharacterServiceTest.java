@@ -359,7 +359,10 @@ class CharacterServiceTest {
         //then
         assertThatThrownBy(call)
             .isInstanceOf(ResponseStatusException.class)
-            .hasMessageContaining("Персонаж не найден");
+            .hasMessageContaining("Персонаж не найден")
+            .extracting(ResponseStatusException.class::cast)
+            .extracting(ErrorResponseException::getStatusCode)
+            .isEqualTo(HttpStatus.NOT_FOUND);
     }
 
 
@@ -383,9 +386,10 @@ class CharacterServiceTest {
         //then
         assertThatThrownBy(call)
             .isInstanceOf(ResponseStatusException.class)
-            .hasMessageContaining("Нельзя добавлять оружие не своему персонажу!");
-
-
+            .hasMessageContaining("Нельзя добавлять оружие не своему персонажу!")
+            .extracting(ResponseStatusException.class::cast)
+            .extracting(ErrorResponseException::getStatusCode)
+            .isEqualTo(HttpStatus.FORBIDDEN);
     }
 
     @Test
@@ -413,10 +417,13 @@ class CharacterServiceTest {
         // When
         Call call = () -> service.putCharacterWeapon(request, characterId, auth);
 
-        // Then
+        // then
         assertThatThrownBy(call)
             .isInstanceOf(ResponseStatusException.class)
-            .hasMessageContaining("Оружие не найдено");
+            .hasMessageContaining("Оружие не найдено")
+            .extracting(ResponseStatusException.class::cast)
+            .extracting(ErrorResponseException::getStatusCode)
+            .isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
@@ -461,7 +468,35 @@ class CharacterServiceTest {
         // When / Then
         assertThatThrownBy(() -> service.deleteCharacterWeapon(weaponId, characterId, auth))
             .isInstanceOf(ResponseStatusException.class)
-            .hasMessageContaining("Персонаж не найден");
+            .hasMessageContaining("Персонаж не найден")
+            .extracting(ResponseStatusException.class::cast)
+            .extracting(ErrorResponseException::getStatusCode)
+            .isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void deleteWeaponUnauthorizedAccess() {
+        // Given
+        UUID weaponId = UUID.randomUUID();
+        UUID characterId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        Authentication auth = mock(Authentication.class);
+
+        User user = new User();
+        user.setId(userId);
+        when(auth.getPrincipal()).thenReturn(user);
+
+        CharacterEntity character = new CharacterEntity();
+        character.setOwnerId(UUID.randomUUID()); // другой владелец
+        when(charRepo.findById(characterId)).thenReturn(Optional.of(character));
+
+        // When / Then
+        assertThatThrownBy(() -> service.deleteCharacterWeapon(weaponId, characterId, auth))
+            .isInstanceOf(ResponseStatusException.class)
+            .hasMessageContaining("Нельзя удалять оружие не своему персонажу!")
+            .extracting(ResponseStatusException.class::cast)
+            .extracting(ErrorResponseException::getStatusCode)
+            .isEqualTo(HttpStatus.FORBIDDEN);
     }
 
     @Test
@@ -486,29 +521,10 @@ class CharacterServiceTest {
         // When & Then
         assertThatThrownBy(() -> service.deleteCharacterWeapon(weaponId, characterId, auth))
             .isInstanceOf(ResponseStatusException.class)
-            .hasMessageContaining("Оружие не найдено"); // Исправлено на правильное сообщение
-    }
-
-    @Test
-    void deleteWeaponUnauthorizedAccess() {
-        // Given
-        UUID weaponId = UUID.randomUUID();
-        UUID characterId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
-        Authentication auth = mock(Authentication.class);
-
-        User user = new User();
-        user.setId(userId);
-        when(auth.getPrincipal()).thenReturn(user);
-
-        CharacterEntity character = new CharacterEntity();
-        character.setOwnerId(UUID.randomUUID()); // другой владелец
-        when(charRepo.findById(characterId)).thenReturn(Optional.of(character));
-
-        // When / Then
-        assertThatThrownBy(() -> service.deleteCharacterWeapon(weaponId, characterId, auth))
-            .isInstanceOf(ResponseStatusException.class)
-            .hasMessageContaining("Нельзя удалять оружие не своему персонажу!");
+            .hasMessageContaining("Оружие не найдено")
+            .extracting(ResponseStatusException.class::cast)
+            .extracting(ErrorResponseException::getStatusCode)
+            .isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
@@ -531,7 +547,9 @@ class CharacterServiceTest {
         // When / Then
         assertThatThrownBy(() -> service.deleteCharacterWeapon(weaponId, characterId, auth))
             .isInstanceOf(ResponseStatusException.class)
-            .hasMessageContaining("Этого оружия нет в списке вашего персонада");
-
+            .hasMessageContaining("Этого оружия нет в списке вашего персонажа")
+            .extracting(ResponseStatusException.class::cast)
+            .extracting(ErrorResponseException::getStatusCode)
+            .isEqualTo(HttpStatus.BAD_REQUEST);
     }
 }

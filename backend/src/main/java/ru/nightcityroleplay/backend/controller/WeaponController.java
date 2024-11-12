@@ -17,25 +17,31 @@ import java.util.UUID;
 @RequestMapping("weapons")
 public class WeaponController {
     private final WeaponService weaponService;
+
     public WeaponController(WeaponService weaponService) {
         this.weaponService = weaponService;
     }
+
     @PostMapping
-    public CreateWeaponResponse createWeapon(@RequestBody CreateWeaponRequest request, Authentication auth){
+    public CreateWeaponResponse createWeapon(@RequestBody CreateWeaponRequest request, Authentication auth) {
         return weaponService.createWeapon(request, auth);
     }
+
     @GetMapping
     public Page<WeaponDto> getWeaponPage(Pageable pageble) {
         return weaponService.getWeaponPage(pageble);
     }
+
     @GetMapping("{weaponId}")
     public WeaponDto getWeapon(@PathVariable UUID weaponId) {
         return weaponService.getWeapon(weaponId);
     }
+
     @PutMapping("{weaponId}")
     public void updateWeapon(@RequestBody UpdateWeaponRequest request, @PathVariable UUID weaponId) {
         weaponService.updateWeapon(request, weaponId);
     }
+
     @DeleteMapping("{weaponId}")
     public void deleteWeapon(@PathVariable UUID weaponId) {
         weaponService.deleteWeapon(weaponId);

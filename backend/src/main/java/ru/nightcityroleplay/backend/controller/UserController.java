@@ -20,6 +20,7 @@ public class UserController {
         meterRegistry.counter("user_created").increment();
         return userService.createUser(request);
     }
+
     @GetMapping("me")
     public UserDto getCurrentUser(Authentication auth) {
         meterRegistry.counter("current_user_requested").increment();
