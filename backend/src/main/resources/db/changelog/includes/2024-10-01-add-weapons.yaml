@@ -46,11 +46,13 @@ databaseChangeLog:
                   constraints:
                     primaryKey: true
                     nullable: false
-                    foreignKeyName: characters.id
+                    foreignKeyName: characters_id_fk
+                    references: characters(id)
               - column:
                   name: weapon_id
                   type: UUID
                   constraints:
                     primaryKey: true
                     nullable: false
-                    foreignKeyName: weapons.id
+                    foreignKeyName: weapons_id_fk
+                    references: weapons(id)
