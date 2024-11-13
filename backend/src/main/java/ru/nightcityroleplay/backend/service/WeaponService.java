@@ -6,7 +6,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,7 +44,6 @@ public class WeaponService {
     }
 
     @Transactional
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public CreateWeaponResponse createWeapon(CreateWeaponRequest request, Authentication auth) {
         log.info("Администратор {} пытается создать оружие с именем: {}", auth.getName(), request.getName());
         //выдача характеристик оружию
@@ -81,7 +79,6 @@ public class WeaponService {
     }
 
     @Transactional
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void updateWeapon(UpdateWeaponRequest request, UUID weaponId) {
         log.info("Начато обновление оружия с ID: {}", weaponId);
 
@@ -102,7 +99,6 @@ public class WeaponService {
     }
 
     @Transactional
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void deleteWeapon(UUID weaponId) {
         log.info("Запрос на удаление оружия с ID: {}", weaponId);
         Weapon weapon = weaponRepo.findById(weaponId).orElse(null);

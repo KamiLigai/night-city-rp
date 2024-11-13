@@ -3,6 +3,7 @@ package ru.nightcityroleplay.backend.controller;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import ru.nightcityroleplay.backend.dto.CreateWeaponRequest;
@@ -22,6 +23,7 @@ public class WeaponController {
         this.weaponService = weaponService;
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping
     public CreateWeaponResponse createWeapon(@RequestBody CreateWeaponRequest request, Authentication auth) {
         return weaponService.createWeapon(request, auth);
@@ -37,11 +39,13 @@ public class WeaponController {
         return weaponService.getWeapon(weaponId);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("{weaponId}")
     public void updateWeapon(@RequestBody UpdateWeaponRequest request, @PathVariable UUID weaponId) {
         weaponService.updateWeapon(request, weaponId);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("{weaponId}")
     public void deleteWeapon(@PathVariable UUID weaponId) {
         weaponService.deleteWeapon(weaponId);
