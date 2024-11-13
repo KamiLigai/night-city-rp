@@ -12,7 +12,6 @@ import ru.nightcityroleplay.backend.service.UserService;
 @RequestMapping("users")
 @RequiredArgsConstructor
 public class UserController {
-
     private final UserService userService;
     private final MeterRegistry meterRegistry;
 

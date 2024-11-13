@@ -11,3 +11,5 @@ databaseChangeLog:
       file: db/changelog/includes/2024-08-20-add-skills.yaml
   - include:
       file: db/changelog/includes/2024-06-11-add-admins.yaml
+  - include:
+      file: db/changelog/includes/2024-10-01-add-weapons.yaml
