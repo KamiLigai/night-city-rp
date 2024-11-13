@@ -106,7 +106,7 @@ public class AppContext {
     }
 
     private static void createBackendRemoteComponent() {
-        put(new BackendRemoteComponent(get(BackendRemote.class)));
+        put(new BackendRemoteComponent(get(BackendRemote.class), get(ObjectMapper.class)));
     }
 
     private static void checkApplication() {
@@ -117,15 +117,9 @@ public class AppContext {
     @SneakyThrows
     private static void createTestUser() {
         String username = "user-" + randomUUID();
-        var backendRemote = get(BackendRemote.class);
-        String jsonBody;
-        try(Response response = backendRemote.createUser(new CreateUserRequest(username, username))) {
-            if (!response.isSuccessful()) {
-                throw new AppContextException("Тестовый пользователь не создан: " + response);
-            }
-            jsonBody = response.body().string();
-        }
-        UserDto userDto = get(ObjectMapper.class).readValue(jsonBody, UserDto.class);
-        backendRemote.setCurrentUser(userDto.id(), username, username);
+        var backendRemoteComponent = get(BackendRemoteComponent.class);
+
+        UserDto userDto = backendRemoteComponent.createUser(username, username);
+        backendRemoteComponent.setCurrentUser(userDto.id(), username, username);
     }
 }

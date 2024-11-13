@@ -97,4 +97,14 @@ public class BackendRemote {
         return call.execute();
     }
 
+    @SneakyThrows
+    public Response getCharacter(UUID characterId) {
+        Request httpRequest = new Request.Builder()
+                .url(baseUrl + "characters/" + characterId)
+                .get()
+                .header(AUTHORIZATION, getBasicAuthorization(username, password))
+                .build();
+        Call call = client.newCall(httpRequest);
+        return call.execute();
+    }
 }

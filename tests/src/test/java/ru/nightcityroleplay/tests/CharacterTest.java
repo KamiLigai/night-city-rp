@@ -13,8 +13,10 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import ru.nightcityroleplay.tests.component.AppContext;
 import ru.nightcityroleplay.tests.component.BackendRemoteComponent;
+import ru.nightcityroleplay.tests.dto.CharacterDto;
 import ru.nightcityroleplay.tests.dto.CreateCharacterRequest;
 import ru.nightcityroleplay.tests.dto.ErrorResponse;
+import ru.nightcityroleplay.tests.dto.UserDto;
 import ru.nightcityroleplay.tests.entity.tables.records.CharactersRecord;
 
 import java.util.List;
@@ -94,6 +96,12 @@ public class CharacterTest {
             .fetch();
 
         assertThat(result).isEmpty();
+    }
+
+    public static Stream<Arguments> createCharacterWithBadRequestData() {
+        // roles, expectedAuthorities
+        return Stream.of(
+                Arguments.of(CreateCharacterRequest.builder().age(null).build(), "Возраст не может быть null"));
     }
 
     @Test
@@ -187,9 +195,70 @@ public class CharacterTest {
         assertThat(result).size().isEqualTo(0);
     }
 
-    public static Stream<Arguments> createCharacterWithBadRequestData() {
-        // roles, expectedAuthorities
-        return Stream.of(
-            Arguments.of(CreateCharacterRequest.builder().age(null).build(), "Возраст не может быть null"));
+    @Test
+    @SneakyThrows
+    @Description("""
+            Дано: Персонаж владельца 1.
+            Действие: Удалить персонажа владельца 1 методом DELETE /characters/{id} от имени владельца 2.
+            Ожидается: 403 Forbidden.
+                       Никакой персонаж не удалён.
+            """)
+    void deleteNotOwnedCharacter() {
+        // Создать персонажа
+        String charName = randomUUID().toString();
+        backendRemote.createCharacter(
+                CreateCharacterRequest.builder()
+                        .name(charName)
+                        .age(205)
+                        .build()
+        );
+
+        // Сменить юзера
+        UUID userId = randomUUID();
+        String username = randomUUID().toString();
+        String password = randomUUID().toString();
+        UserDto userDto = backendRemote.createUser(username, password);
+        backendRemote.setCurrentUser(userDto.id(), username, password);
+
+        // Удалить персонажа
+        Result<CharactersRecord> charRecord = dbContext.select().from(CHARACTERS)
+                .where(CHARACTERS.NAME.eq(charName))
+                .fetchInto(CHARACTERS);
+
+        Response response = backendRemote.makeDeleteCharacterRequest(charRecord.get(0).getId());
+
+        assertThat(charRecord).hasSize(1);
+        assertThat(charRecord.get(0).getOwnerId().equals(userId)).isFalse();
+        assertThat(response.code()).isEqualTo(403);
     }
+
+    @Test
+    @Description("""
+            Дано: Персонаж.
+            Действие: Получить персонажа методом GET /characters/{id}.
+            Ожидается: Получены данные персонажа
+            """)
+    void getCharacter() {
+        // Создать персонажа
+        String charName = randomUUID().toString();
+        backendRemote.createCharacter(
+                CreateCharacterRequest.builder()
+                        .name(charName)
+                        .age(240)
+                        .build()
+        );
+
+        // Получить персонажа
+        Result<CharactersRecord> charRecord = dbContext.select().from(CHARACTERS)
+                .where(CHARACTERS.NAME.eq(charName))
+                .fetchInto(CHARACTERS);
+        CharacterDto charDto = backendRemote.getCharacter(charRecord.get(0).getId());
+
+        assertThat(charRecord).hasSize(1);
+        assertThat(charDto.getName()).isEqualTo(charRecord.get(0).getName());
+        assertThat(charDto.getId()).isEqualTo(charRecord.get(0).getId());
+        assertThat(charDto.getAge()).isEqualTo(charRecord.get(0).getAge());
+    }
+
+
 }
