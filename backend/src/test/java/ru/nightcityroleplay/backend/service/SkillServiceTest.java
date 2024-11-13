@@ -18,12 +18,7 @@ import java.util.UUID;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.*;
 
 class SkillServiceTest {
 
@@ -49,7 +44,7 @@ class SkillServiceTest {
         // given
         UUID id = randomUUID();
         when(skillRepo.findById(id))
-                .thenReturn(Optional.empty());
+            .thenReturn(Optional.empty());
 
         // when
         var result = service.getSkill(id);
@@ -73,13 +68,13 @@ class SkillServiceTest {
         User user = new User();
 
         when(auth.getPrincipal())
-                .thenReturn(user);
+            .thenReturn(user);
 
         UUID id = randomUUID();
         var skill = new Skill();
         skill.setId(id);
         when(skillRepo.save(any()))
-                .thenReturn(skill);
+            .thenReturn(skill);
 
         // when
         service.createSkill(request);
@@ -104,7 +99,7 @@ class SkillServiceTest {
         skill.setCost(2);
 
         when(skillRepo.findById(skillId))
-                .thenReturn(Optional.of(skill));
+            .thenReturn(Optional.of(skill));
 
         // when
         var result = service.getSkill(skillId);
@@ -129,8 +124,8 @@ class SkillServiceTest {
 
         // then
         assertThatThrownBy(() -> service.updateSkill(request, skillId))
-                .isInstanceOf(ResponseStatusException.class)
-                .hasMessageContaining("Навык " + skillId + " не найден");
+            .isInstanceOf(ResponseStatusException.class)
+            .hasMessageContaining("Навык " + skillId + " не найден");
     }
 
     @Test
@@ -161,8 +156,8 @@ class SkillServiceTest {
 
         // then
         assertThatThrownBy(() -> service.deleteSkill(skillId))
-                .isInstanceOf(ResponseStatusException.class)
-                .hasMessageContaining("Навык " + skillId + " не найден");
+            .isInstanceOf(ResponseStatusException.class)
+            .hasMessageContaining("Навык " + skillId + " не найден");
     }
 
     @Test
@@ -178,7 +173,7 @@ class SkillServiceTest {
 
         // then
         assertThatThrownBy(() -> service.deleteSkill(skillId))
-                .isInstanceOf(ResponseStatusException.class)
-                .hasMessageContaining("Этот навык есть как минимум у одного персонажа!");
+            .isInstanceOf(ResponseStatusException.class)
+            .hasMessageContaining("Этот навык есть как минимум у одного персонажа!");
     }
 }

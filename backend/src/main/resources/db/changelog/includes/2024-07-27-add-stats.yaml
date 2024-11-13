@@ -1,0 +1,64 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2024-07-27-add-stats.yaml
+      author: kokoligai
+      changes:
+        - addColumn:
+            tableName: characters
+            columns:
+              - column:
+                  name: reputation
+                  type: integer
+                  defaultValue: "0"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: implant_points
+                  type: integer
+                  defaultValue: "0"
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: special_implant_points
+                  type: integer
+                  defaultValue: "0"
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: battle_points
+                  type: integer
+                  defaultValue: "0"
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: civil_points
+                  type: integer
+                  defaultValue: "0"
+                  constraints:
+                    nullable: false
+
+        - dropDefaultValue:
+            tableName: characters
+            columnName: reputation
+        - dropDefaultValue:
+            tableName: characters
+            columnName: implant_points
+        - dropDefaultValue:
+            tableName: characters
+            columnName: special_implant_points
+        - dropDefaultValue:
+            tableName: characters
+            columnName: battle_points
+        - dropDefaultValue:
+            tableName: characters
+            columnName: civil_points
+
+
+
+
+
+
+

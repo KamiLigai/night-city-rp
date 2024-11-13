@@ -117,10 +117,12 @@ import static ru.nightcityroleplay.backend.util.BooleanUtils.not;
 @Slf4j
 public class CharacterService {
 
+    private final CharacterStatsService characterStatsService;
     private final CharacterRepository characterRepo;
     private final SkillRepository skillRepo;
 
-    public CharacterService(CharacterRepository characterRepo, SkillRepository skillRepo) {
+    public CharacterService(CharacterRepository characterRepo, CharacterStatsService characterStatsService, SkillRepository skillRepo) {
+        this.characterStatsService = characterStatsService;
         this.characterRepo = characterRepo;
         this.skillRepo = skillRepo;
     }
@@ -131,6 +133,11 @@ public class CharacterService {
         characterDto.setOwnerId(character.getOwnerId());
         characterDto.setName(character.getName());
         characterDto.setAge(character.getAge());
+        characterDto.setReputation(character.getReputation());
+        characterDto.setImplantPoints(character.getImplantPoints());
+        characterDto.setSpecialImplantPoints(character.getSpecialImplantPoints());
+        characterDto.setBattlePoints(character.getBattlePoints());
+        characterDto.setCivilPoints(character.getCivilPoints());
         return characterDto;
     }
 
@@ -148,6 +155,9 @@ public class CharacterService {
         character.setOwnerId(user.getId());
         character.setName(request.getName());
         character.setAge(request.getAge());
+        character.setReputation(request.getReputation());
+        characterStatsService.updateCharacterStats(character);
+
         character = characterRepo.save(character);
         log.info("Персонаж {} создан", character.getId());
         return new CreateCharacterResponse(character.getId());
@@ -176,28 +186,33 @@ public class CharacterService {
     @Transactional
     public void updateCharacter(UpdateCharacterRequest request, UUID characterId, Authentication auth) {
         CharacterEntity newCharacter = new CharacterEntity();
-        CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
+        CharacterEntity oldCharacter = characterRepo.findById(characterId).orElseThrow(() ->
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
         Object principal = auth.getPrincipal();
         User user = (User) principal;
         UUID userid = user.getId();
-        if (not(character.getOwnerId().equals(userid))) {
+
+        if (!oldCharacter.getOwnerId().equals(userid)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Изменить чужого персонажа вздумал? а ты хорош.");
         }
+
         newCharacter.setId(characterId);
         newCharacter.setOwnerId(user.getId());
         newCharacter.setName(request.getName());
         newCharacter.setAge(request.getAge());
+        newCharacter.setReputation(oldCharacter.getReputation());
+        newCharacter.setImplantPoints(oldCharacter.getImplantPoints());
+        newCharacter.setSpecialImplantPoints(oldCharacter.getSpecialImplantPoints());
+        newCharacter.setBattlePoints(oldCharacter.getBattlePoints());
+        newCharacter.setCivilPoints(oldCharacter.getCivilPoints());
         characterRepo.save(newCharacter);
-        log.info("Персонаж {} изменён", newCharacter.getId());
     }
-
 
     @Transactional
     public void updateCharacterSkill(UpdateCharacterSkillRequest request, UUID characterId, Authentication auth) {
         log.info("Навыки персонажа {} обновляются", characterId);
         CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
         Object principal = auth.getPrincipal();
         User user = (User) principal;
         UUID userid = user.getId();
