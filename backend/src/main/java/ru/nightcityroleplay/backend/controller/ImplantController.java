@@ -24,7 +24,7 @@ public class ImplantController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('Role_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public CreateImplantResponse createImplant(@RequestBody CreateImplantRequest request, Authentication auth) {
         return implantService.createImplant(request, auth);
     }
@@ -40,13 +40,13 @@ public class ImplantController {
     }
 
     @PutMapping("{implantid}")
-    @PreAuthorize("hasRole('Role_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void updateImplant(@RequestBody UpdateImplantRequest request, @PathVariable UUID implantid, String name) {
         implantService.updateImplant(request, implantid, name);
     }
 
     @DeleteMapping("{implantid}")
-    @PreAuthorize("hasRole('Role_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void deleteImplant(@PathVariable UUID implantid) {
         implantService.deleteImplant(implantid);
     }

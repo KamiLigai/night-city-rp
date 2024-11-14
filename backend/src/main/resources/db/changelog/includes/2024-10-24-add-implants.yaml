@@ -18,7 +18,7 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: implantType
+                  name: implant_type
                   type: varchar
                   constraints:
                     nullable: false
@@ -28,17 +28,17 @@ databaseChangeLog:
                   constraints:
                     nullable: true
               - column:
-                  name: reputationRequirement
+                  name: reputation_requirement
                   type: integer
                   constraints:
                     nullable: false
               - column:
-                  name: implantPointsCost
+                  name: implant_points_cost
                   type: integer
                   constraints:
                     nullable: false
               - column:
-                  name: specialImplantPointsCost
+                  name: special_implant_points_cost
                   type: integer
                   constraints:
                     nullable: false
@@ -57,5 +57,5 @@ databaseChangeLog:
                   type: uuid
                   constraints:
                     foreignKeyName: implant_id_fk
-                    references: implant(id)
+                    references: implants(id)
                     nullable: false

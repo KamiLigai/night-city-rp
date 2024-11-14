@@ -22,10 +22,7 @@ public class Implant {
     private int reputationRequirement;
     private int implantPointsCost;
     private int specialImplantPointsCost;
-    @ManyToMany()
-    @JoinTable(name = "characters_implants",
-        joinColumns = @JoinColumn(name = "chars"),
-        inverseJoinColumns = @JoinColumn(name = "implant_id"))
+    @ManyToMany(mappedBy = "implants")
     private List<CharacterEntity> charsId;
 }
 
