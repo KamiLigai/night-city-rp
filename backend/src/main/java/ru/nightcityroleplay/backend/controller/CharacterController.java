@@ -44,8 +44,8 @@ public class CharacterController {
         characterService.deleteCharacter(characterId, auth);
     }
 
-    @PutMapping("{characterId}")
-    public void giveReputation(@RequestBody GiveRewardRequest request, UUID characterId, Authentication auth) {
+    @PutMapping("{characterId}/giverep")
+    public void giveReputation(@RequestBody GiveRewardRequest request, @PathVariable  UUID characterId, Authentication auth) {
         characterService.giveReputation(request, characterId, auth);
     }
 

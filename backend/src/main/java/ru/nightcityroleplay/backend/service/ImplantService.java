@@ -5,7 +5,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +29,7 @@ public class ImplantService {
 
     private final ImplantRepository implantRepo;
 
+
     public ImplantService(ImplantRepository implantRepo) {
         this.implantRepo = implantRepo;
     }
@@ -47,10 +47,10 @@ public class ImplantService {
     }
 
     @Transactional
-    @PreAuthorize("hasRole('Role_ADMIN')")
     public CreateImplantResponse createImplant(CreateImplantRequest request, Authentication auth) {
         log.info("Админ {} пытается создать имплант с именем {}", auth.getName(), request.getName());
         Implant implant = new Implant();
+        implant.setId(UUID.randomUUID());
         implant.setName(request.getName());
         implant.setImplantType(request.getImplantType());
         implant.setDescription(request.getDescription());
@@ -78,7 +78,7 @@ public class ImplantService {
         return implantById.map(this::toDto).orElse(null);
     }
 
-    @PreAuthorize("hasRole('Role_ADMIN')")
+    @Transactional
     public void updateImplant(UpdateImplantRequest request, UUID implantId, String name) {
         log.info("Начато обновление импланта с ID: {}. Название {}", implantId, name);
 
@@ -94,10 +94,12 @@ public class ImplantService {
         log.info("Имлпнат с ID: {} было успешно обновлено", implantId);
     }
 
-    @PreAuthorize("hasRole('Role_ADMIN')")
+
+    @Transactional
     public void deleteImplant(UUID implantId) {
         log.info("Запрос на удаление оружия с ID: {}", implantId);
         Implant implant = implantRepo.findById(implantId).orElse(null);
+
         if (implant == null) {
             log.info("Имплант {} не найден", implantId);
             return;

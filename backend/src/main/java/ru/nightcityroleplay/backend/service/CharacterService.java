@@ -213,6 +213,8 @@ public class CharacterService {
             character.setImplants(new ArrayList<>());
         }
         character.getImplants().addAll(implants);
+        character.setImplantPoints(character.getImplantPoints() - totalImplantPointsCost);
+        character.setSpecialImplantPoints(character.getSpecialImplantPoints() - totalSpecialImplantPointsCost);
         characterRepo.save(character);
     }
 
@@ -234,12 +236,12 @@ public class CharacterService {
             new ResponseStatusException(HttpStatus.NOT_FOUND, "Имлант не найден"));
         if (character.getImplants() != null && character.getImplants().contains(implant)) {
             character.getImplants().remove(implant);
+            character.setImplantPoints(character.getImplantPoints() + implant.getImplantPointsCost());
+            character.setSpecialImplantPoints(character.getSpecialImplantPoints() + implant.getSpecialImplantPointsCost());
             characterRepo.save(character);
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Этого импланта нет в вашем списке.");
         }
-
-
     }
 }
 

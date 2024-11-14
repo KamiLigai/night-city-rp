@@ -17,7 +17,7 @@ public class CharacterStatsService {
     }
 
 
-    private int calculateImplantPoints(int reputation) {
+    public int calculateImplantPoints(int reputation) {
         if (reputation < 20) {
             return 7;
         } else if (reputation < 30) {
@@ -29,7 +29,7 @@ public class CharacterStatsService {
         }
     }
 
-    int calculateSpecialImplantPoint(int reputation) {
+    public int calculateSpecialImplantPoint(int reputation) {
         if (reputation < 90) {
             return 0;
         } else if (reputation < 120) {
@@ -43,7 +43,7 @@ public class CharacterStatsService {
         }
     }
 
-    int calculateBattlePoints(int age) {
+    public int calculateBattlePoints(int age) {
         if (age <= 25) {
             return 13;
         } else if (age <= 40) {
@@ -53,7 +53,7 @@ public class CharacterStatsService {
         }
     }
 
-    int calculateCivilPoints() {
+    public int calculateCivilPoints() {
         return 13;
     }
 

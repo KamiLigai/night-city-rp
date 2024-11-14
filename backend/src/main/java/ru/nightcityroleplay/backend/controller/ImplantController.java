@@ -2,6 +2,7 @@ package ru.nightcityroleplay.backend.controller;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import ru.nightcityroleplay.backend.dto.CreateImplantRequest;
@@ -23,6 +24,7 @@ public class ImplantController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('Role_ADMIN')")
     public CreateImplantResponse createImplant(@RequestBody CreateImplantRequest request, Authentication auth) {
         return implantService.createImplant(request, auth);
     }
@@ -38,11 +40,13 @@ public class ImplantController {
     }
 
     @PutMapping("{implantid}")
+    @PreAuthorize("hasRole('Role_ADMIN')")
     public void updateImplant(@RequestBody UpdateImplantRequest request, @PathVariable UUID implantid, String name) {
         implantService.updateImplant(request, implantid, name);
     }
 
     @DeleteMapping("{implantid}")
+    @PreAuthorize("hasRole('Role_ADMIN')")
     public void deleteImplant(@PathVariable UUID implantid) {
         implantService.deleteImplant(implantid);
     }
