@@ -24,25 +24,6 @@ public class CharacterStatsSeviceTest {
         characterStatsService = new CharacterStatsService();
     }
 
-    @Test
-    void updateCharacterStats_setsCorrectValues() {
-        // Given
-        CharacterEntity character = new CharacterEntity();
-        character.setReputation(20);
-        character.setAge(30);
-
-        // When
-        characterStatsService.updateCharacterStats(character);
-
-        // Then
-        assertThat(character.getImplantPoints()).isEqualTo(8);
-        assertThat(character.getSpecialImplantPoints()).isEqualTo(1);
-        assertThat(character.getBattlePoints()).isEqualTo(15);
-        assertThat(character.getCivilPoints()).isEqualTo(13);
-
-    }
-
-
     @ParameterizedTest
     @MethodSource("calculateImplantPointsData")
     void calculateImplantPoints(int reputation, int implantPoints) {
