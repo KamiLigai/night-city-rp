@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.nightcityroleplay.backend.dto.*;
 import ru.nightcityroleplay.backend.service.CharacterService;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -52,6 +53,11 @@ public class CharacterController {
     @PutMapping("{characterId}/skills")
     public void updateCharacterSkill(@RequestBody UpdateCharacterSkillRequest request, @PathVariable UUID characterId, Authentication auth) {
         characterService.updateCharacterSkill(request, characterId, auth);
+    }
+
+    @GetMapping("{characterId}/implants")
+    public List<ImplantDto> getCharactersImplants(@PathVariable UUID characterId, Authentication auth) {
+        return characterService.getCharactersImplants(characterId, auth);
     }
 
     @PutMapping("{characterId}/implants")

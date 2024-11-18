@@ -19,10 +19,8 @@ import ru.nightcityroleplay.backend.repo.CharacterRepository;
 import ru.nightcityroleplay.backend.repo.ImplantRepository;
 import ru.nightcityroleplay.backend.repo.SkillRepository;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static ru.nightcityroleplay.backend.util.BooleanUtils.not;
 
@@ -60,6 +58,18 @@ public class CharacterService {
         characterDto.setBattlePoints(character.getBattlePoints());
         characterDto.setCivilPoints(character.getCivilPoints());
         return characterDto;
+    }
+
+    private ImplantDto implantDto(Implant implant) {
+        ImplantDto implantDto = new ImplantDto();
+        implantDto.setId(implant.getId());
+        implantDto.setName(implant.getName());
+        implantDto.setImplantType(implant.getImplantType());
+        implantDto.setDescription(implant.getDescription());
+        implantDto.setReputationRequirement(implant.getReputationRequirement());
+        implantDto.setImplantPointsCost(implant.getImplantPointsCost());
+        implantDto.setSpecialImplantPointsCost(implant.getSpecialImplantPointsCost());
+        return implantDto;
     }
 
     @Transactional
@@ -154,6 +164,25 @@ public class CharacterService {
     }
 
     @Transactional
+    public List<ImplantDto> getCharactersImplants(UUID characterId, Authentication auth){
+        Optional<CharacterEntity> character = characterRepo.findById(characterId);
+        if (character.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден");
+        }
+
+        List<Implant> implants = character.get().getImplants();
+        if (implants == null || implants.isEmpty()){
+            log.info("У персонажа нет имплантов.");
+            return Collections.emptyList();
+        }
+        List<ImplantDto> implantDtos = implants.stream()
+            .map(this::implantDto)
+            .collect(Collectors.toList());
+
+        return implantDtos;
+    }
+
+    @Transactional
     public void deleteCharacter(UUID characterId, Authentication auth) {
         Optional<CharacterEntity> character = characterRepo.findById(characterId);
         if (character.isEmpty()) {
@@ -194,6 +223,9 @@ public class CharacterService {
             Implant implant = implantRepo.findById(implantId).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "Имплант с ID " + implantId + " не найден"));
 
+            if (character.getReputation() < implant.getReputationRequirement()){
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Данный имплант не доступен на вашей репутации");
+            }
             // попытка добавить имплант в список
             implants.add(implant);
             totalImplantPointsCost += implant.getImplantPointsCost();
