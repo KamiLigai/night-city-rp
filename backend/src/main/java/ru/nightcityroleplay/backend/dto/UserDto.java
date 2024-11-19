@@ -10,7 +10,6 @@ public record UserDto(
     String username,
     List<String> roles
 ) {
-
     @Builder
     public UserDto {
     }

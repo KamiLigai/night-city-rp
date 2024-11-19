@@ -1,30 +1,28 @@
 package ru.nightcityroleplay.backend.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.util.List;
 import java.util.UUID;
-
 @Entity
+@Table(name = "weapons")
 @Setter
 @Getter
-@Table(name = "skills")
-public class Skill {
-
+@Accessors(chain = true)
+public class Weapon {
     @Id
     @UuidGenerator
     private UUID id;
+    private Boolean isMelee;
     private String name;
-    private String description;
-    private int level;
-    private String type;
-    private int cost;
-    @ManyToMany(mappedBy = "skills")
+    private String weaponType;
+    private int penetration;
+    private int reputationRequirement;
+    @ManyToMany(mappedBy = "weapons")
     private List<CharacterEntity> characters;
 }
