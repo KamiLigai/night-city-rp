@@ -2,6 +2,7 @@ package ru.nightcityroleplay.backend.dto;
 
 import lombok.Data;
 
+import java.util.List;
 import java.util.UUID;
 
 
@@ -16,6 +17,6 @@ public class CharacterDto {
     private Integer specialImplantPoints;
     private Integer battlePoints;
     private Integer civilPoints;
-
+    private List<UUID> weaponIds;
 }
 

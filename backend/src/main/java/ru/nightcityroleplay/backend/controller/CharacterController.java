@@ -13,7 +13,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("characters")
 public class CharacterController {
-
     private final CharacterService characterService;
 
     public CharacterController(CharacterService characterService) {
@@ -70,5 +69,16 @@ public class CharacterController {
         characterService.deleteCharacterImplant(characterId, implantId, auth);
     }
 
+    @PutMapping("{characterId}/weapons")
+    public void putCharacterWeapon(@PathVariable UUID characterId, @RequestBody UpdateCharacterWeaponRequest request, Authentication auth) {
+        characterService.putCharacterWeapon(request, characterId, auth);
+    }
+
+    @DeleteMapping("{characterId}/weapons/{weaponId}")
+    public void deleteCharacterWeapon(@PathVariable UUID characterId, @PathVariable UUID weaponId, Authentication auth) {
+        characterService.deleteCharacterWeapon(weaponId, characterId, auth);
+    }
 }
+
+
 
