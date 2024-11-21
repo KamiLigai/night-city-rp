@@ -2,14 +2,10 @@ package ru.nightcityroleplay.backend.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.server.ResponseStatusException;
 import ru.nightcityroleplay.backend.dto.CreateImplantRequest;
 import ru.nightcityroleplay.backend.dto.UpdateImplantRequest;
-import ru.nightcityroleplay.backend.dto.UpdateSkillRequest;
 import ru.nightcityroleplay.backend.entity.Implant;
-import ru.nightcityroleplay.backend.entity.Skill;
 import ru.nightcityroleplay.backend.entity.User;
 import ru.nightcityroleplay.backend.exception.NightCityRpException;
 import ru.nightcityroleplay.backend.repo.ImplantRepository;
@@ -24,7 +20,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.verifyNoInteractions;
 
 
 public class ImplantsTest {
