@@ -34,20 +34,20 @@ public class ImplantController {
         return implantService.getImplantPage(pageble);
     }
 
-    @GetMapping("{implantid}")
-    public ImplantDto getImplant(@PathVariable UUID implantid) {
-        return implantService.getImplant(implantid);
+    @GetMapping("{implantId}")
+    public ImplantDto getImplant(@PathVariable UUID implantId) {
+        return implantService.getImplant(implantId);
     }
 
-    @PutMapping("{implantid}")
+    @PutMapping("{implantId}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void updateImplant(@RequestBody UpdateImplantRequest request, @PathVariable UUID implantid, String name) {
-        implantService.updateImplant(request, implantid, name);
+    public void updateImplant(@RequestBody UpdateImplantRequest request, @PathVariable UUID implantId, String name) {
+        implantService.updateImplant(request, implantId, name);
     }
 
-    @DeleteMapping("{implantid}")
+    @DeleteMapping("{implantId}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void deleteImplant(@PathVariable UUID implantid) {
-        implantService.deleteImplant(implantid);
+    public void deleteImplant(@PathVariable UUID implantId) {
+        implantService.deleteImplant(implantId);
     }
 }

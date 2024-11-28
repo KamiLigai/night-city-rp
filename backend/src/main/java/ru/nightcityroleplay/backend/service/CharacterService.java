@@ -139,7 +139,7 @@ public class CharacterService {
 
 
     @PreAuthorize("hasRole('Role_ADMIN')")
-    public void giveReputation(GiveRewardRequest request, UUID characterId, Authentication auth) {
+    public void giveReputation(GiveReputationRequest request, UUID characterId, Authentication auth) {
         CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
             new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж не найден"));
 
@@ -169,7 +169,7 @@ public class CharacterService {
     }
 
     @Transactional
-    public List<ImplantDto> getCharactersImplants(UUID characterId, Authentication auth) {
+    public List<ImplantDto> getCharacterImplants(UUID characterId) {
         Optional<CharacterEntity> character = characterRepo.findById(characterId);
         if (character.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден");
@@ -289,16 +289,29 @@ public class CharacterService {
         }
         // Найти Имплант по ID
         Implant implant = implantRepo.findById(implantId).orElseThrow(() ->
-            new ResponseStatusException(HttpStatus.NOT_FOUND, "Имлант не найден"));
-        if (character.getImplants() != null && character.getImplants().contains(implant)) {
-            character.getImplants().remove(implant);
-            character.setImplantPoints(character.getImplantPoints() + implant.getImplantPointsCost());
-            character.setSpecialImplantPoints(character.getSpecialImplantPoints() + implant.getSpecialImplantPointsCost());
-            characterRepo.save(character);
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Имплант не найден"));
+
+        List<Implant> implants = character.getImplants();
+        if (implants != null) {
+            boolean hasImplant = false;
+            for (int i = 0; i < implants.size(); i++) {
+                if (implants.get(i).getId().equals(implant.getId())) {
+                    hasImplant = true;
+                    break;
+                }
+            }
+            if (!hasImplant) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Этого импланта нет в вашем списке.");
+            }
+            implants.remove(implant);
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Этого импланта нет в вашем списке.");
         }
+        character.setImplantPoints(character.getImplantPoints() + implant.getImplantPointsCost());
+        character.setSpecialImplantPoints(character.getSpecialImplantPoints() + implant.getSpecialImplantPointsCost());
+        characterRepo.save(character);
     }
+
 
     @Transactional
     public void deleteCharacterWeapon(UUID weaponId, UUID characterId, Authentication auth) {
@@ -330,4 +343,3 @@ public class CharacterService {
     }
 
 }
-

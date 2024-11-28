@@ -44,8 +44,8 @@ public class CharacterController {
         characterService.deleteCharacter(characterId, auth);
     }
 
-    @PutMapping("{characterId}/giverep")
-    public void giveReputation(@RequestBody GiveRewardRequest request, @PathVariable  UUID characterId, Authentication auth) {
+    @PostMapping("{characterId}/reputation/give")
+    public void giveReputation(@RequestBody GiveReputationRequest request, @PathVariable UUID characterId, Authentication auth) {
         characterService.giveReputation(request, characterId, auth);
     }
 
@@ -55,8 +55,8 @@ public class CharacterController {
     }
 
     @GetMapping("{characterId}/implants")
-    public List<ImplantDto> getCharactersImplants(@PathVariable UUID characterId, Authentication auth) {
-        return characterService.getCharactersImplants(characterId, auth);
+    public List<ImplantDto> getCharacterImplants(@PathVariable UUID characterId) {
+        return characterService.getCharacterImplants(characterId);
     }
 
     @PutMapping("{characterId}/implants")
