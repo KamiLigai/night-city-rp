@@ -774,7 +774,7 @@ class CharacterServiceTest {
         );
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
-        assertEquals("Имлант не найден", exception.getReason());
+        assertEquals("Имплант не найден", exception.getReason());
     }
 
     @Test
