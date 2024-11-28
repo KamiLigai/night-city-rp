@@ -292,21 +292,17 @@ public class CharacterService {
             new ResponseStatusException(HttpStatus.NOT_FOUND, "Имплант не найден"));
 
         List<Implant> implants = character.getImplants();
-        if (implants != null) {
-            boolean hasImplant = false;
-            for (int i = 0; i < implants.size(); i++) {
-                if (implants.get(i).getId().equals(implant.getId())) {
-                    hasImplant = true;
-                    break;
-                }
+        boolean hasImplant = false;
+        for (int i = 0; i < implants.size(); i++) {
+            if (implants.get(i).getId().equals(implant.getId())) {
+                hasImplant = true;
+                break;
             }
-            if (!hasImplant) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Этого импланта нет в вашем списке.");
-            }
-            implants.remove(implant);
-        } else {
+        }
+        if (!hasImplant) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Этого импланта нет в вашем списке.");
         }
+        implants.remove(implant);
         character.setImplantPoints(character.getImplantPoints() + implant.getImplantPointsCost());
         character.setSpecialImplantPoints(character.getSpecialImplantPoints() + implant.getSpecialImplantPointsCost());
         characterRepo.save(character);
