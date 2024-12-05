@@ -68,4 +68,6 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
         }
         return objectMapper.readValue(jsonBody, CharacterDto.class);
     }
+
+    public Response makeGetCharacterRequest(UUID characterId) { return remote.getCharacter(characterId); }
 }

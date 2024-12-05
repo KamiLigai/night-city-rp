@@ -72,7 +72,7 @@ public class SkillService {
     public SkillDto getSkill(UUID skillId) {
         Optional<Skill> skillById = skillRepo.findById(skillId);
         if (skillById.isEmpty()) {
-            return null;
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + skillId + " не найден");
         }
         return toDto(skillById.get());
     }

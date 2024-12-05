@@ -93,7 +93,7 @@ import static ru.nightcityroleplay.backend.util.BooleanUtils.not;
 Ожидается: Персонаж в бд обновлен.
 
 
-Дано: Персонаж персонаж отсутствует
+Дано: Персонаж отсутствует
 Действие: Изменить персонажа по id методом PUT /characters/{id}
 Ожидается: Ошибка 404, персонаж не найден
 
@@ -192,7 +192,7 @@ public class CharacterService {
     public CharacterDto getCharacter(UUID characterId) {
         Optional<CharacterEntity> byId = characterRepo.findById(characterId);
         if (byId.isEmpty()) {
-            return null;
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден");
         }
         return toDto(byId.get());
     }

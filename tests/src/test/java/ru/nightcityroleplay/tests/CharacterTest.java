@@ -49,6 +49,7 @@ public class CharacterTest {
             CreateCharacterRequest.builder()
                 .name(charName)
                 .age(20)
+                .reputation(0)
                 .build()
         );
 
@@ -84,6 +85,7 @@ public class CharacterTest {
             CreateCharacterRequest.builder()
                 .name(charName)
                 .age(request.age())
+                .reputation(request.reputation())
                 .build()
         );
         assertThat(response.code()).isEqualTo(400);
@@ -101,7 +103,7 @@ public class CharacterTest {
     public static Stream<Arguments> createCharacterWithBadRequestData() {
         // roles, expectedAuthorities
         return Stream.of(
-                Arguments.of(CreateCharacterRequest.builder().age(null).build(), "Возраст не может быть null"));
+            Arguments.of(CreateCharacterRequest.builder().age(null).build(), "Возраст не может быть null"));
     }
 
     @Test
@@ -113,14 +115,22 @@ public class CharacterTest {
                    Новый персонаж не создан в бд.
         """)
     void createCharacterWithSameName() {
-        String charName = "TEST";
-        Response response = backendRemote.makeCreateCharacterRequest(
+        String charName = randomUUID().toString();
+        backendRemote.makeCreateCharacterRequest(
             CreateCharacterRequest.builder()
                 .name(charName)
                 .age(22)
+                .reputation(0)
                 .build()
         );
-        assertThat(response.code()).isEqualTo(422);
+        Response response2 = backendRemote.makeCreateCharacterRequest(
+            CreateCharacterRequest.builder()
+                .name(charName)
+                .age(22)
+                .reputation(0)
+                .build()
+        );
+        assertThat(response2.code()).isEqualTo(422);
 
         // Проверить что новый персонаж не был создан
         Result<Record> result = dbContext.select().from(CHARACTERS)
@@ -143,6 +153,7 @@ public class CharacterTest {
             CreateCharacterRequest.builder()
                 .name(charName)
                 .age(20)
+                .reputation(0)
                 .build()
         );
 
@@ -198,19 +209,20 @@ public class CharacterTest {
     @Test
     @SneakyThrows
     @Description("""
-            Дано: Персонаж владельца 1.
-            Действие: Удалить персонажа владельца 1 методом DELETE /characters/{id} от имени владельца 2.
-            Ожидается: 403 Forbidden.
-                       Никакой персонаж не удалён.
-            """)
+        Дано: Персонаж владельца 1.
+        Действие: Удалить персонажа владельца 1 методом DELETE /characters/{id} от имени владельца 2.
+        Ожидается: 403 Forbidden.
+                   Никакой персонаж не удалён.
+        """)
     void deleteNotOwnedCharacter() {
         // Создать персонажа
         String charName = randomUUID().toString();
         backendRemote.createCharacter(
-                CreateCharacterRequest.builder()
-                        .name(charName)
-                        .age(205)
-                        .build()
+            CreateCharacterRequest.builder()
+                .name(charName)
+                .age(205)
+                .reputation(0)
+                .build()
         );
 
         // Сменить юзера
@@ -222,8 +234,8 @@ public class CharacterTest {
 
         // Удалить персонажа
         Result<CharactersRecord> charRecord = dbContext.select().from(CHARACTERS)
-                .where(CHARACTERS.NAME.eq(charName))
-                .fetchInto(CHARACTERS);
+            .where(CHARACTERS.NAME.eq(charName))
+            .fetchInto(CHARACTERS);
 
         Response response = backendRemote.makeDeleteCharacterRequest(charRecord.get(0).getId());
 
@@ -234,24 +246,25 @@ public class CharacterTest {
 
     @Test
     @Description("""
-            Дано: Персонаж.
-            Действие: Получить персонажа методом GET /characters/{id}.
-            Ожидается: Получены данные персонажа
-            """)
+        Дано: Персонаж.
+        Действие: Получить персонажа методом GET /characters/{id}.
+        Ожидается: Получены данные персонажа
+        """)
     void getCharacter() {
         // Создать персонажа
         String charName = randomUUID().toString();
         backendRemote.createCharacter(
-                CreateCharacterRequest.builder()
-                        .name(charName)
-                        .age(240)
-                        .build()
+            CreateCharacterRequest.builder()
+                .name(charName)
+                .age(240)
+                .reputation(0)
+                .build()
         );
 
         // Получить персонажа
         Result<CharactersRecord> charRecord = dbContext.select().from(CHARACTERS)
-                .where(CHARACTERS.NAME.eq(charName))
-                .fetchInto(CHARACTERS);
+            .where(CHARACTERS.NAME.eq(charName))
+            .fetchInto(CHARACTERS);
         CharacterDto charDto = backendRemote.getCharacter(charRecord.get(0).getId());
 
         assertThat(charRecord).hasSize(1);
@@ -260,5 +273,31 @@ public class CharacterTest {
         assertThat(charDto.getAge()).isEqualTo(charRecord.get(0).getAge());
     }
 
+    @Test
+    @Description("""
+        Дано: Пустая бд.
+        Действие: Получить персонажа методом GET /characters/{id}.
+        Ожидается: 404 Not found.
+                   Данные персонажа не получены.
+        """)
+    void getNonExistingCharacter() {
 
+        String newCharName = randomUUID().toString();
+
+        // Получить персонажа
+
+        Result<CharactersRecord> charRecord = dbContext.select().from(CHARACTERS)
+            .where(CHARACTERS.NAME.eq(newCharName))
+            .fetchInto(CHARACTERS);
+
+        Response response = backendRemote.makeGetCharacterRequest(randomUUID());
+
+        assertThat(charRecord).hasSize(0);
+        assertThat(response.code()).isEqualTo(404);
+    }
+
+
+    void createUser() {
+        backendRemote.createUser("test", "test");
+    }
 }
