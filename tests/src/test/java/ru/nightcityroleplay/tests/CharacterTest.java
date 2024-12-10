@@ -2,12 +2,16 @@ package ru.nightcityroleplay.tests;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jdk.jfr.Description;
+import jdk.jfr.Enabled;
 import lombok.SneakyThrows;
 import okhttp3.Response;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIf;
+import org.junit.jupiter.api.condition.EnabledIf;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -17,15 +21,16 @@ import ru.nightcityroleplay.tests.dto.CharacterDto;
 import ru.nightcityroleplay.tests.dto.CreateCharacterRequest;
 import ru.nightcityroleplay.tests.dto.ErrorResponse;
 import ru.nightcityroleplay.tests.dto.UserDto;
+import ru.nightcityroleplay.tests.entity.tables.Users;
 import ru.nightcityroleplay.tests.entity.tables.records.CharactersRecord;
 
-import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static ru.nightcityroleplay.tests.entity.Tables.CHARACTERS;
+import static ru.nightcityroleplay.tests.entity.Tables.USERS;
 
 public class CharacterTest {
 
@@ -33,7 +38,21 @@ public class CharacterTest {
     BackendRemoteComponent backendRemote = AppContext.get(BackendRemoteComponent.class);
     ObjectMapper objectMapper = AppContext.get(ObjectMapper.class);
 
-    //todo ParametrizedTest
+//    boolean testCheck = dbContext.select().from(USERS)
+//        .where(USERS.USERNAME.contains("test"))
+//        .fetch().isEmpty();
+
+    @Test
+    void createTestUser() {
+        boolean testCheck = dbContext.select().from(USERS)
+            .where(USERS.USERNAME.eq("test"))
+            .fetch().isNotEmpty();
+        if (!testCheck) {
+            backendRemote.createUser("test", "test");
+            testCheck = true;
+        }
+        assertThat(testCheck).isTrue();
+    }
 
     @Test
     @SneakyThrows
@@ -296,8 +315,40 @@ public class CharacterTest {
         assertThat(response.code()).isEqualTo(404);
     }
 
+    @Test
+    @Description("""
+        Дано: Несколько персонажей.
+        Действие: Получить всех персонажей методом GET /characters.
+        Ожидается: Получены данные всех персонажей
+        """)
+    void getAllCharacters() {
+        // Создать несколько персонажей
+        backendRemote.createCharacter(
+            CreateCharacterRequest.builder()
+                .name(randomUUID().toString())
+                .age(240)
+                .reputation(0)
+                .build()
+        );
+        backendRemote.createCharacter(
+            CreateCharacterRequest.builder()
+                .name(randomUUID().toString())
+                .age(240)
+                .reputation(0)
+                .build()
+        );
 
-    void createUser() {
-        backendRemote.createUser("test", "test");
+        // Получить персонажей
+
+        Result<CharactersRecord> charRecord = dbContext.select().from(CHARACTERS)
+            .fetchInto(CHARACTERS);
+        int size = dbContext.select().from(CHARACTERS)
+            .fetch().size();
+
+
+        assertThat(charRecord).hasSize(size);
     }
+
+
+
 }
