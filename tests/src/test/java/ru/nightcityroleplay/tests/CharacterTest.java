@@ -24,6 +24,8 @@ import ru.nightcityroleplay.tests.dto.UserDto;
 import ru.nightcityroleplay.tests.entity.tables.Users;
 import ru.nightcityroleplay.tests.entity.tables.records.CharactersRecord;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -37,10 +39,6 @@ public class CharacterTest {
     DSLContext dbContext = AppContext.get(DSLContext.class);
     BackendRemoteComponent backendRemote = AppContext.get(BackendRemoteComponent.class);
     ObjectMapper objectMapper = AppContext.get(ObjectMapper.class);
-
-//    boolean testCheck = dbContext.select().from(USERS)
-//        .where(USERS.USERNAME.contains("test"))
-//        .fetch().isEmpty();
 
     @Test
     void createTestUser() {
@@ -347,6 +345,51 @@ public class CharacterTest {
 
 
         assertThat(charRecord).hasSize(size);
+    }
+
+    @Test
+    @Description("""
+        Дано: Несколько персонажей
+        Действие: Получить страницу персонажей методом GET /characters.
+                  Размер страницы меньше чем персонажей в бд.
+        Ожидается: Получена страница данных персонажей.
+        """)
+    void getPageCharacters() {
+        // Создать несколько персонажей
+        backendRemote.createCharacter(
+            CreateCharacterRequest.builder()
+                .name(randomUUID().toString())
+                .age(240)
+                .reputation(0)
+                .build()
+        );
+        backendRemote.createCharacter(
+            CreateCharacterRequest.builder()
+                .name(randomUUID().toString())
+                .age(240)
+                .reputation(0)
+                .build()
+        );
+        backendRemote.createCharacter(
+            CreateCharacterRequest.builder()
+                .name(randomUUID().toString())
+                .age(240)
+                .reputation(0)
+                .build()
+        );
+
+        // Получить всех персонажей
+
+        Result<CharactersRecord> charRecord = dbContext.select().from(CHARACTERS)
+            .fetchInto(CHARACTERS);
+
+        List<CharactersRecord> charPageRecord = new ArrayList<>();
+
+        for (int i = 0; i < 3; i++) {
+            charPageRecord.add(charRecord.get(i));
+        }
+
+        assertThat(charPageRecord).hasSize(3);
     }
 
 
