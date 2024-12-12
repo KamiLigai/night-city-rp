@@ -17,10 +17,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import ru.nightcityroleplay.tests.component.AppContext;
 import ru.nightcityroleplay.tests.component.BackendRemoteComponent;
-import ru.nightcityroleplay.tests.dto.CharacterDto;
-import ru.nightcityroleplay.tests.dto.CreateCharacterRequest;
-import ru.nightcityroleplay.tests.dto.ErrorResponse;
-import ru.nightcityroleplay.tests.dto.UserDto;
+import ru.nightcityroleplay.tests.dto.*;
 import ru.nightcityroleplay.tests.entity.tables.Users;
 import ru.nightcityroleplay.tests.entity.tables.records.CharactersRecord;
 
@@ -313,39 +310,6 @@ public class CharacterTest {
         assertThat(response.code()).isEqualTo(404);
     }
 
-    @Test
-    @Description("""
-        Дано: Несколько персонажей.
-        Действие: Получить всех персонажей методом GET /characters.
-        Ожидается: Получены данные всех персонажей
-        """)
-    void getAllCharacters() {
-        // Создать несколько персонажей
-        backendRemote.createCharacter(
-            CreateCharacterRequest.builder()
-                .name(randomUUID().toString())
-                .age(240)
-                .reputation(0)
-                .build()
-        );
-        backendRemote.createCharacter(
-            CreateCharacterRequest.builder()
-                .name(randomUUID().toString())
-                .age(240)
-                .reputation(0)
-                .build()
-        );
-
-        // Получить персонажей
-
-        Result<CharactersRecord> charRecord = dbContext.select().from(CHARACTERS)
-            .fetchInto(CHARACTERS);
-        int size = dbContext.select().from(CHARACTERS)
-            .fetch().size();
-
-
-        assertThat(charRecord).hasSize(size);
-    }
 
     @Test
     @Description("""
@@ -354,7 +318,7 @@ public class CharacterTest {
                   Размер страницы меньше чем персонажей в бд.
         Ожидается: Получена страница данных персонажей.
         """)
-    void getPageCharacters() {
+    void getCharacterPage() {
         // Создать несколько персонажей
         backendRemote.createCharacter(
             CreateCharacterRequest.builder()
@@ -383,15 +347,9 @@ public class CharacterTest {
         Result<CharactersRecord> charRecord = dbContext.select().from(CHARACTERS)
             .fetchInto(CHARACTERS);
 
-        List<CharactersRecord> charPageRecord = new ArrayList<>();
+        PageDto charPageRecord = backendRemote.getCharacterPage(3);
 
-        for (int i = 0; i < 3; i++) {
-            charPageRecord.add(charRecord.get(i));
-        }
-
-        assertThat(charPageRecord).hasSize(3);
+        assertThat(charPageRecord.getContent().size()).isEqualTo(3);
     }
-
-
 
 }

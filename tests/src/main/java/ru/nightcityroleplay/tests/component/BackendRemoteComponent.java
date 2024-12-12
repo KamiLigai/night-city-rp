@@ -3,13 +3,14 @@ package ru.nightcityroleplay.tests.component;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import okhttp3.Response;
-import ru.nightcityroleplay.tests.dto.CharacterDto;
-import ru.nightcityroleplay.tests.dto.CreateCharacterRequest;
-import ru.nightcityroleplay.tests.dto.CreateUserRequest;
-import ru.nightcityroleplay.tests.dto.UserDto;
+import ru.nightcityroleplay.tests.dto.*;
 import ru.nightcityroleplay.tests.exception.AppContextException;
 import ru.nightcityroleplay.tests.remote.BackendRemote;
 
+
+import java.awt.print.Pageable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
@@ -67,6 +68,15 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
             jsonBody = response.body().string();
         }
         return objectMapper.readValue(jsonBody, CharacterDto.class);
+    }
+
+    @SneakyThrows
+    public PageDto getCharacterPage(Integer size) {
+        String jsonBody;
+        Response response = remote.getCharacterPage(size);
+        jsonBody = response.body().string();
+        return objectMapper.readValue(jsonBody,PageDto.class);
+
     }
 
     public Response makeGetCharacterRequest(UUID characterId) { return remote.getCharacter(characterId); }
