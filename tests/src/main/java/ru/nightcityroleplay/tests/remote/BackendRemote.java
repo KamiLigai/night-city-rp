@@ -8,6 +8,7 @@ import okhttp3.*;
 import ru.nightcityroleplay.tests.dto.CreateCharacterRequest;
 import ru.nightcityroleplay.tests.dto.CreateUserRequest;
 import ru.nightcityroleplay.tests.dto.HealthDto;
+import ru.nightcityroleplay.tests.dto.UpdateCharacterRequest;
 import ru.nightcityroleplay.tests.exception.AppContextException;
 import ru.nightcityroleplay.tests.exception.HttpRemoteException;
 
@@ -89,17 +90,6 @@ public class BackendRemote {
     }
 
     @SneakyThrows
-    public Response deleteCharacter(UUID characterId) {
-        Request httpRequest = new Request.Builder()
-            .url(baseUrl + "characters/" + characterId)
-            .delete()
-            .header(AUTHORIZATION, getBasicAuthorization(username, password))
-            .build();
-        Call call = client.newCall(httpRequest);
-        return call.execute();
-    }
-
-    @SneakyThrows
     public Response getCharacter(UUID characterId) {
         Request httpRequest = new Request.Builder()
             .url(baseUrl + "characters/" + characterId)
@@ -115,6 +105,29 @@ public class BackendRemote {
         Request httpRequest = new Request.Builder()
             .url(baseUrl + "characters" + "?size=" + size)
             .get()
+            .header(AUTHORIZATION, getBasicAuthorization(username, password))
+            .build();
+        Call call = client.newCall(httpRequest);
+        return call.execute();
+    }
+
+    @SneakyThrows
+    public Response updateCharacter(UUID characterId, UpdateCharacterRequest request) {
+        byte[] body = objectMapper.writeValueAsBytes(request);
+        Request httpRequest = new Request.Builder()
+            .url(baseUrl + "characters/" + characterId)
+            .put(RequestBody.create(body, APP_JSON))
+            .header(AUTHORIZATION, getBasicAuthorization(username, password))
+            .build();
+        Call call = client.newCall(httpRequest);
+        return call.execute();
+    }
+
+    @SneakyThrows
+    public Response deleteCharacter(UUID characterId) {
+        Request httpRequest = new Request.Builder()
+            .url(baseUrl + "characters/" + characterId)
+            .delete()
             .header(AUTHORIZATION, getBasicAuthorization(username, password))
             .build();
         Call call = client.newCall(httpRequest);

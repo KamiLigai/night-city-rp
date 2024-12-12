@@ -19,6 +19,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 import static java.util.UUID.randomUUID;
@@ -80,7 +82,7 @@ public class AppContext {
         // todo: вынести в параметры
         String url = props.getProperty("datasource.url");
         String userName = props.getProperty("datasource.username");
-        String password = props.getProperty("datasource.password");;
+        String password = props.getProperty("datasource.password");
         Connection connection = DriverManager.getConnection(url, userName, password);
         DSLContext context = DSL.using(connection, POSTGRES);
         put(DSLContext.class, context);
@@ -94,6 +96,7 @@ public class AppContext {
     }
 
     private static void createOkHttp() {
+        Logger.getLogger(OkHttpClient.class.getName()).setLevel(Level.FINE);
         put(new OkHttpClient());
     }
 

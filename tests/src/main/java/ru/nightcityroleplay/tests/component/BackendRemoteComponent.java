@@ -76,8 +76,19 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
         Response response = remote.getCharacterPage(size);
         jsonBody = response.body().string();
         return objectMapper.readValue(jsonBody,PageDto.class);
-
     }
 
     public Response makeGetCharacterRequest(UUID characterId) { return remote.getCharacter(characterId); }
+
+    public void updateCharacter(UUID characterId, UpdateCharacterRequest request) {
+        try (Response response = remote.updateCharacter(characterId, request)) {
+            if (!response.isSuccessful()) {
+                fail("Не удалось обновить персонажа " + characterId.toString() + ", " + response);
+            }
+        }
+    }
+
+    public Response makeUpdateCharacterRequest(UUID characterId, UpdateCharacterRequest request) {
+        return remote.updateCharacter(characterId, request);
+    }
 }
