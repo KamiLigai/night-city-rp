@@ -69,6 +69,50 @@ class CharacterServiceTest {
     }
 
     @Test
+    void createCharacter_ShouldThrowUnprocessableEntity_WhenCharacterNameExists() {
+        // given
+        var request = new CreateCharacterRequest();
+        request.setName("Илон");
+        request.setAge(8);
+
+        Authentication auth = mock(Authentication.class);
+        User user = new User();
+        user.setId(UUID.randomUUID());
+        when(auth.getPrincipal()).thenReturn(user);
+        when(charRepo.existsByName(request.getName())).thenReturn(true);
+
+        // when & then
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+            service.createCharacter(request, auth);
+        });
+
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exception.getStatusCode());
+        assertEquals("Персонаж с таким именем уже есть", exception.getReason());
+    }
+
+
+    @Test
+    void createCharacter_ShouldThrowBadRequest_WhenAgeIsNull() {
+        // given
+        var request = new CreateCharacterRequest();
+        request.setName("Илон");
+        request.setAge(null);
+
+        Authentication auth = mock(Authentication.class);
+        User user = new User();
+        user.setId(UUID.randomUUID());
+        when(auth.getPrincipal()).thenReturn(user);
+
+        // when & then
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+            service.createCharacter(request, auth);
+        });
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+        assertEquals("Возраст не может быть null", exception.getReason());
+    }
+
+    @Test
     void createCharacterIsSave() {
         // given
         var request = new CreateCharacterRequest();
@@ -94,7 +138,6 @@ class CharacterServiceTest {
         // then
         verify(charRepo).save(any());
     }
-
 
     @Test
     void toDtoIsNotNull() {

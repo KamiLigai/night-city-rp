@@ -5,15 +5,10 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import okhttp3.*;
-import ru.nightcityroleplay.tests.dto.CreateCharacterRequest;
-import ru.nightcityroleplay.tests.dto.CreateUserRequest;
-import ru.nightcityroleplay.tests.dto.HealthDto;
-import ru.nightcityroleplay.tests.dto.UpdateCharacterRequest;
+import ru.nightcityroleplay.tests.dto.*;
 import ru.nightcityroleplay.tests.exception.AppContextException;
 import ru.nightcityroleplay.tests.exception.HttpRemoteException;
 
-import java.awt.print.PageFormat;
-import java.awt.print.Pageable;
 import java.util.UUID;
 
 import static ru.nightcityroleplay.tests.constants.HttpConstants.Headers.AUTHORIZATION;
@@ -90,17 +85,6 @@ public class BackendRemote {
     }
 
     @SneakyThrows
-    public Response getCharacter(UUID characterId) {
-        Request httpRequest = new Request.Builder()
-            .url(baseUrl + "characters/" + characterId)
-            .get()
-            .header(AUTHORIZATION, getBasicAuthorization(username, password))
-            .build();
-        Call call = client.newCall(httpRequest);
-        return call.execute();
-    }
-
-    @SneakyThrows
     public Response getCharacterPage(Integer size) {
         Request httpRequest = new Request.Builder()
             .url(baseUrl + "characters" + "?size=" + size)
@@ -139,6 +123,63 @@ public class BackendRemote {
         Request httpRequest = new Request.Builder()
             .url(baseUrl + "characters/" + characterId)
             .delete()
+            .header(AUTHORIZATION, getBasicAuthorization(username, password))
+            .build();
+        Call call = client.newCall(httpRequest);
+        return call.execute();
+    }
+    @SneakyThrows
+    public Response getCharacter(UUID characterId) {
+        Request httpRequest = new Request.Builder()
+            .url(baseUrl + "characters/" + characterId)
+            .get()
+            .header(AUTHORIZATION, getBasicAuthorization(username, password))
+            .build();
+        Call call = client.newCall(httpRequest);
+        return call.execute();
+    }
+
+    @SneakyThrows
+    public Response createWeapon(CreateWeaponRequest request) {
+        byte[] body = objectMapper.writeValueAsBytes(request);
+        Request httpRequest = new Request.Builder()
+            .url(baseUrl + "weapons")
+            .post(RequestBody.create(body, APP_JSON))
+            .header(AUTHORIZATION, getBasicAuthorization(username, password))
+            .build();
+        Call call = client.newCall(httpRequest);
+        return call.execute();
+    }
+
+    @SneakyThrows
+    public Response getWeapon(UUID weaponId) {
+        Request httpRequest = new Request.Builder()
+            .url(baseUrl + "weapons/" + weaponId)
+            .get()
+            .header(AUTHORIZATION, getBasicAuthorization(username, password))
+            .build();
+        Call call = client.newCall(httpRequest);
+        return call.execute();
+    }
+
+    @SneakyThrows
+    public Response deleteWeapon(UUID weaponid) {
+        Request httpRequest = new Request.Builder()
+            .url(baseUrl + "weapons/" + weaponid)
+            .delete()
+            .header(AUTHORIZATION, getBasicAuthorization(username, password))
+            .build();
+        Call call = client.newCall(httpRequest);
+        return call.execute();
+    }
+
+
+    @SneakyThrows
+    public Response updateWeapon(UUID weaponId, UpdateWeaponRequest request) {
+        byte[] body = objectMapper.writeValueAsBytes(request);
+        Request httpRequest = new Request.Builder()
+            .url(baseUrl + "weapons/" + weaponId)
+            .put(RequestBody.create(body, APP_JSON))
             .header(AUTHORIZATION, getBasicAuthorization(username, password))
             .build();
         Call call = client.newCall(httpRequest);

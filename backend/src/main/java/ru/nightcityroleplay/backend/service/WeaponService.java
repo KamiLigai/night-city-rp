@@ -15,7 +15,6 @@ import ru.nightcityroleplay.backend.dto.CreateWeaponResponse;
 import ru.nightcityroleplay.backend.dto.UpdateWeaponRequest;
 import ru.nightcityroleplay.backend.dto.WeaponDto;
 import ru.nightcityroleplay.backend.entity.Weapon;
-import ru.nightcityroleplay.backend.exception.NightCityRpException;
 import ru.nightcityroleplay.backend.repo.WeaponRepository;
 
 import java.util.ArrayList;
@@ -54,6 +53,18 @@ public class WeaponService {
         weapon.setPenetration(request.getPenetration());
         weapon.setReputationRequirement(request.getReputationRequirement());
 
+        //проверка на отрицательные значения
+        if (weapon.getName() == null || weapon.getName().isEmpty())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Имя оружия не может быть пустым.");
+        if (weapon.getIsMelee() == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "'Ближнее?' не может быть null");
+        if (weapon.getWeaponType() == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Тип Оружия не может быть null");
+        if (weapon.getPenetration() < 0)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Пробив не может быть отрицательным.");
+        if (weapon.getReputationRequirement() < 0)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Требование к репутации не может быть отрицательным.");
+
         //Сохранение
         weapon = weaponRepo.save(weapon);
         log.info("Оружие с ID {} было успешно создано.", weapon.getId());
@@ -84,7 +95,7 @@ public class WeaponService {
 
         // Проверка, существует ли оружие с указанным ID
         Weapon existingWeapon = weaponRepo.findById(weaponId).orElseThrow(()
-            -> new NightCityRpException("Оружие не найдено"));
+            -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Оружие не найдено"));
 
         // Обновление существующего оружия с указанными характеристиками
         existingWeapon.setName(request.getName());
@@ -92,6 +103,18 @@ public class WeaponService {
         existingWeapon.setWeaponType(request.getWeaponType());
         existingWeapon.setPenetration(request.getPenetration());
         existingWeapon.setReputationRequirement(request.getReputationRequirement());
+
+        //проверка на отрицательные значения
+        if (existingWeapon.getName() == null || existingWeapon.getName().isEmpty())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Имя оружия не может быть пустым.");
+        if (existingWeapon.getIsMelee() == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "'Ближнее?' не может быть null");
+        if (existingWeapon.getWeaponType() == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Тип Оружия не может быть null");
+        if (existingWeapon.getPenetration() < 0)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Пробив не может быть отрицательным.");
+        if (existingWeapon.getReputationRequirement() < 0)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Требование к репутации не может быть отрицательным.");
 
         // Сохранение обновленного оружия
         weaponRepo.save(existingWeapon);
@@ -102,10 +125,12 @@ public class WeaponService {
     public void deleteWeapon(UUID weaponId) {
         log.info("Запрос на удаление оружия с ID: {}", weaponId);
         Weapon weapon = weaponRepo.findById(weaponId).orElse(null);
+
         if (weapon == null) {
             log.info("Оружие {} не найдено", weaponId);
-            return;
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Оружие не найдено");
         }
+
         if (weapon.getCharacters().isEmpty()) {
             weaponRepo.delete(weapon);
             log.info("Оружие с ID {} было успешно удалено", weaponId);

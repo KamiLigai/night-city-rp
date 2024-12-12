@@ -6,13 +6,12 @@ import java.util.List;
 
 @Data
 public class PageDto {
-
-    List<Object> content;
-    Pageable pageable;
-    Object size;
-    Object totalElements;
-    Object totalPages;
-    Object number;
-    Object numberOfElements;
-    Object empty;
+    private List<Object> content;
+    private Pageable pageable;
+    private Object size;
+    private Object totalElements;
+    private Object totalPages;
+    private Object number;
+    private Object numberOfElements;
+    private Object empty;
 }
