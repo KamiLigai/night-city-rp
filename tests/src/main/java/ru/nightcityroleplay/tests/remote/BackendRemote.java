@@ -124,6 +124,17 @@ public class BackendRemote {
     }
 
     @SneakyThrows
+    public Response updateCharacterWithoutAutentication(UUID characterId, UpdateCharacterRequest request) {
+        byte[] body = objectMapper.writeValueAsBytes(request);
+        Request httpRequest = new Request.Builder()
+            .url(baseUrl + "characters/" + characterId)
+            .put(RequestBody.create(body, APP_JSON))
+            .build();
+        Call call = client.newCall(httpRequest);
+        return call.execute();
+    }
+
+    @SneakyThrows
     public Response deleteCharacter(UUID characterId) {
         Request httpRequest = new Request.Builder()
             .url(baseUrl + "characters/" + characterId)

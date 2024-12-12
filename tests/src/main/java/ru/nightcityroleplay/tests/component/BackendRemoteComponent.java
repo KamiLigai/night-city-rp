@@ -91,4 +91,8 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
     public Response makeUpdateCharacterRequest(UUID characterId, UpdateCharacterRequest request) {
         return remote.updateCharacter(characterId, request);
     }
+
+    public Response makeUpdateCharacterWithoutAutentication(UUID characterId, UpdateCharacterRequest request) {
+        return remote.updateCharacterWithoutAutentication(characterId, request);
+    }
 }

@@ -487,5 +487,41 @@ public class CharacterTest {
         assertThat(response.code()).isEqualTo(403);
     }
 
+    @Test
+    @Description("""
+        Дано: Персонаж с id.
+        Действие: Изменить персонажа по id методом PUT /characters/{id} без аутентификации.
+        Ожидается: Ошибка 401, юзер не аутентифицирован.
+                   Никакой персонаж не был изменён.
+        """)
+    void updateCharacterWithoutAuthentication() {
 
+        String charName = randomUUID().toString();
+        backendRemote.createCharacter(
+            CreateCharacterRequest.builder()
+                .name(charName)
+                .age(1000)
+                .reputation(0)
+                .build()
+        );
+
+        // Получить персонажа
+        Result<CharactersRecord> charRecord = dbContext.select().from(CHARACTERS)
+            .where(CHARACTERS.NAME.eq(charName))
+            .fetchInto(CHARACTERS);
+        UUID charId = charRecord.get(0).getId();
+
+        //Изменить персонажа
+        String updatedCharName = "UPDATED" + randomUUID();
+        Response response = backendRemote.makeUpdateCharacterWithoutAutentication(
+            charId,
+            UpdateCharacterRequest.builder()
+                .name(updatedCharName)
+                .age(1000)
+                .reputation(0)
+                .build()
+        );
+
+        assertThat(response.code()).isEqualTo(401);
+    }
 }
