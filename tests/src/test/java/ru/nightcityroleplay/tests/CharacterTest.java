@@ -444,4 +444,48 @@ public class CharacterTest {
         assertThat(response.code()).isEqualTo(400);
     }
 
+    @Test
+    @Description("""
+        Дано: Персонаж юзера 1.
+        Действие: Юзер 2 изменяет персонажа по id методом PUT /characters/{id}.
+        Ожидается: Ошибка 403, нельзя менять чужого персонажа.
+                   Никакой персонаж не был изменён.
+        """)
+    void updateNotOwnedCharacter() {
+        // Создать персонажа
+        String charName = randomUUID().toString();
+        backendRemote.createCharacter(
+            CreateCharacterRequest.builder()
+                .name(charName)
+                .age(1001)
+                .reputation(0)
+                .build()
+        );
+
+        // Сменить юзера
+        UUID userId = randomUUID();
+        String username = randomUUID().toString();
+        String password = randomUUID().toString();
+        UserDto userDto = backendRemote.createUser(username, password);
+        backendRemote.setCurrentUser(userDto.id(), username, password);
+
+        // Изменить персонажа
+        Result<CharactersRecord> charRecord = dbContext.select().from(CHARACTERS)
+            .where(CHARACTERS.NAME.eq(charName))
+            .fetchInto(CHARACTERS);
+
+        Response response = backendRemote.makeUpdateCharacterRequest(charRecord.get(0).getId(),
+            UpdateCharacterRequest.builder()
+                .name("UPDATED" + randomUUID())
+                .age(1001)
+                .reputation(0)
+                .build()
+            );
+
+        assertThat(charRecord).hasSize(1);
+        assertThat(charRecord.get(0).getOwnerId().equals(userId)).isFalse();
+        assertThat(response.code()).isEqualTo(403);
+    }
+
+
 }
