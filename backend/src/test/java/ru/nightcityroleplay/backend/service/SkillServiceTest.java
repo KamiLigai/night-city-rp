@@ -46,12 +46,9 @@ class SkillServiceTest {
         when(skillRepo.findById(id))
             .thenReturn(Optional.empty());
 
-        // when
-        var result = service.getSkill(id);
-
         // then
-        assertThat(result).isNull();
-        verify(skillRepo).findById(id);
+        assertThatThrownBy(() -> service.getSkill(id))
+            .isInstanceOf(ResponseStatusException.class);
     }
 
     @Test
