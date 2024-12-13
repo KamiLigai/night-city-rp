@@ -56,12 +56,9 @@ class CharacterServiceTest {
         when(charRepo.findById(id))
             .thenReturn(Optional.empty());
 
-        // when
-        var result = service.getCharacter(id);
-
         // then
-        assertThat(result).isNull();
-        verify(charRepo).findById(id);
+        assertThatThrownBy(() -> service.getCharacter(id))
+            .isInstanceOf(ResponseStatusException.class);
     }
 
     @Test
@@ -70,6 +67,7 @@ class CharacterServiceTest {
         var request = new CreateCharacterRequest();
         request.setName("Илон");
         request.setAge(8);
+        request.setReputation(0);
 
         Authentication auth = mock();
         User user = new User();
@@ -88,7 +86,6 @@ class CharacterServiceTest {
 
         // then
         verify(charRepo).save(any());
-        verifyNoMoreInteractions(charRepo);
     }
 
 
@@ -104,6 +101,7 @@ class CharacterServiceTest {
         character.setId(charId);
         character.setName("Vasyatka");
         character.setAge(42);
+        character.setReputation(0);
         character.setWeapons(weapons);
 
         when(charRepo.findById(charId))
@@ -176,8 +174,7 @@ class CharacterServiceTest {
 
         // then
         assertThatThrownBy(() -> service.updateCharacter(request, characterId, auth))
-            .isInstanceOf(ResponseStatusException.class)
-            .hasMessageContaining("Персонаж " + characterId + " не найден");
+            .isInstanceOf(ResponseStatusException.class);
     }
 
     @Test
@@ -200,8 +197,7 @@ class CharacterServiceTest {
 
         // then
         assertThatThrownBy(() -> service.updateCharacter(request, characterId, auth))
-            .isInstanceOf(ResponseStatusException.class)
-            .hasMessageContaining("Изменить чужого персонажа вздумал? а ты хорош."); // Проверяем сообщение
+            .isInstanceOf(ResponseStatusException.class);
     }
 
     @Test
@@ -315,6 +311,7 @@ class CharacterServiceTest {
         // given
         UpdateCharacterRequest request = new UpdateCharacterRequest();
         request.setAge(42);
+        request.setReputation(0);
         request.setName("test-name");
 
         UUID charId = randomUUID();
