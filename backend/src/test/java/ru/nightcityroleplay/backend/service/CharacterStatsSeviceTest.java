@@ -27,15 +27,15 @@ public class CharacterStatsSeviceTest {
     @ParameterizedTest
     @MethodSource("calculateImplantPointsData")
     void calculateImplantPoints(int reputation, int implantPoints) {
-        // Given
+        // given
         var character = new CharacterEntity();
         character.setReputation(reputation);
         character.setAge(26);
 
-        // When
+        // when
         characterStatsService.updateCharacterStats(character);
 
-        // Then
+        // then
         assertThat(character.getImplantPoints()).isEqualTo(implantPoints);
 
     }
@@ -57,47 +57,47 @@ public class CharacterStatsSeviceTest {
 
     @Test
     void calculateBattlePoints_youngAge() {
-        // Given
+        // given
         int age = 20;
 
-        // When
+        // when
         int result = characterStatsService.calculateBattlePoints(age);
 
-        // Then
+        // then
         assertThat(result).isEqualTo(13);
     }
 
     @Test
     void calculateBattlePoints_middleAge() {
-        // Given
+        // given
         int age = 30;
 
-        // When
+        // when
         int result = characterStatsService.calculateBattlePoints(age);
 
-        // Then
+        // then
         assertThat(result).isEqualTo(15);
     }
 
     @Test
     void calculateBattlePoints_oldAge() {
-        // Given
+        // given
         int age = 50;
 
-        // When
+        // when
         int result = characterStatsService.calculateBattlePoints(age);
 
-        // Then
+        // then
         assertThat(result).isEqualTo(17);
     }
 
 
     @Test
     void calculateCivilPoints_isAlwaysThirteen() {
-        // When
+        // when
         int result = characterStatsService.calculateCivilPoints();
 
-        // Then
+        // then
         assertThat(result).isEqualTo(13);
     }
 }

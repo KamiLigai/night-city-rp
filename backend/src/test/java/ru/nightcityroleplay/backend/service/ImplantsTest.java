@@ -33,6 +33,7 @@ public class ImplantsTest {
         implantRepo = mock();
         service = new ImplantService(implantRepo);
     }
+
     @Test
     void createImplantIsSave() {
         // given
@@ -104,7 +105,7 @@ public class ImplantsTest {
 
     @Test
     public void updateImplantSuccess() {
-        // Given
+        // given
         UUID implantId = UUID.randomUUID();
         Implant existingImplant = new Implant();
         existingImplant.setId(implantId);
@@ -120,10 +121,10 @@ public class ImplantsTest {
 
         when(implantRepo.findById(implantId)).thenReturn(Optional.of(existingImplant));
 
-        // When
+        // when
         service.updateImplant(request, implantId, "Новый Имплант");
 
-        // Then
+        // then
         assertEquals("Новый Имплант", existingImplant.getName());
         assertEquals("Конечность", existingImplant.getImplantType());
         assertEquals("Описание", existingImplant.getDescription());
@@ -151,7 +152,7 @@ public class ImplantsTest {
 
     @Test
     public void deleteImplantSuccess() {
-        // Given
+        // given
         UUID implantId = UUID.randomUUID();
         Implant implant = new Implant();
         implant.setId(implantId);
@@ -159,23 +160,23 @@ public class ImplantsTest {
 
         when(implantRepo.findById(implantId)).thenReturn(Optional.of(implant));
 
-        // When
+        // when
         service.deleteImplant(implantId);
 
-        // Then
+        // then
         verify(implantRepo).delete(implant);
     }
 
     @Test
     public void deleteImplantNotFound() {
-        // Given
+        // given
         UUID implantId = UUID.randomUUID();
         when(implantRepo.findById(implantId)).thenReturn(Optional.empty());
 
-        // When
+        // when
         service.deleteImplant(implantId);
 
-        // Then
+        // then
         verify(implantRepo, never()).delete(any(Implant.class));
     }
 
