@@ -337,21 +337,7 @@ public class CharacterService {
         }
     }
 
-    @SuppressWarnings("DuplicatedCode")
-    private void validate(CreateCharacterRequest request) {
-        if (request.getAge() == null || request.getAge() <= 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Возраст не может быть 0 или меньше или null");
-        }
-        if (request.getReputation() == null || request.getReputation() < 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Репутация не может быть меньше 0 или null");
-        }
-        if (characterRepo.existsByName(request.getName())) {
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Персонаж с таким именем уже есть");
-        }
-    }
-
-    @SuppressWarnings("DuplicatedCode")
-    private void validate(UpdateCharacterRequest request) {
+    private void validate(SaveCharacterRequest request) {
         if (request.getAge() == null || request.getAge() <= 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Возраст не может быть 0 или меньше или null");
         }
