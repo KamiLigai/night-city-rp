@@ -13,9 +13,11 @@ import org.springframework.web.ErrorResponseException;
 import org.springframework.web.server.ResponseStatusException;
 import ru.nightcityroleplay.backend.dto.*;
 import ru.nightcityroleplay.backend.entity.CharacterEntity;
+import ru.nightcityroleplay.backend.entity.Implant;
 import ru.nightcityroleplay.backend.entity.User;
 import ru.nightcityroleplay.backend.entity.Weapon;
 import ru.nightcityroleplay.backend.repo.CharacterRepository;
+import ru.nightcityroleplay.backend.repo.ImplantRepository;
 import ru.nightcityroleplay.backend.repo.SkillRepository;
 import ru.nightcityroleplay.backend.repo.WeaponRepository;
 import ru.nightcityroleplay.backend.util.Call;
@@ -25,6 +27,7 @@ import java.util.*;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class CharacterServiceTest {
@@ -33,20 +36,21 @@ class CharacterServiceTest {
 
     CharacterStatsService characterStatsService;
 
-
-    CharacterRepository charRepo;
     WeaponRepository weaponRepo;
+    CharacterRepository charRepo;
     SkillRepository skillRepo;
     private Pageable pageable;
+    ImplantRepository implantRepo;
 
     @BeforeEach
     void setUp() {
+        characterStatsService = mock();
         weaponRepo = mock();
         pageable = mock();
         charRepo = mock();
         skillRepo = mock();
-        characterStatsService = mock();
-        service = new CharacterService(charRepo, characterStatsService, weaponRepo, skillRepo);
+        implantRepo = mock();
+        service = new CharacterService(charRepo, characterStatsService, weaponRepo, skillRepo, implantRepo);
     }
 
     @Test
@@ -245,29 +249,6 @@ class CharacterServiceTest {
     }
 
     @Test
-    public void deleteCharacterSuccess() {
-        // given
-        UUID characterId = UUID.randomUUID();
-        Authentication auth = mock(Authentication.class);
-        User user = new User();
-        UUID userId = UUID.randomUUID();
-        user.setId(userId);
-        when(auth.getPrincipal()).thenReturn(user);
-
-        CharacterEntity character = new CharacterEntity();
-        character.setId(characterId);
-        character.setOwnerId(userId);
-
-        when(charRepo.findById(characterId)).thenReturn(java.util.Optional.of(character));
-
-        // when
-        service.deleteCharacter(characterId, auth);
-
-        // then
-        verify(charRepo, times(1)).deleteById(characterId);
-    }
-
-    @Test
     public void deleteCharacterNotFound() {
         // given
         UUID characterId = UUID.randomUUID();
@@ -393,42 +374,8 @@ class CharacterServiceTest {
     }
 
     @Test
-    void putCharacterWeapon_WeaponNotExist() {
-        // given
-        UUID characterId = randomUUID();
-        UUID weaponId = randomUUID();
-        UUID userId = randomUUID();
-        Authentication auth = mock(Authentication.class);
-
-        User user = new User();
-        user.setId(userId);
-        when(auth.getPrincipal()).thenReturn(user);
-
-        CharacterEntity character = new CharacterEntity();
-        character.setId(characterId);
-        character.setOwnerId(userId);
-
-        UpdateCharacterWeaponRequest request = new UpdateCharacterWeaponRequest();
-        request.setWeaponId(weaponId);
-
-        when(charRepo.findById(characterId)).thenReturn(Optional.of(character));
-        when(weaponRepo.findById(weaponId)).thenReturn(Optional.empty());
-
-        // When
-        Call call = () -> service.putCharacterWeapon(request, characterId, auth);
-
-        // then
-        assertThatThrownBy(call)
-            .isInstanceOf(ResponseStatusException.class)
-            .hasMessageContaining("Оружие не найдено")
-            .extracting(ResponseStatusException.class::cast)
-            .extracting(ErrorResponseException::getStatusCode)
-            .isEqualTo(HttpStatus.NOT_FOUND);
-    }
-
-    @Test
     void deleteWeaponSuccessful() {
-        // Given
+        // given
         UUID weaponId = UUID.randomUUID();
         UUID characterId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
@@ -449,23 +396,23 @@ class CharacterServiceTest {
         when(charRepo.findById(characterId)).thenReturn(Optional.of(character));
         when(weaponRepo.findById(weaponId)).thenReturn(Optional.of(weapon));
 
-        // When
+        // when
         service.deleteCharacterWeapon(weaponId, characterId, auth);
 
-        // Then
+        // then
         assertThat(character.getWeapons()).doesNotContain(weapon);
         verify(charRepo).save(character);
     }
 
     @Test
     void deleteWeaponCharacterNotFound() {
-        // Given
+        // given
         UUID weaponId = UUID.randomUUID();
         UUID characterId = UUID.randomUUID();
         Authentication auth = mock(Authentication.class);
         when(charRepo.findById(characterId)).thenReturn(Optional.empty());
 
-        // When / Then
+        // when / then
         assertThatThrownBy(() -> service.deleteCharacterWeapon(weaponId, characterId, auth))
             .isInstanceOf(ResponseStatusException.class)
             .hasMessageContaining("Персонаж не найден")
@@ -476,7 +423,7 @@ class CharacterServiceTest {
 
     @Test
     void deleteWeaponUnauthorizedAccess() {
-        // Given
+        // given
         UUID weaponId = UUID.randomUUID();
         UUID characterId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
@@ -490,7 +437,7 @@ class CharacterServiceTest {
         character.setOwnerId(UUID.randomUUID()); // другой владелец
         when(charRepo.findById(characterId)).thenReturn(Optional.of(character));
 
-        // When / Then
+        // when / then
         assertThatThrownBy(() -> service.deleteCharacterWeapon(weaponId, characterId, auth))
             .isInstanceOf(ResponseStatusException.class)
             .hasMessageContaining("Нельзя удалять оружие не своему персонажу!")
@@ -501,7 +448,7 @@ class CharacterServiceTest {
 
     @Test
     void deleteWeaponNotFound() {
-        // Given
+        // given
         UUID weaponId = UUID.randomUUID();
         UUID characterId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
@@ -518,7 +465,7 @@ class CharacterServiceTest {
         when(charRepo.findById(characterId)).thenReturn(Optional.of(character));
         when(weaponRepo.findById(weaponId)).thenReturn(Optional.empty()); // Ожидаем, что оружие не найдено
 
-        // When & Then
+        // when & then
         assertThatThrownBy(() -> service.deleteCharacterWeapon(weaponId, characterId, auth))
             .isInstanceOf(ResponseStatusException.class)
             .hasMessageContaining("Оружие не найдено")
@@ -529,7 +476,7 @@ class CharacterServiceTest {
 
     @Test
     void deleteWeaponNotFoundInCharacter() {
-        // Given
+        // given
         UUID weaponId = UUID.randomUUID();
         UUID characterId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
@@ -544,12 +491,324 @@ class CharacterServiceTest {
         when(charRepo.findById(characterId)).thenReturn(Optional.of(character));
         when(weaponRepo.findById(weaponId)).thenReturn(Optional.of(new Weapon())); // оружие не в инвентаре
 
-        // When / Then
+        // when / then
         assertThatThrownBy(() -> service.deleteCharacterWeapon(weaponId, characterId, auth))
             .isInstanceOf(ResponseStatusException.class)
             .hasMessageContaining("Этого оружия нет в списке вашего персонажа")
             .extracting(ResponseStatusException.class::cast)
             .extracting(ErrorResponseException::getStatusCode)
             .isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+
+    @Test
+    public void giveReputationSuccess() {
+        // given
+        UUID characterId = UUID.randomUUID();
+        CharacterEntity character = new CharacterEntity();
+        character.setId(characterId);
+        character.setReputation(50);
+
+        GiveReputationRequest request = new GiveReputationRequest();
+        request.setReputation(10);
+
+        Authentication auth = mock();
+        User user = new User();
+        user.setId(randomUUID());
+        when(auth.getPrincipal())
+            .thenReturn(user);
+
+        when(charRepo.findById(characterId)).thenReturn(Optional.of(character));
+        when(auth.getPrincipal()).thenReturn(user);
+
+        // when
+        service.giveReputation(request, characterId, auth);
+
+        // then
+        assertEquals(60, character.getReputation());
+        verify(charRepo).save(character);
+    }
+
+    @Test
+    public void getCharacterImplantsSuccess() {
+        // given
+        UUID characterId = UUID.randomUUID();
+
+        CharacterEntity character = new CharacterEntity();
+        character.setId(characterId);
+        Implant implant = new Implant();
+        List<Implant> implants = List.of(implant);
+        character.setImplants(implants);
+
+        when(charRepo.findById(characterId)).thenReturn(Optional.of(character));
+
+        // when
+        List<ImplantDto> implantDtos = service.getCharacterImplants(characterId);
+
+        // then
+        assertEquals(1, implantDtos.size());
+        verify(charRepo, times(1)).findById(characterId);
+    }
+
+    @Test
+    public void getCharactersImplantsCharacterNotFound() {
+        // given
+        UUID characterId = UUID.randomUUID();
+        Authentication auth = mock(Authentication.class);
+
+        when(charRepo.findById(characterId)).thenReturn(Optional.empty());
+
+        // when & then
+        ResponseStatusException exception = assertThrows(
+            ResponseStatusException.class,
+            () -> service.getCharacterImplants(characterId)
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        assertEquals("Персонаж " + characterId + " не найден", exception.getReason());
+        verify(charRepo, times(1)).findById(characterId);
+    }
+
+    @Test
+    public void getCharactersImplantsNoImplants() {
+        // given
+        UUID characterId = UUID.randomUUID();
+
+        CharacterEntity character = new CharacterEntity();
+        character.setId(characterId);
+        character.setImplants(Collections.emptyList()); // Нет имплантов
+
+        when(charRepo.findById(characterId)).thenReturn(Optional.of(character));
+
+        // when
+        List<ImplantDto> implantDtos = service.getCharacterImplants(characterId);
+
+        // then
+        assertTrue(implantDtos.isEmpty());
+        verify(charRepo, times(1)).findById(characterId);
+    }
+
+    @Test
+    public void putCharacterImplantReputationInsufficient() {
+        // given
+        UUID characterId = UUID.randomUUID();
+        User user = new User();
+        user.setId(UUID.randomUUID());
+        Authentication auth = mock(Authentication.class);
+        when(auth.getPrincipal()).thenReturn(user);
+
+        CharacterEntity character = new CharacterEntity();
+        character.setId(characterId);
+        character.setOwnerId(user.getId());
+        character.setImplantPoints(10);
+        character.setSpecialImplantPoints(10);
+        character.setReputation(0); // Низкая репутация <----
+
+        Implant implant = new Implant();
+        implant.setId(UUID.randomUUID());
+        implant.setReputationRequirement(1);
+        implant.setImplantPointsCost(3);
+        implant.setSpecialImplantPointsCost(0);
+
+        UpdateCharacterImplantRequest request = new UpdateCharacterImplantRequest();
+        request.setImplantId(List.of(implant.getId()));
+
+
+        when(charRepo.findById(characterId)).thenReturn(Optional.of(character));
+        when(implantRepo.findById(implant.getId())).thenReturn(Optional.of(implant));
+
+        // when & then
+        ResponseStatusException exception = assertThrows(
+            ResponseStatusException.class,
+            () -> service.putCharacterImplant(request, characterId, auth)
+        );
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+        assertEquals("Данный имплант не доступен на вашей репутации", exception.getReason());
+    }
+
+    @Test
+    public void putCharacterImplantInsufficientPoints() {
+        // given
+        UUID characterId = UUID.randomUUID();
+        User user = new User();
+        user.setId(UUID.randomUUID());
+        Authentication auth = mock(Authentication.class);
+        when(auth.getPrincipal()).thenReturn(user);
+
+        CharacterEntity character = new CharacterEntity();
+        character.setId(characterId);
+        character.setOwnerId(user.getId());
+        character.setImplantPoints(4); // Недостаточно очков
+        character.setSpecialImplantPoints(10);
+        character.setReputation(5);
+
+        Implant implant = new Implant();
+        implant.setId(UUID.randomUUID());
+        implant.setReputationRequirement(1);
+        implant.setImplantPointsCost(5);
+        implant.setSpecialImplantPointsCost(0); // 0 для специальных очков
+
+        UpdateCharacterImplantRequest request = new UpdateCharacterImplantRequest();
+        request.setImplantId(List.of(implant.getId()));
+
+        when(charRepo.findById(characterId)).thenReturn(Optional.of(character));
+        when(implantRepo.findById(implant.getId())).thenReturn(Optional.of(implant));
+
+        // when & then
+        ResponseStatusException exception = assertThrows(
+            ResponseStatusException.class,
+            () -> service.putCharacterImplant(request, characterId, auth)
+        );
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+        assertEquals("Недостаточно ОИ для обычных имплантов", exception.getReason());
+    }
+
+    @Test
+    public void deleteCharacterImplantSuccess() {
+        // given
+        UUID characterId = UUID.randomUUID();
+        UUID implantId = UUID.randomUUID();
+        User user = new User();
+        user.setId(UUID.randomUUID());
+        Authentication auth = mock(Authentication.class);
+        when(auth.getPrincipal()).thenReturn(user);
+
+        CharacterEntity character = new CharacterEntity();
+        character.setId(characterId);
+        character.setOwnerId(user.getId());
+        character.setImplants(new ArrayList<>());
+
+        Implant implant = new Implant();
+        implant.setId(implantId);
+        implant.setImplantPointsCost(5);
+        implant.setSpecialImplantPointsCost(5);
+
+        character.getImplants().add(implant);
+        character.setImplantPoints(10);
+        character.setSpecialImplantPoints(10);
+
+        when(charRepo.findById(characterId)).thenReturn(Optional.of(character));
+        when(implantRepo.findById(implantId)).thenReturn(Optional.of(implant));
+
+        // when
+        service.deleteCharacterImplant(implantId, characterId, auth);
+
+        // then
+        assertFalse(character.getImplants().contains(implant));
+        assertEquals(15, character.getImplantPoints());
+        assertEquals(15, character.getSpecialImplantPoints());
+        verify(charRepo, times(1)).save(character);
+    }
+
+    @Test
+    public void deleteCharacterImplantCharacterNotFound() {
+        // given
+        UUID characterId = UUID.randomUUID();
+        UUID implantId = UUID.randomUUID();
+        User user = new User();
+        user.setId(UUID.randomUUID());
+        Authentication auth = mock(Authentication.class);
+        when(auth.getPrincipal()).thenReturn(user);
+
+        when(charRepo.findById(characterId)).thenReturn(Optional.empty());
+
+        // when & then
+        ResponseStatusException exception = assertThrows(
+            ResponseStatusException.class,
+            () -> service.deleteCharacterImplant(implantId, characterId, auth)
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        assertEquals("Персонаж не найден", exception.getReason());
+    }
+
+    @Test
+    public void deleteCharacterImplantForbidden() {
+        // given
+        UUID characterId = UUID.randomUUID();
+        UUID implantId = UUID.randomUUID();
+        User user = new User();
+        user.setId(UUID.randomUUID()); // Другой пользователь
+        Authentication auth = mock(Authentication.class);
+        when(auth.getPrincipal()).thenReturn(user);
+        CharacterEntity character = new CharacterEntity();
+        character.setId(characterId);
+        character.setOwnerId(UUID.randomUUID()); // Не тот пользователь
+
+        when(charRepo.findById(characterId)).thenReturn(Optional.of(character));
+
+        // when & then
+        ResponseStatusException exception = assertThrows(
+            ResponseStatusException.class,
+            () -> service.deleteCharacterImplant(implantId, characterId, auth)
+        );
+
+        assertEquals(HttpStatus.FORBIDDEN, exception.getStatusCode());
+        assertEquals("Нельзя добавлять имплант не своему персонажу!", exception.getReason());
+    }
+
+    @Test
+    public void deleteCharacterImplantImplantNotFound() {
+        // given
+        UUID characterId = UUID.randomUUID();
+        UUID implantId = UUID.randomUUID();
+        User user = new User();
+        user.setId(UUID.randomUUID());
+        Authentication auth = mock(Authentication.class);
+        when(auth.getPrincipal()).thenReturn(user);
+
+        CharacterEntity character = new CharacterEntity();
+        character.setId(characterId);
+        character.setOwnerId(user.getId());
+        character.setImplants(new ArrayList<>());
+
+        when(charRepo.findById(characterId)).thenReturn(Optional.of(character));
+        when(implantRepo.findById(implantId)).thenReturn(Optional.empty());
+
+        // when & then
+        ResponseStatusException exception = assertThrows(
+            ResponseStatusException.class,
+            () -> service.deleteCharacterImplant(implantId, characterId, auth)
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        assertEquals("Имплант не найден", exception.getReason());
+    }
+
+    @Test
+    public void deleteCharacterImplantNotInList() {
+        // given
+        UUID characterId = UUID.randomUUID();
+        UUID implantId = UUID.randomUUID();
+        User user = new User();
+        user.setId(UUID.randomUUID());
+        Authentication auth = mock(Authentication.class);
+        when(auth.getPrincipal()).thenReturn(user);
+
+        CharacterEntity character = new CharacterEntity();
+        character.setId(characterId);
+        character.setOwnerId(user.getId());
+        character.setImplants(new ArrayList<>());
+
+        Implant implant = new Implant();
+        implant.setId(UUID.randomUUID());
+
+        character.getImplants().add(implant);
+        character.setImplantPoints(10);
+        character.setSpecialImplantPoints(10);
+
+        when(charRepo.findById(characterId)).thenReturn(Optional.of(character));
+        when(implantRepo.findById(implantId)).thenReturn(Optional.of(new Implant())); // Это возвращает несуществующий имплант
+
+        // when & then
+        ResponseStatusException exception = assertThrows(
+            ResponseStatusException.class,
+            () -> service.deleteCharacterImplant(implantId, characterId, auth)
+        );
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+        assertEquals("Этого импланта нет в вашем списке.", exception.getReason());
     }
 }

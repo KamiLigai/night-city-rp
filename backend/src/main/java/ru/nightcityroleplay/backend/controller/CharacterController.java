@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.nightcityroleplay.backend.dto.*;
 import ru.nightcityroleplay.backend.service.CharacterService;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -43,9 +44,29 @@ public class CharacterController {
         characterService.deleteCharacter(characterId, auth);
     }
 
+    @PostMapping("{characterId}/reputation/give")
+    public void giveReputation(@RequestBody GiveReputationRequest request, @PathVariable UUID characterId, Authentication auth) {
+        characterService.giveReputation(request, characterId, auth);
+    }
+
     @PutMapping("{characterId}/skills")
     public void updateCharacterSkill(@RequestBody UpdateCharacterSkillRequest request, @PathVariable UUID characterId, Authentication auth) {
         characterService.updateCharacterSkill(request, characterId, auth);
+    }
+
+    @GetMapping("{characterId}/implants")
+    public List<ImplantDto> getCharacterImplants(@PathVariable UUID characterId) {
+        return characterService.getCharacterImplants(characterId);
+    }
+
+    @PutMapping("{characterId}/implants")
+    public void putCharacterImplant(@RequestBody UpdateCharacterImplantRequest request, @PathVariable UUID characterId, Authentication auth) {
+        characterService.putCharacterImplant(request, characterId, auth);
+    }
+
+    @DeleteMapping("{characterId}/implants/{implantId}")
+    public void deleteCharacterImplant(@PathVariable UUID characterId, @PathVariable UUID implantId, Authentication auth) {
+        characterService.deleteCharacterImplant(characterId, implantId, auth);
     }
 
     @PutMapping("{characterId}/weapons")
@@ -58,5 +79,6 @@ public class CharacterController {
         characterService.deleteCharacterWeapon(weaponId, characterId, auth);
     }
 }
+
 
 

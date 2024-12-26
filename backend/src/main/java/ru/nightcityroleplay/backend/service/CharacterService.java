@@ -5,23 +5,19 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import ru.nightcityroleplay.backend.dto.*;
-import ru.nightcityroleplay.backend.entity.CharacterEntity;
-import ru.nightcityroleplay.backend.entity.Skill;
-import ru.nightcityroleplay.backend.entity.User;
-import ru.nightcityroleplay.backend.entity.Weapon;
+import ru.nightcityroleplay.backend.entity.*;
 import ru.nightcityroleplay.backend.repo.CharacterRepository;
+import ru.nightcityroleplay.backend.repo.ImplantRepository;
 import ru.nightcityroleplay.backend.repo.SkillRepository;
 import ru.nightcityroleplay.backend.repo.WeaponRepository;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ru.nightcityroleplay.backend.util.BooleanUtils.not;
@@ -31,21 +27,24 @@ import static ru.nightcityroleplay.backend.util.BooleanUtils.not;
 @Slf4j
 public class CharacterService {
 
-    private final CharacterStatsService characterStatsService;
     private final CharacterRepository characterRepo;
+    private final CharacterStatsService characterStatsService;
     private final WeaponRepository weaponRepo;
     private final SkillRepository skillRepo;
+    private final ImplantRepository implantRepo;
 
     public CharacterService(
         CharacterRepository characterRepo,
         CharacterStatsService characterStatsService,
         WeaponRepository weaponRepo,
-        SkillRepository skillRepo
+        SkillRepository skillRepo,
+        ImplantRepository implantRepo
     ) {
         this.characterStatsService = characterStatsService;
         this.characterRepo = characterRepo;
         this.weaponRepo = weaponRepo;
         this.skillRepo = skillRepo;
+        this.implantRepo = implantRepo;
     }
 
     private CharacterDto toDto(CharacterEntity character) {
@@ -64,6 +63,18 @@ public class CharacterService {
         characterDto.setBattlePoints(character.getBattlePoints());
         characterDto.setCivilPoints(character.getCivilPoints());
         return characterDto;
+    }
+
+    private ImplantDto implantDto(Implant implant) {
+        ImplantDto implantDto = new ImplantDto();
+        implantDto.setId(implant.getId());
+        implantDto.setName(implant.getName());
+        implantDto.setImplantType(implant.getImplantType());
+        implantDto.setDescription(implant.getDescription());
+        implantDto.setReputationRequirement(implant.getReputationRequirement());
+        implantDto.setImplantPointsCost(implant.getImplantPointsCost());
+        implantDto.setSpecialImplantPointsCost(implant.getSpecialImplantPointsCost());
+        return implantDto;
     }
 
     @Transactional
@@ -105,24 +116,39 @@ public class CharacterService {
     @Transactional
     public void updateCharacter(UpdateCharacterRequest request, UUID characterId, Authentication auth) {
         CharacterEntity newCharacter = new CharacterEntity();
-        CharacterEntity oldCharacter = characterRepo.findById(characterId).orElseThrow(() ->
+        CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
             new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
         Object principal = auth.getPrincipal();
         User user = (User) principal;
         UUID userid = user.getId();
-        if (!oldCharacter.getOwnerId().equals(userid)) {
+        if (not(character.getOwnerId().equals(userid))) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Изменить чужого персонажа вздумал? а ты хорош.");
         }
         newCharacter.setId(characterId);
         newCharacter.setOwnerId(user.getId());
         newCharacter.setName(request.getName());
         newCharacter.setAge(request.getAge());
-        newCharacter.setReputation(oldCharacter.getReputation());
-        newCharacter.setImplantPoints(oldCharacter.getImplantPoints());
-        newCharacter.setSpecialImplantPoints(oldCharacter.getSpecialImplantPoints());
-        newCharacter.setBattlePoints(oldCharacter.getBattlePoints());
-        newCharacter.setCivilPoints(oldCharacter.getCivilPoints());
+        newCharacter.setReputation(character.getReputation());
+        newCharacter.setImplantPoints(character.getImplantPoints());
+        newCharacter.setSpecialImplantPoints(character.getSpecialImplantPoints());
+        newCharacter.setBattlePoints(character.getBattlePoints());
+        newCharacter.setCivilPoints(character.getCivilPoints());
         characterRepo.save(newCharacter);
+        log.info("Персонаж {} изменён", newCharacter.getId());
+    }
+
+
+    @PreAuthorize("hasRole('Role_ADMIN')")
+    public void giveReputation(GiveReputationRequest request, UUID characterId, Authentication auth) {
+        CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж не найден"));
+
+        Object principal = auth.getPrincipal();
+        User user = (User) principal;
+        int rewardReputation = request.getReputation();
+        character.setReputation(character.getReputation() + rewardReputation);
+        log.info("{} выдал персонажу {} репутацию {}", user.getUsername(), characterId, rewardReputation);
+        characterRepo.save(character);
     }
 
     @Transactional
@@ -140,6 +166,25 @@ public class CharacterService {
         character.setSkills(skills);
         characterRepo.save(character);
         log.info("Персонажу {} обновлены навыки", character.getId());
+    }
+
+    @Transactional
+    public List<ImplantDto> getCharacterImplants(UUID characterId) {
+        Optional<CharacterEntity> character = characterRepo.findById(characterId);
+        if (character.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден");
+        }
+
+        List<Implant> implants = character.get().getImplants();
+        if (implants == null || implants.isEmpty()) {
+            log.info("У персонажа нет имплантов.");
+            return Collections.emptyList();
+        }
+        List<ImplantDto> implantDtos = implants.stream()
+            .map(this::implantDto)
+            .collect(Collectors.toList());
+
+        return implantDtos;
     }
 
     @Transactional
@@ -175,15 +220,94 @@ public class CharacterService {
         if (!character.getOwnerId().equals(userid)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Нельзя добавлять оружие не своему персонажу!");
         }
+    }
 
-        // Найти оружие по ID
-        Weapon weapon = weaponRepo.findById(request.getWeaponId()).orElse(null);
-        if (weapon == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Оружие не найдено");
+    @Transactional
+    public void putCharacterImplant(UpdateCharacterImplantRequest request, UUID characterId, Authentication auth) {
+        CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж не найден"));
+
+        // Получить текущего пользователя
+        Object principal = auth.getPrincipal();
+        User user = (User) principal;
+        UUID userid = user.getId();
+
+        // Проверка прав доступа
+        if (!character.getOwnerId().equals(userid)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Нельзя добавлять имплант не своему персонажу!");
         }
-        character.getWeapons().add(weapon);
+
+        // Списки для проверок
+        List<Implant> implants = new ArrayList<>();
+        int totalImplantPointsCost = 0;
+        int totalSpecialImplantPointsCost = 0;
+
+        // Проверка наличия имплантов и суммируем стоимости
+        for (UUID implantId : request.getImplantId()) {
+            Implant implant = implantRepo.findById(implantId).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Имплант с ID " + implantId + " не найден"));
+
+            if (character.getReputation() < implant.getReputationRequirement()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Данный имплант не доступен на вашей репутации");
+            }
+            // попытка добавить имплант в список
+            implants.add(implant);
+            totalImplantPointsCost += implant.getImplantPointsCost();
+            totalSpecialImplantPointsCost += implant.getSpecialImplantPointsCost();
+        }
+
+        // Проверка наличия у персонажа нужных очков
+        if (character.getImplantPoints() < totalImplantPointsCost) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Недостаточно ОИ для обычных имплантов");
+        }
+        if (character.getSpecialImplantPoints() < totalSpecialImplantPointsCost) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Недостаточно ОИ* для специальных имплантов");
+        }
+
+        // Создаем или обновляем список имплантов персонажа
+        if (character.getImplants() == null) {
+            character.setImplants(new ArrayList<>());
+        }
+        character.getImplants().addAll(implants);
+        character.setImplantPoints(character.getImplantPoints() - totalImplantPointsCost);
+        character.setSpecialImplantPoints(character.getSpecialImplantPoints() - totalSpecialImplantPointsCost);
         characterRepo.save(character);
     }
+
+
+    @Transactional
+    public void deleteCharacterImplant(UUID implantId, UUID characterId, Authentication auth) {
+        CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж не найден"));
+
+        Object principal = auth.getPrincipal();
+        User user = (User) principal;
+        UUID userid = user.getId();
+
+        if (!character.getOwnerId().equals(userid)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Нельзя добавлять имплант не своему персонажу!");
+        }
+        // Найти Имплант по ID
+        Implant implant = implantRepo.findById(implantId).orElseThrow(() ->
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Имплант не найден"));
+
+        List<Implant> implants = character.getImplants();
+        boolean hasImplant = false;
+        for (int i = 0; i < implants.size(); i++) {
+            if (implants.get(i).getId().equals(implant.getId())) {
+                hasImplant = true;
+                break;
+            }
+        }
+        if (!hasImplant) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Этого импланта нет в вашем списке.");
+        }
+        implants.remove(implant);
+        character.setImplantPoints(character.getImplantPoints() + implant.getImplantPointsCost());
+        character.setSpecialImplantPoints(character.getSpecialImplantPoints() + implant.getSpecialImplantPointsCost());
+        characterRepo.save(character);
+    }
+
 
     @Transactional
     public void deleteCharacterWeapon(UUID weaponId, UUID characterId, Authentication auth) {
@@ -215,4 +339,3 @@ public class CharacterService {
     }
 
 }
-
