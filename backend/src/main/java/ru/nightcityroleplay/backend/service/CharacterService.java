@@ -78,6 +78,7 @@ public class CharacterService {
 
     @Transactional
     public CreateCharacterResponse createCharacter(CreateCharacterRequest request, Authentication auth) {
+        validate(request);
         CharacterEntity character = new CharacterEntity();
         Object principal = auth.getPrincipal();
         User user = (User) principal;
@@ -180,11 +181,10 @@ public class CharacterService {
             log.info("У персонажа нет имплантов.");
             return Collections.emptyList();
         }
-        List<ImplantDto> implantDtos = implants.stream()
+
+        return implants.stream()
             .map(this::implantDto)
             .collect(Collectors.toList());
-
-        return implantDtos;
     }
 
     @Transactional
@@ -220,6 +220,13 @@ public class CharacterService {
         if (!character.getOwnerId().equals(userid)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Нельзя добавлять оружие не своему персонажу!");
         }
+        // Найти оружие по ID
+        Weapon weapon = weaponRepo.findById(request.getWeaponId()).orElse(null);
+        if (weapon == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Оружие не найдено");
+        }
+        character.getWeapons().add(weapon);
+        characterRepo.save(character);
     }
 
     @Transactional
@@ -293,8 +300,8 @@ public class CharacterService {
 
         List<Implant> implants = character.getImplants();
         boolean hasImplant = false;
-        for (int i = 0; i < implants.size(); i++) {
-            if (implants.get(i).getId().equals(implant.getId())) {
+        for (Implant value : implants) {
+            if (value.getId().equals(implant.getId())) {
                 hasImplant = true;
                 break;
             }
