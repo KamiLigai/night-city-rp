@@ -11,5 +11,4 @@ public class CreateSkillRequest {
     private int level;
     private String type;
     private int cost;
-
 }

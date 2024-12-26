@@ -6,25 +6,26 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.experimental.Accessors;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.util.List;
 import java.util.UUID;
+
 @Entity
-@Table(name = "weapons")
 @Setter
 @Getter
-@Accessors(chain = true)
-public class Weapon {
+@Table(name = "implants")
+public class Implant {
     @Id
     @UuidGenerator
     private UUID id;
-    private Boolean isMelee;
     private String name;
-    private String weaponType;
-    private int penetration;
+    private String implantType;
+    private String description;
     private int reputationRequirement;
-    @ManyToMany(mappedBy = "weapons")
-    private List<CharacterEntity> characters;
+    private int implantPointsCost;
+    private int specialImplantPointsCost;
+    @ManyToMany(mappedBy = "implants")
+    private List<CharacterEntity> charsId;
 }
+
