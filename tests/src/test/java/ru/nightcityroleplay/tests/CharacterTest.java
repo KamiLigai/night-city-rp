@@ -2,32 +2,24 @@ package ru.nightcityroleplay.tests;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jdk.jfr.Description;
-import jdk.jfr.Enabled;
 import lombok.SneakyThrows;
 import okhttp3.Response;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledIf;
-import org.junit.jupiter.api.condition.EnabledIf;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import ru.nightcityroleplay.tests.component.AppContext;
 import ru.nightcityroleplay.tests.component.BackendRemoteComponent;
 import ru.nightcityroleplay.tests.dto.*;
-import ru.nightcityroleplay.tests.entity.tables.Users;
 import ru.nightcityroleplay.tests.entity.tables.records.CharactersRecord;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
 import static java.util.UUID.randomUUID;
-import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static ru.nightcityroleplay.tests.entity.Tables.CHARACTERS;
 import static ru.nightcityroleplay.tests.entity.Tables.USERS;
@@ -247,11 +239,11 @@ public class CharacterTest {
         UserDto userDto = backendRemote.createUser(username, password);
         backendRemote.setCurrentUser(userDto.id(), username, password);
 
-        // Удалить персонажа
         Result<CharactersRecord> charRecord = dbContext.select().from(CHARACTERS)
             .where(CHARACTERS.NAME.eq(charName))
             .fetchInto(CHARACTERS);
 
+        // Удалить персонажа
         Response response = backendRemote.makeDeleteCharacterRequest(charRecord.get(0).getId());
 
         assertThat(charRecord).hasSize(1);
@@ -324,21 +316,21 @@ public class CharacterTest {
         backendRemote.createCharacter(
             CreateCharacterRequest.builder()
                 .name(randomUUID().toString())
-                .age(240)
+                .age(10000)
                 .reputation(0)
                 .build()
         );
         backendRemote.createCharacter(
             CreateCharacterRequest.builder()
                 .name(randomUUID().toString())
-                .age(240)
+                .age(10001)
                 .reputation(0)
                 .build()
         );
         backendRemote.createCharacter(
             CreateCharacterRequest.builder()
                 .name(randomUUID().toString())
-                .age(240)
+                .age(10002)
                 .reputation(0)
                 .build()
         );
@@ -347,15 +339,18 @@ public class CharacterTest {
         PageDto charPageRecord = backendRemote.getCharacterPage(2);
 
         assertThat(charPageRecord.getContent().size()).isEqualTo(2);
+        assertThat(charPageRecord.getNumberOfElements()).isEqualTo(2);
+        assertThat(charPageRecord.getSize()).isEqualTo(2);
     }
 
-    @Test
+    @ParameterizedTest
+    @MethodSource("updateCharacterData")
     @Description("""
         Дано: Персонаж с id.
         Действие: Изменить персонажа по id методом PUT /characters/{id}.
         Ожидается: Персонаж в бд обновлен.
         """)
-    void updateCharacter() {
+    void updateCharacter(UpdateCharacterRequest request) {
         String charName = randomUUID().toString();
         backendRemote.createCharacter(
             CreateCharacterRequest.builder()
@@ -372,19 +367,20 @@ public class CharacterTest {
         UUID charId = charRecord.get(0).getId();
 
         //Изменить персонажа
-        String updatedCharName = "UPDATED" + randomUUID();
         backendRemote.updateCharacter(
             charId,
             UpdateCharacterRequest.builder()
-                .name(updatedCharName)
-                .age(1000)
-                .reputation(0)
+                .name(request.name())
+                .age(request.age())
+                .reputation(request.reputation())
                 .build()
         );
 
         CharacterDto charDto = backendRemote.getCharacter(charId);
 
-        assertThat(charDto.getName()).isEqualTo(updatedCharName);
+        assertThat(charDto.getName()).isEqualTo(request.name());
+        assertThat(charDto.getAge()).isEqualTo(request.age());
+        assertThat(charDto.getReputation()).isEqualTo(request.reputation());
     }
 
     @Test
@@ -407,14 +403,15 @@ public class CharacterTest {
         assertThat(response.code()).isEqualTo(404);
     }
 
-    @Test
+    @ParameterizedTest
+    @MethodSource("updateCharacterWithBadRequestData")
     @Description("""
         Дано: Персонаж с id.
         Действие: Изменить персонажа по id методом PUT /characters/{id} с некорректными данными.
         Ожидается: 400 Bad_Request.
                    Никакой персонаж не был изменён.
         """)
-    void updateCharacterWithBadRequest() {
+    void updateCharacterWithBadRequest(UpdateCharacterRequest request) {
         String charName = randomUUID().toString();
         backendRemote.createCharacter(
             CreateCharacterRequest.builder()
@@ -431,27 +428,33 @@ public class CharacterTest {
         UUID charId = charRecord.get(0).getId();
 
         //Изменить персонажа
-        String updatedCharName = "UPDATED" + randomUUID();
         Response response = backendRemote.makeUpdateCharacterRequest(
             charId,
             UpdateCharacterRequest.builder()
-                .name(updatedCharName)
-                .age(1000)
-                .reputation(null)
+                .name(request.name())
+                .age(request.age())
+                .reputation(request.reputation())
                 .build()
         );
 
         assertThat(response.code()).isEqualTo(400);
     }
 
-    @Test
+    public static Stream<Arguments> updateCharacterWithBadRequestData() {
+        return Stream.of(
+            Arguments.of(UpdateCharacterRequest.builder().name("UPDATED" + randomUUID()).age(null).reputation(null).build()));
+    }
+
+
+    @ParameterizedTest
+    @MethodSource("updateCharacterData")
     @Description("""
         Дано: Персонаж юзера 1.
         Действие: Юзер 2 изменяет персонажа по id методом PUT /characters/{id}.
         Ожидается: Ошибка 403, нельзя менять чужого персонажа.
                    Никакой персонаж не был изменён.
         """)
-    void updateNotOwnedCharacter() {
+    void updateNotOwnedCharacter(UpdateCharacterRequest request) {
         // Создать персонажа
         String charName = randomUUID().toString();
         backendRemote.createCharacter(
@@ -476,9 +479,9 @@ public class CharacterTest {
 
         Response response = backendRemote.makeUpdateCharacterRequest(charRecord.get(0).getId(),
             UpdateCharacterRequest.builder()
-                .name("UPDATED" + randomUUID())
-                .age(1001)
-                .reputation(0)
+                .name(request.name())
+                .age(request.age())
+                .reputation(request.reputation())
                 .build()
             );
 
@@ -487,14 +490,15 @@ public class CharacterTest {
         assertThat(response.code()).isEqualTo(403);
     }
 
-    @Test
+    @ParameterizedTest
+    @MethodSource("updateCharacterData")
     @Description("""
         Дано: Персонаж с id.
         Действие: Изменить персонажа по id методом PUT /characters/{id} без аутентификации.
         Ожидается: Ошибка 401, юзер не аутентифицирован.
                    Никакой персонаж не был изменён.
         """)
-    void updateCharacterWithoutAuthentication() {
+    void updateCharacterWithoutAuthentication(UpdateCharacterRequest request) {
 
         String charName = randomUUID().toString();
         backendRemote.createCharacter(
@@ -512,16 +516,20 @@ public class CharacterTest {
         UUID charId = charRecord.get(0).getId();
 
         //Изменить персонажа
-        String updatedCharName = "UPDATED" + randomUUID();
         Response response = backendRemote.makeUpdateCharacterWithoutAutentication(
             charId,
             UpdateCharacterRequest.builder()
-                .name(updatedCharName)
-                .age(1000)
-                .reputation(0)
+                .name(request.name())
+                .age(request.age())
+                .reputation(request.reputation())
                 .build()
         );
 
         assertThat(response.code()).isEqualTo(401);
+    }
+
+    public static Stream<Arguments> updateCharacterData() {
+        return Stream.of(
+            Arguments.of(UpdateCharacterRequest.builder().name("UPDATED" + randomUUID()).age(100).reputation(0).build()));
     }
 }

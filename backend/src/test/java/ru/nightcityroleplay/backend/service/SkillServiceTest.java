@@ -22,14 +22,6 @@ import static org.mockito.Mockito.*;
 
 class SkillServiceTest {
 
-    //todo assertThatThrownBy(() -> yourService.yourMethodThatThrowsException())
-    //            .isInstanceOf(ResponseStatusException.class)
-    //            .hasMessage("Your expected message")
-    //            .extracting(ResponseStatusException::getStatus)
-    //            .isEqualTo(BAD_REQUEST);
-    //            .extracting(ResponseStatusException.class::cast)
-    //              .satisfies(ErrorResponseException::getStatusCode)
-
     SkillService service;
     SkillRepository skillRepo;
 

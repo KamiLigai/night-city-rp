@@ -1,5 +1,6 @@
 package ru.nightcityroleplay.backend.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -27,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
+@Slf4j
 class CharacterServiceTest {
 
     CharacterService service;
@@ -58,6 +60,7 @@ class CharacterServiceTest {
 
         // then
         assertThatThrownBy(() -> service.getCharacter(id))
+            .hasMessage("404 NOT_FOUND \"Персонаж " + id + " не найден\"")
             .isInstanceOf(ResponseStatusException.class);
     }
 
@@ -167,6 +170,9 @@ class CharacterServiceTest {
         // given
         var request = new UpdateCharacterRequest();
         UUID characterId = UUID.randomUUID();
+        request.setAge(1);
+        request.setReputation(0);
+        request.setName(randomUUID().toString());
 
         Authentication auth = mock(Authentication.class);
 
@@ -174,14 +180,19 @@ class CharacterServiceTest {
 
         // then
         assertThatThrownBy(() -> service.updateCharacter(request, characterId, auth))
+            .hasMessage("404 NOT_FOUND \"Персонаж " + characterId + " не найден\"")
             .isInstanceOf(ResponseStatusException.class);
     }
 
     @Test
-    void updateCharacterUnauthorized() {
+    void updateCharacterForbidden() {
         // given
         var request = new UpdateCharacterRequest();
         UUID characterId = UUID.randomUUID();
+
+        request.setAge(1);
+        request.setReputation(0);
+        request.setName(randomUUID().toString());
 
         var oldCharacter = new CharacterEntity();
         oldCharacter.setId(characterId);
@@ -197,6 +208,7 @@ class CharacterServiceTest {
 
         // then
         assertThatThrownBy(() -> service.updateCharacter(request, characterId, auth))
+            .hasMessage(("403 FORBIDDEN \"Изменить чужого персонажа вздумал? а ты хорош.\""))
             .isInstanceOf(ResponseStatusException.class);
     }
 

@@ -26,86 +26,6 @@ import java.util.stream.Collectors;
 
 import static ru.nightcityroleplay.backend.util.BooleanUtils.not;
 
-/*
-Дано: Пустая бд.
-Действие: Добавить персонажа методом POST /characters.
-Ожидается: Персонаж добавлен в бд.
-
-
-Дано: Пустая бд.
-Действие: Добавить персонажа методом POST /characters с некорректными данными.
-Ожидается: 400 Bad_Request.
-           Новый персонаж не создан в бд.
-
-
-Дано: Персонаж с определённым именем.
-Действие: Добавить нового персонажа с таким же именем методом POST /characters.
-Ожидается: 422 UNPROCESSABLE_ENTITY.
-           Новый персонаж не создан в бд.
-
-
-Дано: Персонаж с id.
-Действие: Удалить персонажа методом DELETE /characters/{id}.
-Ожидается: Персонаж удалён из бд.
-
-
-Дано: Персонаж 1.
-Действие: Удалить персонажа 2 методом DELETE /characters/{id}.
-Ожидается: 404 Not Found.
-           Никакой персонаж не удалён.
-
-
-Дано: Персонаж владельца 1.
-Действие: Удалить персонажа владельца 1 методом DELETE /characters/{id} от имени владельца 2.
-Ожидается: 403 Forbidden.
-           Никакой персонаж не удалён.
-
-
-Дано: Персонаж.
-Действие: Получить персонажа методом GET /characters/{id}.
-Ожидается: Получены данные персонажа
-
-
-Дано: Персонаж 1.
-Действие: Получить персонажа 2 методом GET /characters/{id}.
-Ожидается: 404 Not found.
-           Данные персонажа не получены.
-
-
-Дано: Несколько персонажей
-Действие: Получить страницу персонажей методом GET /characters.
-          Размер страницы меньше чем персонажей в бд.
-Ожидается: Получена страница данных персонажей.
-
-
-Дано: Персонаж с id.
-Действие: Изменить персонажа по id методом PUT /characters/{id}.
-Ожидается: Персонаж в бд обновлен.
-
-
-Дано: Персонаж отсутствует
-Действие: Изменить персонажа по id методом PUT /characters/{id}
-Ожидается: Ошибка 404, персонаж не найден
-
-
-Дано: Персонаж с id.
-Действие: Изменить персонажа по id методом PUT /characters/{id} с некорректными данными.
-Ожидается: 400 Bad_Request.
-           Никакой персонаж не был изменён.
-
-
-Дано: Персонаж юзера 1.
-Действие: Юзер 2 изменяет персонажа по id методом PUT /characters/{id}.
-Ожидается: Ошибка 403, нельзя менять чужого персонажа.
-           Никакой персонаж не был изменён.
-
-
-Дано: Персонаж с id.
-Действие: Изменить персонажа по id методом PUT /characters/{id} без аутентификации.
-Ожидается: Ошибка 401, юзер не аутентифицирован.
-           Никакой персонаж не был изменён.
- */
-
 @Service
 @Slf4j
 public class CharacterService {
@@ -147,15 +67,7 @@ public class CharacterService {
 
     @Transactional
     public CreateCharacterResponse createCharacter(CreateCharacterRequest request, Authentication auth) {
-        if (request.getAge() == null || request.getAge() <= 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Возраст не может быть 0 или меньше или null");
-        }
-        if (request.getReputation() == null || request.getReputation() < 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Репутация не может быть меньше 0 или null");
-        }
-        if (characterRepo.existsByName(request.getName())) {
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Персонаж с таким именем уже есть");
-        }
+        validate(request);
         CharacterEntity character = new CharacterEntity();
         Object principal = auth.getPrincipal();
         User user = (User) principal;
@@ -192,12 +104,7 @@ public class CharacterService {
 
     @Transactional
     public void updateCharacter(UpdateCharacterRequest request, UUID characterId, Authentication auth) {
-        if (request.getAge() == null || request.getAge() <= 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Возраст не может быть 0 или меньше или null");
-        }
-        if (request.getReputation() == null || request.getReputation() < 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Репутация не может быть меньше 0 или null");
-        }
+        validate(request);
         CharacterEntity newCharacter = new CharacterEntity();
         CharacterEntity oldCharacter = characterRepo.findById(characterId).orElseThrow(() ->
             new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
@@ -211,7 +118,7 @@ public class CharacterService {
         newCharacter.setOwnerId(user.getId());
         newCharacter.setName(request.getName());
         newCharacter.setAge(request.getAge());
-        newCharacter.setReputation(oldCharacter.getReputation());
+        newCharacter.setReputation(request.getReputation());
         newCharacter.setImplantPoints(oldCharacter.getImplantPoints());
         newCharacter.setSpecialImplantPoints(oldCharacter.getSpecialImplantPoints());
         newCharacter.setBattlePoints(oldCharacter.getBattlePoints());
@@ -308,5 +215,30 @@ public class CharacterService {
         }
     }
 
+    @SuppressWarnings("DuplicatedCode")
+    private void validate(CreateCharacterRequest request) {
+        if (request.getAge() == null || request.getAge() <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Возраст не может быть 0 или меньше или null");
+        }
+        if (request.getReputation() == null || request.getReputation() < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Репутация не может быть меньше 0 или null");
+        }
+        if (characterRepo.existsByName(request.getName())) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Персонаж с таким именем уже есть");
+        }
+    }
+
+    @SuppressWarnings("DuplicatedCode")
+    private void validate(UpdateCharacterRequest request) {
+        if (request.getAge() == null || request.getAge() <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Возраст не может быть 0 или меньше или null");
+        }
+        if (request.getReputation() == null || request.getReputation() < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Репутация не может быть меньше 0 или null");
+        }
+        if (characterRepo.existsByName(request.getName())) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Персонаж с таким именем уже есть");
+        }
+    }
 }
 
