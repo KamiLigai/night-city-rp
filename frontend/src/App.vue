@@ -6,9 +6,13 @@ import HeaderView from '@/views/HeaderView.vue'
 
 <template>
   <HeaderView/>
-  <RouterView />
+  <div class="content">
+    <RouterView />
+  </div>
 </template>
 
 <style scoped>
-
+.content {
+  margin: 0 16px;
+}
 </style>
