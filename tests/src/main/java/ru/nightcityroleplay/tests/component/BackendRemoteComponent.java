@@ -7,23 +7,22 @@ import ru.nightcityroleplay.tests.dto.*;
 import ru.nightcityroleplay.tests.exception.AppContextException;
 import ru.nightcityroleplay.tests.remote.BackendRemote;
 
-
-import java.awt.print.Pageable;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
-import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.fail;
 
 public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMapper) {
 
-    public void createCharacter(CreateCharacterRequest request) {
+    @SneakyThrows
+    public CreateCharacterResponse createCharacter(CreateCharacterRequest request) {
+        String jsonBody;
         try (Response response = remote.createCharacter(request)) {
             if (!response.isSuccessful()) {
                 fail("Не удалось создать персонажа " + request.name() + ", " + response);
             }
+            jsonBody = response.body().string();
         }
+        return objectMapper.readValue(jsonBody, CreateCharacterResponse.class);
     }
 
     @SneakyThrows
