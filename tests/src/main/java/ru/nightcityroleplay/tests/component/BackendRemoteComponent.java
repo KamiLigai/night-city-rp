@@ -1,5 +1,6 @@
 package ru.nightcityroleplay.tests.component;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import okhttp3.Response;
@@ -62,7 +63,7 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
         String jsonBody;
         try(Response response = remote.getCharacter(characterId)) {
             if (!response.isSuccessful()) {
-                throw new AppContextException("Персонаж не найден " + response);
+                throw new AppContextException("Не удалось получить персонажа " + response);
             }
             jsonBody = response.body().string();
         }
@@ -70,11 +71,12 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
     }
 
     @SneakyThrows
-    public PageDto getCharacterPage(Integer size) {
+    public PageDto<Object> getCharacterPage(Integer size) {
         String jsonBody;
         Response response = remote.getCharacterPage(size);
         jsonBody = response.body().string();
-        return objectMapper.readValue(jsonBody,PageDto.class);
+        return objectMapper.readValue(jsonBody, new TypeReference<>() {
+        });
     }
 
     public Response makeGetCharacterRequest(UUID characterId) { return remote.getCharacter(characterId); }

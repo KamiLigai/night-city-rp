@@ -18,8 +18,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 import static org.jooq.SQLDialect.POSTGRES;
@@ -99,7 +97,6 @@ public class AppContext {
     }
 
     private static void createOkHttp() {
-        Logger.getLogger(OkHttpClient.class.getName()).setLevel(Level.FINE);
         put(new OkHttpClient());
     }
 

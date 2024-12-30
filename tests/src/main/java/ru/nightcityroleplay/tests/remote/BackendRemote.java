@@ -12,8 +12,6 @@ import ru.nightcityroleplay.tests.dto.UpdateCharacterRequest;
 import ru.nightcityroleplay.tests.exception.AppContextException;
 import ru.nightcityroleplay.tests.exception.HttpRemoteException;
 
-import java.awt.print.PageFormat;
-import java.awt.print.Pageable;
 import java.util.UUID;
 
 import static ru.nightcityroleplay.tests.constants.HttpConstants.Headers.AUTHORIZATION;

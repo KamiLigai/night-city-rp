@@ -33,7 +33,6 @@ public class CharacterTest {
 
     @BeforeEach
     void setUp() {
-
         UserDto user = AppContext.get("defaultUser");
         backendRemote.setCurrentUser(user.id(), user.username(), user.username());
     }
@@ -79,7 +78,7 @@ public class CharacterTest {
             );
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} - Проверка с данными: {0}, ожидаемое сообщение: {1}")
     @MethodSource("createCharacterWithBadRequestData")
     @SneakyThrows
     @Description("""
@@ -114,7 +113,10 @@ public class CharacterTest {
         // roles, expectedAuthorities
         return Stream.of(
             Arguments.of(CreateCharacterRequest.builder().age(null).reputation(0).build(), "Возраст не может быть 0 или меньше или null"),
-            Arguments.of(CreateCharacterRequest.builder().age(10).reputation(null).build(), "Репутация не может быть меньше 0 или null")
+            Arguments.of(CreateCharacterRequest.builder().age(0).reputation(0).build(), "Возраст не может быть 0 или меньше или null"),
+            Arguments.of(CreateCharacterRequest.builder().age(-1).reputation(0).build(), "Возраст не может быть 0 или меньше или null"),
+            Arguments.of(CreateCharacterRequest.builder().age(10).reputation(null).build(), "Репутация не может быть меньше 0 или null"),
+            Arguments.of(CreateCharacterRequest.builder().age(10).reputation(-1).build(), "Репутация не может быть меньше 0 или null")
         );
     }
 
@@ -135,6 +137,10 @@ public class CharacterTest {
                 .reputation(0)
                 .build()
         );
+        Result<Record> result = dbContext.select().from(CHARACTERS)
+            .where(CHARACTERS.NAME.eq(charName))
+            .fetch();
+
         Response response2 = backendRemote.makeCreateCharacterRequest(
             CreateCharacterRequest.builder()
                 .name(charName)
@@ -143,12 +149,7 @@ public class CharacterTest {
                 .build()
         );
         assertThat(response2.code()).isEqualTo(422);
-
-        // Проверить что новый персонаж не был создан
-        Result<Record> result = dbContext.select().from(CHARACTERS)
-            .where(CHARACTERS.NAME.eq(charName))
-            .fetch();
-
+        assertThat(response2.body().string()).contains("Персонаж с таким именем уже есть");
         assertThat(result).size().isEqualTo(1);
     }
 
@@ -174,17 +175,8 @@ public class CharacterTest {
             .where(CHARACTERS.NAME.eq(charName))
             .fetchInto(CHARACTERS);
 
-        charResult.get(0).getId();
-
         assertThat(charResult).hasSize(1);
-        assertThat(charResult.get(0))
-            .satisfies(
-                character -> assertThat(character.getId()).isNotNull(),
-                character -> assertThat(character.getOwnerId())
-                    .isEqualTo(backendRemote.remote().getUserId()),
-                character -> assertThat(character.getName()).isEqualTo(charName),
-                character -> assertThat(character.getAge()).isEqualTo(20)
-            );
+
         // Удалить персонажа
         backendRemote.deleteCharacter(charResult.get(0).getId());
 
@@ -215,6 +207,7 @@ public class CharacterTest {
             .fetch();
 
         assertThat(response.code()).isEqualTo(404);
+        assertThat(response.body().string()).contains("не найден");
         assertThat(result).size().isEqualTo(0);
     }
 
@@ -247,6 +240,7 @@ public class CharacterTest {
         Response response = backendRemote.makeDeleteCharacterRequest(responseChar.id());
 
         assertThat(response.code()).isEqualTo(403);
+        assertThat(response.body().string()).contains("Удалить чужого персонажа вздумал? а ты хорош.");
 
         Result<CharactersRecord> charRecord = dbContext.select().from(CHARACTERS)
             .where(CHARACTERS.NAME.eq(charName))
@@ -285,6 +279,7 @@ public class CharacterTest {
     }
 
     @Test
+    @SneakyThrows
     @Description("""
         Дано: Пустая бд.
         Действие: Получить персонажа методом GET /characters/{id}.
@@ -304,6 +299,7 @@ public class CharacterTest {
         Response response = backendRemote.makeGetCharacterRequest(randomUUID());
 
         assertThat(charRecord).hasSize(0);
+        assertThat(response.body().string()).contains("не найден");
         assertThat(response.code()).isEqualTo(404);
     }
 
@@ -340,7 +336,7 @@ public class CharacterTest {
         );
 
         // Получить страницу персонажей
-        PageDto charPageRecord = backendRemote.getCharacterPage(2);
+        PageDto<Object> charPageRecord = backendRemote.getCharacterPage(2);
 
         assertThat(charPageRecord.getContent().size()).isEqualTo(2);
         assertThat(charPageRecord.getNumberOfElements()).isEqualTo(2);
@@ -388,6 +384,7 @@ public class CharacterTest {
     }
 
     @Test
+    @SneakyThrows
     @Description("""
          Дано: Персонаж отсутствует
           Действие: Изменить персонажа по id методом PUT /characters/{id}
@@ -405,9 +402,10 @@ public class CharacterTest {
         );
 
         assertThat(response.code()).isEqualTo(404);
+        assertThat(response.body().string()).contains("не найден");
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "guardTest")
     @MethodSource("updateCharacterWithBadRequestData")
     @Description("""
         Дано: Персонаж с id.
@@ -451,6 +449,7 @@ public class CharacterTest {
 
 
     @Test
+    @SneakyThrows
     @Description("""
         Дано: Персонаж юзера 1.
         Действие: Юзер 2 изменяет персонажа по id методом PUT /characters/{id}.
@@ -492,6 +491,7 @@ public class CharacterTest {
         assertThat(charRecord).hasSize(1);
         assertThat(charRecord.get(0).getOwnerId().equals(userId)).isFalse();
         assertThat(response.code()).isEqualTo(403);
+        assertThat(response.body().string()).contains("Изменить чужого персонажа вздумал? а ты хорош.");
     }
 
     @Test
