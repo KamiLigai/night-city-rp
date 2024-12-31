@@ -2,7 +2,7 @@
 
 import client from '@/Clients/Client'
 import { ref } from 'vue'
-import { CreateCharacterRequest } from '@/dto/CreateCharacterRequest'
+import { CreateCharacterRequest } from '@/dto/characters/CreateCharacterRequest'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue3-toastify'
 
@@ -21,6 +21,7 @@ function createCharacter() {
         <h1>Создать персонажа</h1>
         <input class="item" placeholder="Имя" v-model="request.name">
         <input class="item" placeholder="Возраст" type="number" v-model="request.age" />
+        <input class="item" placeholder="Репутация" type="number" v-model="request.reputation" />
         <button class="item" v-on:click="createCharacter">Создать</button>
     </div>
 </template>

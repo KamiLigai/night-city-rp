@@ -1,11 +1,12 @@
 <script setup lang="ts">
 
-import { onMounted, ref } from 'vue'
+import {onMounted, ref} from 'vue'
 import client from '@/Clients/Client'
-import { CharactersPage } from '@/dto/CharactersPage'
-import { toast } from 'vue3-toastify'
+import {toast} from 'vue3-toastify'
+import type {Page} from "@/dto/Page";
+import type {CharacterDto} from "@/dto/characters/CharacterDto";
 
-const charactersResponse = ref<CharactersPage>()
+const charactersResponse = ref<Page<CharacterDto>>()
 const page = ref(0)
 const size = ref(3)
 
@@ -40,7 +41,7 @@ onMounted(() => {
 
 <template>
     <h1>Персонажи</h1>
-    <div v-for="character in charactersResponse?.content">
+    <div v-for="character in charactersResponse?.content" :key="character.id">
         <router-link :to="{name: 'character', params: { characterId: character.id }}">{{ character.name }}</router-link>
     </div>
     <div class="buttons-container">
