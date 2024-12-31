@@ -1,5 +1,6 @@
 package ru.nightcityroleplay.backend.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -30,6 +31,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@Slf4j
 class CharacterServiceTest {
 
     CharacterService service;
@@ -60,12 +62,10 @@ class CharacterServiceTest {
         when(charRepo.findById(id))
             .thenReturn(Optional.empty());
 
-        // when
-        var result = service.getCharacter(id);
-
         // then
-        assertThat(result).isNull();
-        verify(charRepo).findById(id);
+        assertThatThrownBy(() -> service.getCharacter(id))
+            .hasMessage("404 NOT_FOUND \"Персонаж " + id + " не найден\"")
+            .isInstanceOf(ResponseStatusException.class);
     }
 
     @Test
@@ -74,6 +74,7 @@ class CharacterServiceTest {
         var request = new CreateCharacterRequest();
         request.setName("Илон");
         request.setAge(8);
+        request.setReputation(0);
 
         Authentication auth = mock();
         User user = new User();
@@ -92,7 +93,6 @@ class CharacterServiceTest {
 
         // then
         verify(charRepo).save(any());
-        verifyNoMoreInteractions(charRepo);
     }
 
 
@@ -108,6 +108,7 @@ class CharacterServiceTest {
         character.setId(charId);
         character.setName("Vasyatka");
         character.setAge(42);
+        character.setReputation(0);
         character.setWeapons(weapons);
 
         when(charRepo.findById(charId))
@@ -173,6 +174,9 @@ class CharacterServiceTest {
         // given
         var request = new UpdateCharacterRequest();
         UUID characterId = UUID.randomUUID();
+        request.setAge(1);
+        request.setReputation(0);
+        request.setName(randomUUID().toString());
 
         Authentication auth = mock(Authentication.class);
 
@@ -180,15 +184,19 @@ class CharacterServiceTest {
 
         // then
         assertThatThrownBy(() -> service.updateCharacter(request, characterId, auth))
-            .isInstanceOf(ResponseStatusException.class)
-            .hasMessageContaining("Персонаж " + characterId + " не найден");
+            .hasMessage("404 NOT_FOUND \"Персонаж " + characterId + " не найден\"")
+            .isInstanceOf(ResponseStatusException.class);
     }
 
     @Test
-    void updateCharacterUnauthorized() {
+    void updateCharacterForbidden() {
         // given
         var request = new UpdateCharacterRequest();
         UUID characterId = UUID.randomUUID();
+
+        request.setAge(1);
+        request.setReputation(0);
+        request.setName(randomUUID().toString());
 
         var oldCharacter = new CharacterEntity();
         oldCharacter.setId(characterId);
@@ -204,8 +212,8 @@ class CharacterServiceTest {
 
         // then
         assertThatThrownBy(() -> service.updateCharacter(request, characterId, auth))
-            .isInstanceOf(ResponseStatusException.class)
-            .hasMessageContaining("Изменить чужого персонажа вздумал? а ты хорош."); // Проверяем сообщение
+            .hasMessage(("403 FORBIDDEN \"Изменить чужого персонажа вздумал? а ты хорош.\""))
+            .isInstanceOf(ResponseStatusException.class);
     }
 
     @Test
@@ -296,6 +304,7 @@ class CharacterServiceTest {
         // given
         UpdateCharacterRequest request = new UpdateCharacterRequest();
         request.setAge(42);
+        request.setReputation(0);
         request.setName("test-name");
 
         UUID charId = randomUUID();

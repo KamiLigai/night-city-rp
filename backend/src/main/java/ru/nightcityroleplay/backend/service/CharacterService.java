@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 
 import static ru.nightcityroleplay.backend.util.BooleanUtils.not;
 
-
 @Service
 @Slf4j
 public class CharacterService {
@@ -79,6 +78,7 @@ public class CharacterService {
 
     @Transactional
     public CreateCharacterResponse createCharacter(CreateCharacterRequest request, Authentication auth) {
+        validate(request);
         CharacterEntity character = new CharacterEntity();
         Object principal = auth.getPrincipal();
         User user = (User) principal;
@@ -108,13 +108,14 @@ public class CharacterService {
     public CharacterDto getCharacter(UUID characterId) {
         Optional<CharacterEntity> byId = characterRepo.findById(characterId);
         if (byId.isEmpty()) {
-            return null;
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден");
         }
         return toDto(byId.get());
     }
 
     @Transactional
     public void updateCharacter(UpdateCharacterRequest request, UUID characterId, Authentication auth) {
+        validate(request);
         CharacterEntity newCharacter = new CharacterEntity();
         CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
             new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
@@ -128,7 +129,7 @@ public class CharacterService {
         newCharacter.setOwnerId(user.getId());
         newCharacter.setName(request.getName());
         newCharacter.setAge(request.getAge());
-        newCharacter.setReputation(character.getReputation());
+        newCharacter.setReputation(request.getReputation());
         newCharacter.setImplantPoints(character.getImplantPoints());
         newCharacter.setSpecialImplantPoints(character.getSpecialImplantPoints());
         newCharacter.setBattlePoints(character.getBattlePoints());
@@ -180,11 +181,10 @@ public class CharacterService {
             log.info("У персонажа нет имплантов.");
             return Collections.emptyList();
         }
-        List<ImplantDto> implantDtos = implants.stream()
+
+        return implants.stream()
             .map(this::implantDto)
             .collect(Collectors.toList());
-
-        return implantDtos;
     }
 
     @Transactional
@@ -220,6 +220,13 @@ public class CharacterService {
         if (!character.getOwnerId().equals(userid)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Нельзя добавлять оружие не своему персонажу!");
         }
+        // Найти оружие по ID
+        Weapon weapon = weaponRepo.findById(request.getWeaponId()).orElse(null);
+        if (weapon == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Оружие не найдено");
+        }
+        character.getWeapons().add(weapon);
+        characterRepo.save(character);
     }
 
     @Transactional
@@ -293,8 +300,8 @@ public class CharacterService {
 
         List<Implant> implants = character.getImplants();
         boolean hasImplant = false;
-        for (int i = 0; i < implants.size(); i++) {
-            if (implants.get(i).getId().equals(implant.getId())) {
+        for (Implant value : implants) {
+            if (value.getId().equals(implant.getId())) {
                 hasImplant = true;
                 break;
             }
@@ -307,7 +314,6 @@ public class CharacterService {
         character.setSpecialImplantPoints(character.getSpecialImplantPoints() + implant.getSpecialImplantPointsCost());
         characterRepo.save(character);
     }
-
 
     @Transactional
     public void deleteCharacterWeapon(UUID weaponId, UUID characterId, Authentication auth) {
@@ -338,4 +344,15 @@ public class CharacterService {
         }
     }
 
+    private void validate(SaveCharacterRequest request) {
+        if (request.getAge() == null || request.getAge() <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Возраст не может быть 0 или меньше или null");
+        }
+        if (request.getReputation() == null || request.getReputation() < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Репутация не может быть меньше 0 или null");
+        }
+        if (characterRepo.existsByName(request.getName())) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Персонаж с таким именем уже есть");
+        }
+    }
 }

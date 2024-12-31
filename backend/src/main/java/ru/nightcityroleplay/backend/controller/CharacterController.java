@@ -25,7 +25,7 @@ public class CharacterController {
     }
 
     @GetMapping()
-    public Page<CharacterDto> getCharacters(Pageable pageable) {
+    public Page<CharacterDto> getCharacterPage(Pageable pageable) {
         return characterService.getCharacterPage(pageable);
     }
 
