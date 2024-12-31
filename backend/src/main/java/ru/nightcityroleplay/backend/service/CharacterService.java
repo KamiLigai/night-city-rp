@@ -20,6 +20,7 @@ import ru.nightcityroleplay.backend.repo.WeaponRepository;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static ru.nightcityroleplay.backend.util.BooleanUtils.not;
 
 @Service
@@ -220,12 +221,13 @@ public class CharacterService {
         if (!character.getOwnerId().equals(userid)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Нельзя добавлять оружие не своему персонажу!");
         }
-        // Найти оружие по ID
-        Weapon weapon = weaponRepo.findById(request.getWeaponId()).orElse(null);
-        if (weapon == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Оружие не найдено");
+
+        List<Weapon> newWeapons = weaponRepo.findAllByIdIn(request.getWeaponIds());
+        if (newWeapons.size() != request.getWeaponIds().size()) {
+            throw new ResponseStatusException(NOT_FOUND, "Не удалось найти все оружие");
         }
-        character.getWeapons().add(weapon);
+        // todo: сделать проверку очков
+        character.setWeapons(newWeapons);
         characterRepo.save(character);
     }
 

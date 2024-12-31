@@ -34,6 +34,11 @@ const router = createRouter({
             component: () => import('../views/characters/CharacterView.vue')
         },
         {
+            path: '/characters/:characterId/weapons/change',
+            name: 'change-character-weapons',
+            component: () => import('../views/characters/ChangeWeaponView.vue')
+        },
+        {
             path: '/user/me',
             name: 'current-user',
             component: () => import('../views/users/CurrentUserView.vue')

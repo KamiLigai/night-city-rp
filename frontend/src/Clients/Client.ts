@@ -71,6 +71,10 @@ class Client {
         return this.axiosClient.get('/characters/' + id)
     }
 
+    updateCharacterWeapons(characterId: string, weaponIds: string[]) {
+        return this.axiosClient.put('characters/' + characterId + '/weapons', {weaponIds})
+    }
+
     getImplants(page: number, size: number): Promise<AxiosResponse<Page<ImplantDto>>> {
         return this.axiosClient.get('/implants', {
             params: {page, size}
@@ -111,6 +115,14 @@ class Client {
 
     getWeapon(id: string): Promise<AxiosResponse<WeaponDto>> {
         return this.axiosClient.get('/weapons/' + id)
+    }
+
+    getWeaponIds(): Promise<AxiosResponse<string[]>> {
+        return this.axiosClient.get('/weapons/ids')
+    }
+
+    getWeaponsBulk(weaponIds: string[]): Promise<AxiosResponse<WeaponDto[]>> {
+        return this.axiosClient.post('/weapons/get-bulk', {ids: weaponIds})
     }
 }
 

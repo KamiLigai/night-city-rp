@@ -15,7 +15,7 @@ const user: Ref<UserDto | null> = computed(() => userStore.user)
 
 function logout() {
   client.logout()
-  router.push({name: "login"})
+  router.push({name: "login", force: true})
 }
 
 </script>
