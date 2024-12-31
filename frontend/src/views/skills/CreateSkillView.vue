@@ -11,7 +11,7 @@ const request = ref<CreateSkillRequest>(new CreateSkillRequest())
 
 function createSkill() {
   client.createSkill(request.value!)
-      .then(response => router.push({name: 'skill', params: {skillId: response.data.id}}))
+      .then(response => router.push({name: 'skill', force: true, params: {skillId: response.data.id}}))
       .catch(() => toast('Не удалось создать навык', {type: toast.TYPE.ERROR}))
 }
 </script>

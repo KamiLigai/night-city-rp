@@ -11,7 +11,7 @@ const request = ref<CreateCharacterRequest>(new CreateCharacterRequest())
 
 function createCharacter() {
     client.createCharacter(request.value!)
-        .then(response => router.push({ name: 'character', params: { characterId: response.data.id } }))
+        .then(response => router.push({ name: 'character', force: true, params: { characterId: response.data.id } }))
         .catch(() => toast('Не удалось создать персонажа', { type: toast.TYPE.ERROR }))
 }
 </script>
