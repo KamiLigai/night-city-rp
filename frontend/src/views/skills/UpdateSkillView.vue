@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 import client from '@/Clients/Client'
-import {computed, ref} from 'vue'
+import {computed, onMounted, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import {toast} from 'vue3-toastify'
 import {UpdateSkillRequest} from "@/dto/skills/UpdateSkillRequest";
@@ -11,6 +11,18 @@ const router = useRouter()
 const request = ref<UpdateSkillRequest>(new UpdateSkillRequest())
 
 const skillId = computed(() => route.params.skillId as string)
+
+onMounted(() => {
+  loadSkill()
+})
+
+function loadSkill() {
+  client.getSkill(skillId.value)
+      .then(response => {
+        request.value.name = response.data.name
+        request.value.description = response.data.description
+      }).catch(() => toast('Не удалось загрузить навык', {type: toast.TYPE.ERROR}))
+}
 
 function updateSkill() {
   client.updateSkill(skillId.value, request.value!)

@@ -19,7 +19,7 @@ onMounted(() => {
 })
 
 function goToUpdateImplant() {
-  router.push({name: 'update-implant', params: {characterId: implantId.value}})
+  router.push({name: 'update-implant', params: {implantId: implantId.value}})
 }
 </script>
 
