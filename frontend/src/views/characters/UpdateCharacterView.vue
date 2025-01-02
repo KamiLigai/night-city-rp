@@ -1,44 +1,49 @@
 <script setup lang="ts">
 
 import client from '@/Clients/Client'
-import { ref } from 'vue'
-import { CreateCharacterRequest } from '@/dto/characters/CreateCharacterRequest'
-import { useRouter } from 'vue-router'
-import { toast } from 'vue3-toastify'
+import {computed, ref} from 'vue'
+import {UpdateCharacterRequest} from '@/dto/characters/UpdateCharacterRequest'
+import {useRoute, useRouter} from 'vue-router'
+import {toast} from 'vue3-toastify'
 
+const route = useRoute()
 const router = useRouter()
-const request = ref<CreateCharacterRequest>(new CreateCharacterRequest())
+const request = ref<UpdateCharacterRequest>(new UpdateCharacterRequest())
 
-function createCharacter() {
-    client.createCharacter(request.value!)
-        .then(response => router.push({ name: 'character', params: { characterId: response.data.id } }))
-        .catch(() => toast('Не удалось создать персонажа', { type: toast.TYPE.ERROR }))
+const characterId = computed(() => route.params.characterId as string)
+
+function updateCharacter() {
+  client.updateCharacter(characterId.value, request.value!)
+      .then(() => router.push({name: 'character', params: {characterId: characterId.value}})
+          .then(() => toast('Персонаж изменен', {type: toast.TYPE.SUCCESS}))
+      ).catch(() => toast('Не удалось изменить персонажа', {type: toast.TYPE.ERROR}))
 }
 </script>
 
 <template>
-    <div class="container">
-        <h1>Создать персонажа</h1>
-        <input class="item" placeholder="Имя" v-model="request.name">
-        <input class="item" placeholder="Возраст" type="number" v-model="request.age" />
-        <input class="item" placeholder="Репутация" type="number" v-model="request.reputation" />
-        <button class="item" v-on:click="createCharacter">Создать</button>
-    </div>
+  <div class="container">
+    <h1>Обновить персонажа</h1>
+    <input class="item" placeholder="Имя" v-model="request.name">
+    <input class="item" placeholder="Возраст" type="number" v-model="request.age"/>
+    <input class="item" placeholder="Репутация" type="number" v-model="request.reputation"/>
+    <button class="item" v-on:click="updateCharacter">Сохранить</button>
+  </div>
 </template>
 
 <style scoped>
 .container {
-    display: flex;
-    flex-direction: column;
-    align-items: center
+  display: flex;
+  flex-direction: column;
+  align-items: center
 }
+
 .container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .item {
-    margin: 4px;
+  margin: 4px;
 }
 </style>

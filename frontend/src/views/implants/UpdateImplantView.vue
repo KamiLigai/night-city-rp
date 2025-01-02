@@ -1,25 +1,28 @@
 <script setup lang="ts">
 
 import client from '@/Clients/Client'
-import {ref} from 'vue'
-import {useRouter} from 'vue-router'
+import {computed, ref} from 'vue'
+import {useRoute, useRouter} from 'vue-router'
 import {toast} from 'vue3-toastify'
-import {CreateImplantRequest} from "@/dto/implants/CreateImplantRequest";
+import {UpdateImplantRequest} from "@/dto/implants/UpdateImplantRequest";
 
+const route = useRoute()
 const router = useRouter()
-const request = ref<CreateImplantRequest>(new CreateImplantRequest())
+const request = ref<UpdateImplantRequest>(new UpdateImplantRequest())
 
-function createImplant() {
-  client.createImplant(request.value!)
-      .then(response => router.push({name: 'implant', params: {implantId: response.data.id}})
-          .then(() => toast('Новый имплант создан', {type: toast.TYPE.SUCCESS}))
-      ).catch(() => toast('Не удалось создать имплант', {type: toast.TYPE.ERROR}))
+const implantId = computed(() => route.params.implantId as string)
+
+function updateImplant() {
+  client.updateImplant(implantId.value, request.value!)
+      .then(() => router.push({name: 'implant', params: {implantId: implantId.value}})
+          .then(() => toast('Имплант изменен', {type: toast.TYPE.SUCCESS}))
+      ).catch(() => toast('Не удалось изменить имплант', {type: toast.TYPE.ERROR}))
 }
 </script>
 
 <template>
   <div class="container">
-    <h1>Создать имплант</h1>
+    <h1>Изменить имплант</h1>
     <input class="item" placeholder="Название" v-model="request.name">
     <input class="item" placeholder="Тип" v-model="request.implantType"/>
     <input class="item" placeholder="Описание" v-model="request.description"/>
@@ -27,7 +30,7 @@ function createImplant() {
     <input class="item" placeholder="Стоимость в очках имплантов" type="number" v-model="request.implantPointsCost"/>
     <input class="item" placeholder="Стоимость в специальных очках имплантов" type="number"
            v-model="request.specialImplantPointsCost"/>
-    <button class="item" v-on:click="createImplant">Создать</button>
+    <button class="item" v-on:click="updateImplant">Сохранить</button>
   </div>
 </template>
 

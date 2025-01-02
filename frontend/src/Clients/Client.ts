@@ -16,6 +16,10 @@ import type {CreateSkillResponse} from "@/dto/skills/CreateSkillResponse";
 import type {WeaponDto} from "@/dto/weapons/WeaponDto";
 import type {CreateWeaponRequest} from "@/dto/weapons/CreateWeaponRequest";
 import type {CreateWeaponResponse} from "@/dto/weapons/CreateWeaponResponse";
+import type {UpdateCharacterRequest} from "@/dto/characters/UpdateCharacterRequest";
+import type {UpdateImplantRequest} from "@/dto/implants/UpdateImplantRequest";
+import type {UpdateSkillRequest} from "@/dto/skills/UpdateSkillRequest";
+import type {UpdateWeaponRequest} from "@/dto/weapons/UpdateWeaponRequest";
 
 // todo: make useUserStore() lazy loading field
 class Client {
@@ -47,12 +51,12 @@ class Client {
         return this.axiosClient.get<UserDto>('/users/me')
     }
 
-    logout() {
+    logout(): void {
         useUserStore().clearUser()
         this.axiosClient.defaults.headers.common['Authorization'] = null
     }
 
-    createUser(username: string, password: string) {
+    createUser(username: string, password: string): Promise<AxiosResponse> {
         const createUserRequest: CreateUserRequest = {username, password}
         return this.axiosClient.post('/users', createUserRequest)
     }
@@ -67,11 +71,15 @@ class Client {
         return this.axiosClient.post('/characters', request)
     }
 
+    updateCharacter(id: string, request: UpdateCharacterRequest): Promise<AxiosResponse> {
+        return this.axiosClient.put('/characters/' + id, request)
+    }
+
     getCharacter(id: string): Promise<AxiosResponse<CharacterDto>> {
         return this.axiosClient.get('/characters/' + id)
     }
 
-    updateCharacterWeapons(characterId: string, weaponIds: string[]) {
+    updateCharacterWeapons(characterId: string, weaponIds: string[]): Promise<AxiosResponse> {
         return this.axiosClient.put('characters/' + characterId + '/weapons', {weaponIds})
     }
 
@@ -83,6 +91,11 @@ class Client {
 
     createImplant(request: CreateImplantRequest): Promise<AxiosResponse<CreateImplantResponse>> {
         return this.axiosClient.post('/implants', request)
+    }
+
+
+    updateImplant(id: string, request: UpdateImplantRequest): Promise<AxiosResponse> {
+        return this.axiosClient.put('/implants/' + id, request)
     }
 
     getImplant(id: string): Promise<AxiosResponse<ImplantDto>> {
@@ -99,6 +112,10 @@ class Client {
         return this.axiosClient.post('/skills', request)
     }
 
+    updateSkill(id: string, request: UpdateSkillRequest): Promise<AxiosResponse> {
+        return this.axiosClient.put('/skills/' + id, request)
+    }
+
     getSkill(id: string): Promise<AxiosResponse<SkillDto>> {
         return this.axiosClient.get('/skills/' + id)
     }
@@ -111,6 +128,10 @@ class Client {
 
     createWeapon(request: CreateWeaponRequest): Promise<AxiosResponse<CreateWeaponResponse>> {
         return this.axiosClient.post('/weapons', request)
+    }
+
+    updateWeapon(id: string, request: UpdateWeaponRequest): Promise<AxiosResponse> {
+        return this.axiosClient.put('/weapons/' + id, request)
     }
 
     getWeapon(id: string): Promise<AxiosResponse<WeaponDto>> {
