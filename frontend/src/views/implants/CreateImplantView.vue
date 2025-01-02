@@ -11,7 +11,7 @@ const request = ref<CreateImplantRequest>(new CreateImplantRequest())
 
 function createImplant() {
   client.createImplant(request.value!)
-      .then(response => router.push({name: 'implant', force: true, params: {implantId: response.data.id}}))
+      .then(response => router.push({name: 'implant', params: {implantId: response.data.id}}))
       .catch(() => toast('Не удалось создать имплант', {type: toast.TYPE.ERROR}))
 }
 </script>

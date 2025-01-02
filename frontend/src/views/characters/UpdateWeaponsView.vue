@@ -52,7 +52,7 @@ function unassignWeapon(weaponId: string) {
 
 function saveWeapons() {
   client.updateCharacterWeapons(characterId.value, assignedWeapons.value)
-      .then(() => router.push({name: 'character', force: true, params: {characterId: characterId.value}})
+      .then(() => router.push({name: 'character', params: {characterId: characterId.value}})
           .then(() => toast('Оружие обновлено', {type: toast.TYPE.SUCCESS}))
       ).catch(() => toast('Ошибка сохранения оружия', {type: toast.TYPE.ERROR}))
 }
@@ -62,7 +62,7 @@ function resetWeapons() {
 }
 
 function goToCharacter() {
-  router.push({name: 'character', force: true, params: {characterId: characterId.value}})
+  router.push({name: 'character', params: {characterId: characterId.value}})
 }
 
 function toWeaponLabel(weaponId: string) {
@@ -89,9 +89,9 @@ function loadWeapons() {
   <button v-on:click="goToCharacter">К персонажу</button>
   <h2>Прочее оружие</h2>
   <ul>
-    <li v-for="weapon in notAssignedWeapons" :key="weapon" >
-      {{ toWeaponLabel(weapon) }}
-      <button v-on:click="assignWeapon(weapon)" class="close-button">X</button>
+    <li v-for="weaponId in notAssignedWeapons" :key="weaponId" >
+      <router-link :to="{name: 'weapon', params: { weaponId: weaponId }}">{{ toWeaponLabel(weaponId) }}</router-link>
+      <button v-on:click="assignWeapon(weaponId)" class="close-button">+</button>
     </li>
   </ul>
 </template>

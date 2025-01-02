@@ -15,7 +15,7 @@ onMounted(() => {
 
 function createWeapon() {
   client.createWeapon(request.value!)
-      .then(response => router.push({name: 'weapon', force: true, params: {weaponId: response.data.id}}))
+      .then(response => router.push({name: 'weapon', params: {weaponId: response.data.id}}))
       .catch(() => toast('Не удалось создать оружие', {type: toast.TYPE.ERROR}))
 }
 </script>

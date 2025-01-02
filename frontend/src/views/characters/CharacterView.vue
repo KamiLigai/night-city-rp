@@ -44,10 +44,12 @@ function toWeaponLabel(weaponId: string) {
   <p>Мирные Очки Навыков: {{ character?.civilPoints }}</p>
   <div>
     <p>
-      <router-link :to="{name: 'change-character-weapons', params: { characterId: charId }}">Оружие:</router-link>
+      <router-link :to="{name: 'update-character-weapons', params: { characterId: charId }}">Оружие:</router-link>
     </p>
     <ul>
-      <li v-for="weaponId in character?.weaponIds" :key="weaponId">{{ toWeaponLabel(weaponId)}}</li>
+      <li v-for="weaponId in character?.weaponIds" :key="weaponId">
+        <router-link :to="{name: 'weapon', params: { weaponId: weaponId }}">{{ toWeaponLabel(weaponId) }}</router-link>
+      </li>
     </ul>
   </div>
 </template>
