@@ -14,7 +14,19 @@ const weaponId = computed(() => route.params.weaponId as string)
 
 onMounted(() => {
   request.value.isMelee = false
+  loadWeapon()
 })
+
+function loadWeapon() {
+  client.getWeapon(weaponId.value)
+      .then(response => {
+        request.value.name = response.data.name
+        request.value.isMelee = response.data.isMelee
+        request.value.weaponType = response.data.weaponType
+        request.value.penetration = response.data.penetration
+        request.value.reputationRequirement = response.data.reputationRequirement
+      }).catch(() => toast('Не удалось загрузить оружие', {type: toast.TYPE.ERROR}))
+}
 
 function updateWeapon() {
   client.updateWeapon(weaponId.value, request.value!)

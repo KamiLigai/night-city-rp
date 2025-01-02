@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 import client from '@/Clients/Client'
-import {computed, ref} from 'vue'
+import {computed, onMounted, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import {toast} from 'vue3-toastify'
 import {UpdateImplantRequest} from "@/dto/implants/UpdateImplantRequest";
@@ -11,6 +11,22 @@ const router = useRouter()
 const request = ref<UpdateImplantRequest>(new UpdateImplantRequest())
 
 const implantId = computed(() => route.params.implantId as string)
+
+onMounted(() => {
+  loadImplant()
+})
+
+function loadImplant() {
+  client.getImplant(implantId.value)
+      .then(response => {
+        request.value.name = response.data.name
+        request.value.implantType = response.data.implantType
+        request.value.description = response.data.description
+        request.value.reputationRequirement = response.data.reputationRequirement
+        request.value.implantPointsCost = response.data.implantPointsCost
+        request.value.specialImplantPointsCost = response.data.specialImplantPointsCost
+      }).catch(() => toast('Не удалось загрузить имплант', {type: toast.TYPE.ERROR}))
+}
 
 function updateImplant() {
   client.updateImplant(implantId.value, request.value!)
