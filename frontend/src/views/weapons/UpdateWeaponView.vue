@@ -1,29 +1,32 @@
 <script setup lang="ts">
 
 import client from '@/Clients/Client'
-import {onMounted, ref} from 'vue'
-import {useRouter} from 'vue-router'
+import {computed, onMounted, ref} from 'vue'
+import {useRoute, useRouter} from 'vue-router'
 import {toast} from 'vue3-toastify'
-import {CreateWeaponRequest} from "@/dto/weapons/CreateWeaponRequest";
+import {UpdateWeaponRequest} from "@/dto/weapons/UpdateWeaponRequest";
 
+const route = useRoute()
 const router = useRouter()
-const request = ref<CreateWeaponRequest>(new CreateWeaponRequest())
+const request = ref<UpdateWeaponRequest>(new UpdateWeaponRequest())
+
+const weaponId = computed(() => route.params.weaponId as string)
 
 onMounted(() => {
   request.value.isMelee = false
 })
 
-function createWeapon() {
-  client.createWeapon(request.value!)
-      .then(response => router.push({name: 'weapon', params: {weaponId: response.data.id}})
-          .then(() => toast('Новое оружие создано', {type: toast.TYPE.SUCCESS}))
-      ).catch(() => toast('Не удалось создать оружие', {type: toast.TYPE.ERROR}))
+function updateWeapon() {
+  client.updateWeapon(weaponId.value, request.value!)
+      .then(() => router.push({name: 'weapon', params: {weaponId: weaponId.value}})
+          .then(() => toast('Оружие изменено', {type: toast.TYPE.SUCCESS}))
+      ).catch(() => toast('Не удалось изменить оружие', {type: toast.TYPE.ERROR}))
 }
 </script>
 
 <template>
   <div class="container">
-    <h1>Создать оружие</h1>
+    <h1>Изменить оружие</h1>
     <input class="item" placeholder="Название" v-model="request.name">
     <div>
       <label>Холодное оружие: </label>
@@ -32,7 +35,7 @@ function createWeapon() {
     <input class="item" placeholder="Тип" v-model="request.weaponType"/>
     <input class="item" placeholder="Пробитие" type="number" v-model="request.penetration"/>
     <input class="item" placeholder="Требуемая репутация" type="number" v-model="request.reputationRequirement"/>
-    <button class="item" v-on:click="createWeapon">Создать</button>
+    <button class="item" v-on:click="updateWeapon">Сохранить</button>
   </div>
 </template>
 

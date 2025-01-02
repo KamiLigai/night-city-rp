@@ -15,7 +15,7 @@ onMounted(() => {
 
 function login() {
     client.login(username.value!, password.value!)
-        .then(() => router.push({ name: 'home', force: true }))
+        .then(() => router.push({ name: 'home' }))
         .catch(() => toast('Не удалось войти', { type: toast.TYPE.ERROR }))
 }
 

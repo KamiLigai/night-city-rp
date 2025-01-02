@@ -29,14 +29,19 @@ const router = createRouter({
             component: () => import('../views/characters/CreateCharacterView.vue')
         },
         {
+            path: '/characters/:characterId/update',
+            name: 'update-character',
+            component: () => import('../views/characters/UpdateCharacterView.vue')
+        },
+        {
             path: '/characters/:characterId',
             name: 'character',
             component: () => import('../views/characters/CharacterView.vue')
         },
         {
-            path: '/characters/:characterId/weapons/change',
-            name: 'change-character-weapons',
-            component: () => import('../views/characters/ChangeWeaponView.vue')
+            path: '/characters/:characterId/weapons/update',
+            name: 'update-character-weapons',
+            component: () => import('../views/characters/UpdateWeaponsView.vue')
         },
         {
             path: '/user/me',
@@ -59,6 +64,11 @@ const router = createRouter({
             component: () => import('../views/implants/ImplantView.vue')
         },
         {
+            path: '/implants/:implantId/update',
+            name: 'update-implant',
+            component: () => import('../views/implants/UpdateImplantView.vue')
+        },
+        {
             path: '/skills',
             name: 'skills',
             component: () => import('../views/skills/SkillsView.vue')
@@ -74,6 +84,11 @@ const router = createRouter({
             component: () => import('../views/skills/SkillView.vue')
         },
         {
+            path: '/skills/:skillId/update',
+            name: 'update-skill',
+            component: () => import('../views/skills/UpdateSkillView.vue')
+        },
+        {
             path: '/weapons',
             name: 'weapons',
             component: () => import('../views/weapons/WeaponsView.vue')
@@ -87,6 +102,11 @@ const router = createRouter({
             path: '/weapons/:weaponId',
             name: 'weapon',
             component: () => import('../views/weapons/WeaponView.vue')
+        },
+        {
+            path: '/weapons/:weaponId/update',
+            name: 'update-weapon',
+            component: () => import('../views/weapons/UpdateWeaponView.vue')
         },
     ]
 })

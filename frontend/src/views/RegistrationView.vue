@@ -11,7 +11,7 @@ const usernameInput = ref<HTMLInputElement>()
 
 function register(): void {
   client.createUser(username.value!, password.value!)
-      .then(() => router.push({name: 'login', force: true})
+      .then(() => router.push({name: 'login'})
           .then(() => toast('Новый юзер создан', {type: toast.TYPE.SUCCESS}))
       ).catch(() => toast('Не удалось зарегистрироваться', {type: toast.TYPE.ERROR}))
 }

@@ -6,15 +6,16 @@ import client from '@/Clients/Client'
 import {useRoute} from 'vue-router'
 import {toast} from 'vue3-toastify'
 import {WeaponDto} from "@/dto/weapons/WeaponDto";
+import router from "@/router";
 
 const route = useRoute()
 const character = ref<CharacterDto>()
 const weapons = ref<WeaponDto[]>()
 
-const charId = computed(() => route.params.characterId as string)
+const characterId = computed(() => route.params.characterId as string)
 
 onMounted(() => {
-  client.getCharacter(charId.value)
+  client.getCharacter(characterId.value)
       .then(response => character.value = response.data)
       .catch(() => toast('Ошибка запроса персонажа', {type: toast.TYPE.ERROR}))
 })
@@ -30,6 +31,10 @@ function loadWeapons() {
 function toWeaponLabel(weaponId: string) {
   return (weapons.value ?? []).find(weapon => weapon.id == weaponId)?.name ?? "-"
 }
+
+function goToUpdateCharacter() {
+  router.push({name: 'update-character', params: {characterId: characterId.value}})
+}
 </script>
 
 <template>
@@ -44,12 +49,15 @@ function toWeaponLabel(weaponId: string) {
   <p>Мирные Очки Навыков: {{ character?.civilPoints }}</p>
   <div>
     <p>
-      <router-link :to="{name: 'change-character-weapons', params: { characterId: charId }}">Оружие:</router-link>
+      <router-link :to="{name: 'update-character-weapons', params: { characterId: characterId }}">Оружие:</router-link>
     </p>
     <ul>
-      <li v-for="weaponId in character?.weaponIds" :key="weaponId">{{ toWeaponLabel(weaponId)}}</li>
+      <li v-for="weaponId in character?.weaponIds" :key="weaponId">
+        <router-link :to="{name: 'weapon', params: { weaponId: weaponId }}">{{ toWeaponLabel(weaponId) }}</router-link>
+      </li>
     </ul>
   </div>
+  <button v-on:click="goToUpdateCharacter">Изменить</button>
 </template>
 
 <style scoped>
