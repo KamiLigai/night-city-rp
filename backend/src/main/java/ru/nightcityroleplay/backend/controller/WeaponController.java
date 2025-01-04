@@ -8,10 +8,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import ru.nightcityroleplay.backend.dto.CreateWeaponRequest;
 import ru.nightcityroleplay.backend.dto.CreateWeaponResponse;
+import ru.nightcityroleplay.backend.dto.IdsRequest;
 import ru.nightcityroleplay.backend.dto.UpdateWeaponRequest;
 import ru.nightcityroleplay.backend.dto.WeaponDto;
 import ru.nightcityroleplay.backend.service.WeaponService;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -30,13 +32,23 @@ public class WeaponController {
     }
 
     @GetMapping
-    public Page<WeaponDto> getWeaponPage(Pageable pageble) {
-        return weaponService.getWeaponPage(pageble);
+    public Page<WeaponDto> getWeaponPage(Pageable pageable) {
+        return weaponService.getWeaponPage(pageable);
     }
 
     @GetMapping("{weaponId}")
     public WeaponDto getWeapon(@PathVariable UUID weaponId) {
         return weaponService.getWeapon(weaponId);
+    }
+
+    @GetMapping("ids")
+    public List<UUID> getWeaponIds() {
+        return weaponService.getWeaponIds();
+    }
+
+    @PostMapping("get-bulk")
+    public List<WeaponDto> getWeaponsBulk(@RequestBody IdsRequest request) {
+        return weaponService.getWeaponsBulk(request);
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")

@@ -1,5 +1,8 @@
 package ru.nightcityroleplay.tests.component;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import okhttp3.Response;
@@ -13,18 +16,22 @@ import static org.assertj.core.api.Assertions.fail;
 
 public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMapper) {
 
-    public void createCharacter(CreateCharacterRequest request) {
+    @SneakyThrows
+    public CreateCharacterResponse createCharacter(CreateCharacterRequest request) {
+        String jsonBody;
         try (Response response = remote.createCharacter(request)) {
             if (!response.isSuccessful()) {
                 fail("Не удалось создать персонажа " + request.name() + ", " + response);
             }
+            jsonBody = response.body().string();
         }
+        return objectMapper.readValue(jsonBody, CreateCharacterResponse.class);
     }
 
     @SneakyThrows
     public UserDto createUser(String username, String password) {
         String jsonBody;
-        try (Response response = remote.createUser(new CreateUserRequest(username, password))) {
+        try(Response response = remote.createUser(new CreateUserRequest(username, password))) {
             if (!response.isSuccessful()) {
                 throw new AppContextException("Тестовый пользователь не создан: " + response);
             }
@@ -34,7 +41,7 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
     }
 
     public void setCurrentUser(UUID id, String username, String password) {
-        remote.setCurrentUser(id, username, password);
+        remote.setCurrentUser(id,username,password);
     }
 
     public Response makeCreateCharacterRequest(CreateCharacterRequest request) {
@@ -56,9 +63,9 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
     @SneakyThrows
     public CharacterDto getCharacter(UUID characterId) {
         String jsonBody;
-        try (Response response = remote.getCharacter(characterId)) {
+        try(Response response = remote.getCharacter(characterId)) {
             if (!response.isSuccessful()) {
-                throw new AppContextException("Персонаж не найден " + response);
+                throw new AppContextException("Не удалось получить персонажа " + response);
             }
             jsonBody = response.body().string();
         }
@@ -66,16 +73,15 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
     }
 
     @SneakyThrows
-    public PageDto getCharacterPage(Integer size) {
+    public PageDto<Object> getCharacterPage(Integer size) {
         String jsonBody;
         Response response = remote.getCharacterPage(size);
         jsonBody = response.body().string();
-        return objectMapper.readValue(jsonBody, PageDto.class);
+        return objectMapper.readValue(jsonBody, new TypeReference<>() {
+        });
     }
 
-    public Response makeGetCharacterRequest(UUID characterId) {
-        return remote.getCharacter(characterId);
-    }
+    public Response makeGetCharacterRequest(UUID characterId) { return remote.getCharacter(characterId); }
 
     public void updateCharacter(UUID characterId, UpdateCharacterRequest request) {
         try (Response response = remote.updateCharacter(characterId, request)) {
@@ -92,20 +98,6 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
     public Response makeUpdateCharacterWithoutAutentication(UUID characterId, UpdateCharacterRequest request) {
         return remote.updateCharacterWithoutAutentication(characterId, request);
     }
-
-
-    public void createWeapon(CreateWeaponRequest request) {
-        try (Response response = remote.createWeapon(request)) {
-            if (!response.isSuccessful()) {
-                fail("Не удалось создать Оружие " + request.name() + ", " + response);
-            }
-        }
-    }
-
-    public Response makeCreateWeaponRequest(CreateWeaponRequest request) {
-        return remote.createWeapon(request);
-    }
-
     @SneakyThrows
     public WeaponDto getWeapon(UUID weaponId) {
         String jsonBody;
@@ -142,5 +134,4 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
     public Response makeDeleteWeaponRequest(UUID weaponid) {
         return remote.deleteWeapon(weaponid);
     }
-
 }

@@ -85,6 +85,17 @@ public class BackendRemote {
     }
 
     @SneakyThrows
+    public Response getCharacter(UUID characterId) {
+        Request httpRequest = new Request.Builder()
+            .url(baseUrl + "characters/" + characterId)
+            .get()
+            .header(AUTHORIZATION, getBasicAuthorization(username, password))
+            .build();
+        Call call = client.newCall(httpRequest);
+        return call.execute();
+    }
+
+    @SneakyThrows
     public Response getCharacterPage(Integer size) {
         Request httpRequest = new Request.Builder()
             .url(baseUrl + "characters" + "?size=" + size)
@@ -123,16 +134,6 @@ public class BackendRemote {
         Request httpRequest = new Request.Builder()
             .url(baseUrl + "characters/" + characterId)
             .delete()
-            .header(AUTHORIZATION, getBasicAuthorization(username, password))
-            .build();
-        Call call = client.newCall(httpRequest);
-        return call.execute();
-    }
-    @SneakyThrows
-    public Response getCharacter(UUID characterId) {
-        Request httpRequest = new Request.Builder()
-            .url(baseUrl + "characters/" + characterId)
-            .get()
             .header(AUTHORIZATION, getBasicAuthorization(username, password))
             .build();
         Call call = client.newCall(httpRequest);

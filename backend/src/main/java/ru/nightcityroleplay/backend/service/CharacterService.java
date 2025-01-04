@@ -20,6 +20,7 @@ import ru.nightcityroleplay.backend.repo.WeaponRepository;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static ru.nightcityroleplay.backend.util.BooleanUtils.not;
 
 @Service

@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import ru.nightcityroleplay.backend.dto.CreateWeaponRequest;
 import ru.nightcityroleplay.backend.dto.CreateWeaponResponse;
+import ru.nightcityroleplay.backend.dto.IdsRequest;
 import ru.nightcityroleplay.backend.dto.UpdateWeaponRequest;
 import ru.nightcityroleplay.backend.dto.WeaponDto;
 import ru.nightcityroleplay.backend.entity.Weapon;
@@ -138,5 +139,17 @@ public class WeaponService {
             log.info("Не удалось удалить оружие с ID {}: связано с характеристиками", weaponId);
             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Запрещено удаление оружия, так как оно связано с характеристиками!");
         }
+    }
+
+    @Transactional(readOnly = true)
+    public List<UUID> getWeaponIds() {
+        return weaponRepo.findAllWeaponIds();
+    }
+
+    @Transactional(readOnly = true)
+    public List<WeaponDto> getWeaponsBulk(IdsRequest request) {
+        return weaponRepo.findAllByIdIn(request.getIds())
+            .stream().map(this::toDto)
+            .toList();
     }
 }

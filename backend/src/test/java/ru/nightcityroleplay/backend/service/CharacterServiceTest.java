@@ -380,11 +380,11 @@ class CharacterServiceTest {
     void putCharacterWeapon_CharacterNotFound() {
         //given
         UUID characterId = randomUUID();
-        UUID wheaponId = randomUUID();
+        UUID weaponId = randomUUID();
         Authentication auth = mock(Authentication.class);
         when(charRepo.findById(characterId)).thenReturn(Optional.empty());
         UpdateCharacterWeaponRequest request = new UpdateCharacterWeaponRequest();
-        request.setWeaponId(wheaponId);
+        request.setWeaponIds(List.of(weaponId));
 
         //when
         Call call = () -> service.putCharacterWeapon(request, characterId, auth);

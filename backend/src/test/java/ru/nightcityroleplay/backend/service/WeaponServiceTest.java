@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.server.ResponseStatusException;
 import ru.nightcityroleplay.backend.dto.CreateWeaponRequest;
+import ru.nightcityroleplay.backend.dto.IdsRequest;
 import ru.nightcityroleplay.backend.dto.UpdateWeaponRequest;
 import ru.nightcityroleplay.backend.dto.WeaponDto;
 import ru.nightcityroleplay.backend.entity.CharacterEntity;
@@ -19,6 +20,7 @@ import ru.nightcityroleplay.backend.repo.WeaponRepository;
 
 import java.util.*;
 
+import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -100,7 +102,7 @@ public class WeaponServiceTest {
     @Test
     void getWeapon_ShouldReturnWeaponDto_WhenWeaponExists() {
         // given
-        UUID weaponId = UUID.randomUUID();
+        UUID weaponId = randomUUID();
         Weapon weaponEntity = new Weapon();
         weaponEntity.setId(weaponId);
         weaponEntity.setName("test-name");
@@ -127,7 +129,7 @@ public class WeaponServiceTest {
     @Test
     void updateWeapon_ShouldUpdateWeapon_WhenWeaponExists() {
         // given
-        UUID weaponId = UUID.randomUUID();
+        UUID weaponId = randomUUID();
         UpdateWeaponRequest request = new UpdateWeaponRequest();
         request.setName("updated-name");
         request.setIsMelee(false);
@@ -159,7 +161,7 @@ public class WeaponServiceTest {
     @Test
     void updateWeapon_ShouldThrowException_WhenWeaponDoesNotExist() {
         // given
-        UUID nonExistentWeaponId = UUID.randomUUID(); // создаем UUID, для которого оружие не будет найдено
+        UUID nonExistentWeaponId = randomUUID(); // создаем UUID, для которого оружие не будет найдено
         UpdateWeaponRequest request = new UpdateWeaponRequest();
         request.setName("some-name");
 
@@ -175,7 +177,7 @@ public class WeaponServiceTest {
     @Test
     void deleteWeapon_ShouldThrowNotFound_WhenWeaponNotExist() {
         // given
-        UUID nonexistentWeaponId = UUID.randomUUID();
+        UUID nonexistentWeaponId = randomUUID();
         when(repo.findById(nonexistentWeaponId)).thenReturn(Optional.empty());
 
         // when & then
@@ -193,7 +195,7 @@ public class WeaponServiceTest {
     @Test
     void deleteWeapon_ShouldDeleteWeapon_WhenWeaponHasNoChars() {
         // given
-        UUID weaponId = UUID.randomUUID();
+        UUID weaponId = randomUUID();
         Weapon weapon = new Weapon();
         weapon.setCharacters(Collections.emptyList()); // Оружие без характеристик
 
@@ -210,7 +212,7 @@ public class WeaponServiceTest {
     @Test
     void deleteWeapon_ShouldThrowException_WhenWeaponHasChars() {
         // given
-        UUID weaponId = UUID.randomUUID();
+        UUID weaponId = randomUUID();
         Weapon weapon = new Weapon();
 
         List<CharacterEntity> chars = new ArrayList<>();
@@ -228,6 +230,20 @@ public class WeaponServiceTest {
 
         verify(repo).findById(weaponId);
         verify(repo, never()).delete(any());
+    }
+
+    @Test
+    void getWeaponsBulk() {
+        // given
+        when(repo.findAllByIdIn(any()))
+            .thenReturn(List.of(new Weapon().setName("a"), new Weapon().setName("b")));
+        // when
+        List<WeaponDto> weaponsBulk = service.getWeaponsBulk(new IdsRequest(List.of(randomUUID())));
+
+        // then
+        assertThat(weaponsBulk).hasSize(2);
+        assertThat(weaponsBulk.get(0).getName()).isEqualTo("a");
+        assertThat(weaponsBulk.get(1).getName()).isEqualTo("b");
     }
 }
 

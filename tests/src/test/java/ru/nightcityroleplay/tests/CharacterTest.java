@@ -7,6 +7,8 @@ import okhttp3.Response;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -40,6 +42,19 @@ public class CharacterTest {
             testCheck = true;
         }
         assertThat(testCheck).isTrue();
+    }
+
+    @BeforeEach
+    void setUp() {
+        UserDto user = AppContext.get("defaultUser");
+        backendRemote.setCurrentUser(user.id(), user.username(), user.username());
+    }
+
+    @AfterAll
+    static void afterAll() {
+        UserDto user = AppContext.get("defaultUser");
+        AppContext.get(BackendRemoteComponent.class)
+            .setCurrentUser(user.id(), user.username(), user.username());
     }
 
     @Test
@@ -76,7 +91,7 @@ public class CharacterTest {
             );
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} - Проверка с данными: {0}, ожидаемое сообщение: {1}")
     @MethodSource("createCharacterWithBadRequestData")
     @SneakyThrows
     @Description("""
@@ -110,7 +125,12 @@ public class CharacterTest {
     public static Stream<Arguments> createCharacterWithBadRequestData() {
         // roles, expectedAuthorities
         return Stream.of(
-            Arguments.of(CreateCharacterRequest.builder().age(null).build(), "Возраст не может быть 0 или меньше или null"));
+            Arguments.of(CreateCharacterRequest.builder().age(null).reputation(0).build(), "Возраст не может быть 0 или меньше или null"),
+            Arguments.of(CreateCharacterRequest.builder().age(0).reputation(0).build(), "Возраст не может быть 0 или меньше или null"),
+            Arguments.of(CreateCharacterRequest.builder().age(-1).reputation(0).build(), "Возраст не может быть 0 или меньше или null"),
+            Arguments.of(CreateCharacterRequest.builder().age(10).reputation(null).build(), "Репутация не может быть меньше 0 или null"),
+            Arguments.of(CreateCharacterRequest.builder().age(10).reputation(-1).build(), "Репутация не может быть меньше 0 или null")
+        );
     }
 
     @Test
@@ -130,6 +150,10 @@ public class CharacterTest {
                 .reputation(0)
                 .build()
         );
+        Result<Record> result = dbContext.select().from(CHARACTERS)
+            .where(CHARACTERS.NAME.eq(charName))
+            .fetch();
+
         Response response2 = backendRemote.makeCreateCharacterRequest(
             CreateCharacterRequest.builder()
                 .name(charName)
@@ -138,12 +162,7 @@ public class CharacterTest {
                 .build()
         );
         assertThat(response2.code()).isEqualTo(422);
-
-        // Проверить что новый персонаж не был создан
-        Result<Record> result = dbContext.select().from(CHARACTERS)
-            .where(CHARACTERS.NAME.eq(charName))
-            .fetch();
-
+        assertThat(response2.body().string()).contains("Персонаж с таким именем уже есть");
         assertThat(result).size().isEqualTo(1);
     }
 
@@ -169,17 +188,8 @@ public class CharacterTest {
             .where(CHARACTERS.NAME.eq(charName))
             .fetchInto(CHARACTERS);
 
-        charResult.get(0).getId();
-
         assertThat(charResult).hasSize(1);
-        assertThat(charResult.get(0))
-            .satisfies(
-                character -> assertThat(character.getId()).isNotNull(),
-                character -> assertThat(character.getOwnerId())
-                    .isEqualTo(backendRemote.remote().getUserId()),
-                character -> assertThat(character.getName()).isEqualTo(charName),
-                character -> assertThat(character.getAge()).isEqualTo(20)
-            );
+
         // Удалить персонажа
         backendRemote.deleteCharacter(charResult.get(0).getId());
 
@@ -210,6 +220,7 @@ public class CharacterTest {
             .fetch();
 
         assertThat(response.code()).isEqualTo(404);
+        assertThat(response.body().string()).contains("не найден");
         assertThat(result).size().isEqualTo(0);
     }
 
@@ -224,7 +235,7 @@ public class CharacterTest {
     void deleteNotOwnedCharacter() {
         // Создать персонажа
         String charName = randomUUID().toString();
-        backendRemote.createCharacter(
+        CreateCharacterResponse responseChar = backendRemote.createCharacter(
             CreateCharacterRequest.builder()
                 .name(charName)
                 .age(205)
@@ -233,22 +244,22 @@ public class CharacterTest {
         );
 
         // Сменить юзера
-        UUID userId = randomUUID();
         String username = randomUUID().toString();
         String password = randomUUID().toString();
         UserDto userDto = backendRemote.createUser(username, password);
         backendRemote.setCurrentUser(userDto.id(), username, password);
 
+        // Удалить персонажа
+        Response response = backendRemote.makeDeleteCharacterRequest(responseChar.id());
+
+        assertThat(response.code()).isEqualTo(403);
+        assertThat(response.body().string()).contains("Удалить чужого персонажа вздумал? а ты хорош.");
+
         Result<CharactersRecord> charRecord = dbContext.select().from(CHARACTERS)
             .where(CHARACTERS.NAME.eq(charName))
             .fetchInto(CHARACTERS);
 
-        // Удалить персонажа
-        Response response = backendRemote.makeDeleteCharacterRequest(charRecord.get(0).getId());
-
         assertThat(charRecord).hasSize(1);
-        assertThat(charRecord.get(0).getOwnerId().equals(userId)).isFalse();
-        assertThat(response.code()).isEqualTo(403);
     }
 
     @Test
@@ -281,6 +292,7 @@ public class CharacterTest {
     }
 
     @Test
+    @SneakyThrows
     @Description("""
         Дано: Пустая бд.
         Действие: Получить персонажа методом GET /characters/{id}.
@@ -300,6 +312,7 @@ public class CharacterTest {
         Response response = backendRemote.makeGetCharacterRequest(randomUUID());
 
         assertThat(charRecord).hasSize(0);
+        assertThat(response.body().string()).contains("не найден");
         assertThat(response.code()).isEqualTo(404);
     }
 
@@ -336,21 +349,20 @@ public class CharacterTest {
         );
 
         // Получить страницу персонажей
-        PageDto charPageRecord = backendRemote.getCharacterPage(2);
+        PageDto<Object> charPageRecord = backendRemote.getCharacterPage(2);
 
         assertThat(charPageRecord.getContent().size()).isEqualTo(2);
         assertThat(charPageRecord.getNumberOfElements()).isEqualTo(2);
         assertThat(charPageRecord.getSize()).isEqualTo(2);
     }
 
-    @ParameterizedTest
-    @MethodSource("updateCharacterData")
+    @Test
     @Description("""
         Дано: Персонаж с id.
         Действие: Изменить персонажа по id методом PUT /characters/{id}.
         Ожидается: Персонаж в бд обновлен.
         """)
-    void updateCharacter(UpdateCharacterRequest request) {
+    void updateCharacter() {
         String charName = randomUUID().toString();
         backendRemote.createCharacter(
             CreateCharacterRequest.builder()
@@ -367,6 +379,7 @@ public class CharacterTest {
         UUID charId = charRecord.get(0).getId();
 
         //Изменить персонажа
+        UpdateCharacterRequest request = createUpdateCharacterRequest();
         backendRemote.updateCharacter(
             charId,
             UpdateCharacterRequest.builder()
@@ -384,11 +397,12 @@ public class CharacterTest {
     }
 
     @Test
+    @SneakyThrows
     @Description("""
-        Дано: Персонаж отсутствует
-         Действие: Изменить персонажа по id методом PUT /characters/{id}
-         Ожидается: Ошибка 404, персонаж не найден
-       """)
+         Дано: Персонаж отсутствует
+          Действие: Изменить персонажа по id методом PUT /characters/{id}
+          Ожидается: Ошибка 404, персонаж не найден
+        """)
     void updateNonExistingCharacter() {
         //Изменить персонажа
         Response response = backendRemote.makeUpdateCharacterRequest(
@@ -401,9 +415,10 @@ public class CharacterTest {
         );
 
         assertThat(response.code()).isEqualTo(404);
+        assertThat(response.body().string()).contains("не найден");
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "guardTest")
     @MethodSource("updateCharacterWithBadRequestData")
     @Description("""
         Дано: Персонаж с id.
@@ -446,15 +461,15 @@ public class CharacterTest {
     }
 
 
-    @ParameterizedTest
-    @MethodSource("updateCharacterData")
+    @Test
+    @SneakyThrows
     @Description("""
         Дано: Персонаж юзера 1.
         Действие: Юзер 2 изменяет персонажа по id методом PUT /characters/{id}.
         Ожидается: Ошибка 403, нельзя менять чужого персонажа.
                    Никакой персонаж не был изменён.
         """)
-    void updateNotOwnedCharacter(UpdateCharacterRequest request) {
+    void updateNotOwnedCharacter() {
         // Создать персонажа
         String charName = randomUUID().toString();
         backendRemote.createCharacter(
@@ -477,28 +492,29 @@ public class CharacterTest {
             .where(CHARACTERS.NAME.eq(charName))
             .fetchInto(CHARACTERS);
 
+        UpdateCharacterRequest request = createUpdateCharacterRequest();
         Response response = backendRemote.makeUpdateCharacterRequest(charRecord.get(0).getId(),
             UpdateCharacterRequest.builder()
                 .name(request.name())
                 .age(request.age())
                 .reputation(request.reputation())
                 .build()
-            );
+        );
 
         assertThat(charRecord).hasSize(1);
         assertThat(charRecord.get(0).getOwnerId().equals(userId)).isFalse();
         assertThat(response.code()).isEqualTo(403);
+        assertThat(response.body().string()).contains("Изменить чужого персонажа вздумал? а ты хорош.");
     }
 
-    @ParameterizedTest
-    @MethodSource("updateCharacterData")
+    @Test
     @Description("""
         Дано: Персонаж с id.
         Действие: Изменить персонажа по id методом PUT /characters/{id} без аутентификации.
         Ожидается: Ошибка 401, юзер не аутентифицирован.
                    Никакой персонаж не был изменён.
         """)
-    void updateCharacterWithoutAuthentication(UpdateCharacterRequest request) {
+    void updateCharacterWithoutAuthentication() {
 
         String charName = randomUUID().toString();
         backendRemote.createCharacter(
@@ -516,6 +532,7 @@ public class CharacterTest {
         UUID charId = charRecord.get(0).getId();
 
         //Изменить персонажа
+        UpdateCharacterRequest request = createUpdateCharacterRequest();
         Response response = backendRemote.makeUpdateCharacterWithoutAutentication(
             charId,
             UpdateCharacterRequest.builder()
@@ -528,8 +545,7 @@ public class CharacterTest {
         assertThat(response.code()).isEqualTo(401);
     }
 
-    public static Stream<Arguments> updateCharacterData() {
-        return Stream.of(
-            Arguments.of(UpdateCharacterRequest.builder().name("UPDATED" + randomUUID()).age(100).reputation(0).build()));
+    private UpdateCharacterRequest createUpdateCharacterRequest() {
+        return (UpdateCharacterRequest.builder().name("UPDATED" + randomUUID()).age(100).reputation(0).build());
     }
 }

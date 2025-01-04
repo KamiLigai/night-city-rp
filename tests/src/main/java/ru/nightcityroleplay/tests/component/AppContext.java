@@ -6,8 +6,10 @@ import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 import okhttp3.OkHttpClient;
 import org.jooq.DSLContext;
+import org.jooq.Result;
 import org.jooq.impl.DSL;
 import ru.nightcityroleplay.tests.dto.UserDto;
+import ru.nightcityroleplay.tests.entity.tables.records.UsersRecord;
 import ru.nightcityroleplay.tests.exception.AppContextException;
 import ru.nightcityroleplay.tests.remote.BackendRemote;
 import ru.nightcityroleplay.tests.repo.WeaponRepo;
@@ -22,8 +24,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
-import static java.util.UUID.randomUUID;
 import static org.jooq.SQLDialect.POSTGRES;
+import static ru.nightcityroleplay.tests.entity.Tables.USERS;
 import static ru.nightcityroleplay.tests.entity.tables.Roles.ROLES;
 import static ru.nightcityroleplay.tests.entity.tables.UsersRoles.USERS_ROLES;
 
@@ -58,9 +60,8 @@ public class AppContext {
     }
 
 
-    @SuppressWarnings("unchecked")
     public static <T> T get(Class<T> key) {
-        return (T) DEPENDENCIES.get(key.getName());
+        return get(key.getName());
     }
 
     @SuppressWarnings("unchecked")
@@ -99,7 +100,7 @@ public class AppContext {
     private static void createJackson() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule())
-            .disable(FAIL_ON_UNKNOWN_PROPERTIES);
+                .disable(FAIL_ON_UNKNOWN_PROPERTIES);
         put(objectMapper);
     }
 
@@ -127,14 +128,25 @@ public class AppContext {
 
     @SneakyThrows
     private static void createTestUser() {
-        String username = "user-" + randomUUID();
-        var backendRemoteComponent = get(BackendRemoteComponent.class);
+        DSLContext dbContext = AppContext.get(DSLContext.class);
+        String username = "test-1";
+        Result<UsersRecord> testUserFetch = dbContext.select()
+            .from(USERS)
+            .where(USERS.USERNAME.eq(username))
+            .fetchInto(USERS);
 
+
+        if (testUserFetch.isNotEmpty()) {
+            UsersRecord usersRecord = testUserFetch.get(0);
+            put("defaultUser", new UserDto(usersRecord.getId(), usersRecord.getUsername()));
+            return;
+        }
+
+        var backendRemoteComponent = get(BackendRemoteComponent.class);
         UserDto userDto = backendRemoteComponent.createUser(username, username);
         backendRemoteComponent.setCurrentUser(userDto.id(), username, username);
         put("defaultUser", userDto);
     }
-
     @SneakyThrows
     private static void createAdminUser() {
         String username = "admin-" + randomUUID();

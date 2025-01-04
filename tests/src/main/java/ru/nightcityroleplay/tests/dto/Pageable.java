@@ -5,6 +5,11 @@ import lombok.Data;
 @Data
 public class Pageable {
 
-    Object pageSize;
-    Object offset;
+    private int pageSize;
+    private int offset;
+    private int totalElements;
+    private int totalPages;
+    private int totalElementsPerPage;
+    private int first;
+    private int last;
 }

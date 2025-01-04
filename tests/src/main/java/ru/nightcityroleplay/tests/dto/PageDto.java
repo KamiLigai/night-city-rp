@@ -5,13 +5,14 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class PageDto {
-    private List<Object> content;
+public class PageDto<T> {
+
+    private List<T> content;
     private Pageable pageable;
-    private Object size;
-    private Object totalElements;
-    private Object totalPages;
-    private Object number;
-    private Object numberOfElements;
-    private Object empty;
+    private int size;
+    private int totalElements;
+    private int totalPages;
+    private int number;
+    private int numberOfElements;
+    private boolean empty;
 }
