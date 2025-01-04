@@ -27,7 +27,9 @@ system-test:
   stage: build
   image: nexus-public-docker-repo.ntrubkin.ru/ntrubkin/java-maven-docker:21
   rules:
-    - when: manual
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      when: manual
   before_script:
     - docker-compose -f compose-ci-cd.yml --project-name night-city-rp-ci-cd build
     - docker-compose -f compose-ci-cd.yml --project-name night-city-rp-ci-cd down
