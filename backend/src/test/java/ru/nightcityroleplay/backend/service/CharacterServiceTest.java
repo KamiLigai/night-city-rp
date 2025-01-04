@@ -108,7 +108,6 @@ class CharacterServiceTest {
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
             service.createCharacter(request, auth);
         });
-
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
         assertEquals("Возраст не может быть 0 или меньше или null", exception.getReason());
     }
@@ -607,7 +606,6 @@ class CharacterServiceTest {
     public void getCharactersImplantsCharacterNotFound() {
         // given
         UUID characterId = UUID.randomUUID();
-        Authentication auth = mock(Authentication.class);
 
         when(charRepo.findById(characterId)).thenReturn(Optional.empty());
 
