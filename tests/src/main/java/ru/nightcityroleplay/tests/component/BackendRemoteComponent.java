@@ -112,7 +112,7 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
     }
 
     @SneakyThrows
-    public CreateWeaponResponse createWeapon(CreateWeaponRequest request) {
+    public void createWeapon(CreateWeaponRequest request) {
         String jsonBody;
         try (Response response = remote.createWeapon(request)) {
             if (!response.isSuccessful()) {
@@ -120,7 +120,7 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
             }
             jsonBody = response.body().string();
         }
-        return objectMapper.readValue(jsonBody, CreateWeaponResponse.class);
+        objectMapper.readValue(jsonBody, CreateWeaponResponse.class);
     }
 
     public void deleteWeapon(UUID weaponid) {

@@ -101,7 +101,7 @@ public class AppContext {
     private static void createJackson() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule())
-                .disable(FAIL_ON_UNKNOWN_PROPERTIES);
+            .disable(FAIL_ON_UNKNOWN_PROPERTIES);
         put(objectMapper);
     }
 
@@ -148,6 +148,7 @@ public class AppContext {
         backendRemoteComponent.setCurrentUser(userDto.id(), username, username);
         put("defaultUser", userDto);
     }
+
     @SneakyThrows
     private static void createAdminUser() {
         String username = "admin-" + randomUUID();
