@@ -7,4 +7,5 @@ public class UpdateSkillRequest {
 
     private String name;
     private String description;
+    private String type;
 }

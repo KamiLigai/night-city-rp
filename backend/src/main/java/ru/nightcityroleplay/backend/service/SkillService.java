@@ -87,6 +87,7 @@ public class SkillService {
         newSkill.setId(skillId);
         newSkill.setName(skillDto.getName());
         newSkill.setDescription(skillDto.getDescription());
+        newSkill.setType(skillDto.getType());
         skillRepo.save(newSkill);
         log.info("Навык {} обновлен", skillDto.getName());
     }
