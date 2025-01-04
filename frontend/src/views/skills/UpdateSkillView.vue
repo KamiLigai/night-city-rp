@@ -21,6 +21,7 @@ function loadSkill() {
       .then(response => {
         request.value.name = response.data.name
         request.value.description = response.data.description
+        request.value.type = response.data.type
       }).catch(() => toast('Не удалось загрузить навык', {type: toast.TYPE.ERROR}))
 }
 
@@ -37,6 +38,7 @@ function updateSkill() {
     <h1>Изменить навык</h1>
     <input class="item" placeholder="Название" v-model="request.name">
     <input class="item" placeholder="Описание" v-model="request.description"/>
+    <input class="item" placeholder="Тип" v-model="request.type"/>
     <button class="item" v-on:click="updateSkill">Сохранить</button>
   </div>
 </template>
