@@ -24,6 +24,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
+import static java.util.UUID.randomUUID;
 import static org.jooq.SQLDialect.POSTGRES;
 import static ru.nightcityroleplay.tests.entity.Tables.USERS;
 import static ru.nightcityroleplay.tests.entity.tables.Roles.ROLES;

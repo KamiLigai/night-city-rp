@@ -3,8 +3,6 @@ package ru.nightcityroleplay.tests.component;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.SneakyThrows;
 import okhttp3.Response;
 import ru.nightcityroleplay.tests.dto.*;
 import ru.nightcityroleplay.tests.exception.AppContextException;
@@ -31,7 +29,7 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
     @SneakyThrows
     public UserDto createUser(String username, String password) {
         String jsonBody;
-        try(Response response = remote.createUser(new CreateUserRequest(username, password))) {
+        try (Response response = remote.createUser(new CreateUserRequest(username, password))) {
             if (!response.isSuccessful()) {
                 throw new AppContextException("Тестовый пользователь не создан: " + response);
             }
@@ -41,7 +39,7 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
     }
 
     public void setCurrentUser(UUID id, String username, String password) {
-        remote.setCurrentUser(id,username,password);
+        remote.setCurrentUser(id, username, password);
     }
 
     public Response makeCreateCharacterRequest(CreateCharacterRequest request) {
@@ -63,7 +61,7 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
     @SneakyThrows
     public CharacterDto getCharacter(UUID characterId) {
         String jsonBody;
-        try(Response response = remote.getCharacter(characterId)) {
+        try (Response response = remote.getCharacter(characterId)) {
             if (!response.isSuccessful()) {
                 throw new AppContextException("Не удалось получить персонажа " + response);
             }
@@ -81,7 +79,9 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
         });
     }
 
-    public Response makeGetCharacterRequest(UUID characterId) { return remote.getCharacter(characterId); }
+    public Response makeGetCharacterRequest(UUID characterId) {
+        return remote.getCharacter(characterId);
+    }
 
     public void updateCharacter(UUID characterId, UpdateCharacterRequest request) {
         try (Response response = remote.updateCharacter(characterId, request)) {
@@ -98,6 +98,7 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
     public Response makeUpdateCharacterWithoutAutentication(UUID characterId, UpdateCharacterRequest request) {
         return remote.updateCharacterWithoutAutentication(characterId, request);
     }
+
     @SneakyThrows
     public WeaponDto getWeapon(UUID weaponId) {
         String jsonBody;
@@ -108,6 +109,18 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
             jsonBody = response.body().string();
         }
         return objectMapper.readValue(jsonBody, WeaponDto.class);
+    }
+
+    @SneakyThrows
+    public CreateWeaponResponse createWeapon(CreateWeaponRequest request) {
+        String jsonBody;
+        try (Response response = remote.createWeapon(request)) {
+            if (!response.isSuccessful()) {
+                fail("Не удалось создать оружие " + request.name() + ", " + response);
+            }
+            jsonBody = response.body().string();
+        }
+        return objectMapper.readValue(jsonBody, CreateWeaponResponse.class);
     }
 
     public void deleteWeapon(UUID weaponid) {
@@ -126,10 +139,13 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
         }
     }
 
+    public Response makeCreateWeaponRequest(CreateWeaponRequest request) {
+        return remote.createWeapon(request);
+    }
+
     public Response makeUpdateWeaponRequest(UUID weaponId, UpdateWeaponRequest request) {
         return remote.updateWeapon(weaponId, request);
     }
-
 
     public Response makeDeleteWeaponRequest(UUID weaponid) {
         return remote.deleteWeapon(weaponid);
