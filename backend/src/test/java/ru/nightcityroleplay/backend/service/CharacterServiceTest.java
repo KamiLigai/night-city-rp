@@ -74,6 +74,7 @@ class CharacterServiceTest {
         var request = new CreateCharacterRequest();
         request.setName("Илон");
         request.setAge(8);
+        request.setReputation(0);
 
         Authentication auth = mock(Authentication.class);
         User user = new User();
@@ -109,7 +110,7 @@ class CharacterServiceTest {
         });
 
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
-        assertEquals("Возраст не может быть null", exception.getReason());
+        assertEquals("Возраст не может быть 0 или меньше или null", exception.getReason());
     }
 
     @Test
