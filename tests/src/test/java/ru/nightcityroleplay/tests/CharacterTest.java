@@ -1,7 +1,7 @@
 package ru.nightcityroleplay.tests;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jdk.jfr.Description;
+import io.qameta.allure.Description;
 import lombok.SneakyThrows;
 import okhttp3.Response;
 import org.jooq.DSLContext;
@@ -24,25 +24,12 @@ import java.util.stream.Stream;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static ru.nightcityroleplay.tests.entity.Tables.CHARACTERS;
-import static ru.nightcityroleplay.tests.entity.Tables.USERS;
 
 public class CharacterTest {
 
     DSLContext dbContext = AppContext.get(DSLContext.class);
     BackendRemoteComponent backendRemote = AppContext.get(BackendRemoteComponent.class);
     ObjectMapper objectMapper = AppContext.get(ObjectMapper.class);
-
-    @Test
-    void createTestUser() {
-        boolean testCheck = dbContext.select().from(USERS)
-            .where(USERS.USERNAME.eq("test"))
-            .fetch().isNotEmpty();
-        if (!testCheck) {
-            backendRemote.createUser("test", "test");
-            testCheck = true;
-        }
-        assertThat(testCheck).isTrue();
-    }
 
     @BeforeEach
     void setUp() {
