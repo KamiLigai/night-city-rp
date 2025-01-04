@@ -15,7 +15,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jackson.version>2.15.4</jackson.version>
         <junit.version>5.11.0-M2</junit.version>
-
         <jooq.version>3.19.11</jooq.version>
     </properties>
 

@@ -2,7 +2,6 @@ package ru.nightcityroleplay.tests;
 
 import io.qameta.allure.Description;
 import lombok.SneakyThrows;
-import okhttp3.Response;
 import org.jooq.Result;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -10,10 +9,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import ru.nightcityroleplay.tests.component.AppContext;
 import ru.nightcityroleplay.tests.component.BackendRemoteComponent;
-import ru.nightcityroleplay.tests.dto.CreateWeaponRequest;
-import ru.nightcityroleplay.tests.dto.UpdateWeaponRequest;
-import ru.nightcityroleplay.tests.dto.UserDto;
-import ru.nightcityroleplay.tests.dto.WeaponDto;
+import ru.nightcityroleplay.tests.dto.*;
 import ru.nightcityroleplay.tests.entity.tables.records.WeaponsRecord;
 import ru.nightcityroleplay.tests.repo.WeaponRepo;
 
@@ -82,7 +78,7 @@ public class WeaponTest {
         backendRemote.setCurrentUser(defaultAdmin.id(), defaultAdmin.username(), defaultAdmin.username());
 
         // Создать оружие с пустым именем
-        Response response = backendRemote.makeCreateWeaponRequest(
+        HttpResponse response = backendRemote.makeCreateWeaponRequest(
             CreateWeaponRequest.builder()
                 .isMelee(true)
                 .name("") // Пустое имя
@@ -96,7 +92,7 @@ public class WeaponTest {
         assertThat(response.code()).isEqualTo(400);
 
         // Проверить тело ответа на наличие ожидаемого сообщения
-        String responseBody = response.body().string();
+        String responseBody = response.body();
         assertThat(responseBody).contains("Имя оружия не может быть пустым.");
     }
 
@@ -104,13 +100,13 @@ public class WeaponTest {
     @MethodSource("weaponDataProvider")
     @SneakyThrows
     @Description("""
-    Дано: Пустая БД.
-    Действие: Попытаться добавить оружие методом POST /weapons с некорректными данными.
-    Ожидается: Запрос завершился с ошибкой и сообщение об ошибке о некорректных данных.
-    """)
+        Дано: Пустая БД.
+        Действие: Попытаться добавить оружие методом POST /weapons с некорректными данными.
+        Ожидается: Запрос завершился с ошибкой и сообщение об ошибке о некорректных данных.
+        """)
     void createWeaponWithInvalidData(String weaponName, String weaponType, int penetration, int reputationRequirement, String expectedErrorMessage) {
         // Попытаться создать оружие с некорректными данными
-        Response response = backendRemote.makeCreateWeaponRequest(
+        HttpResponse response = backendRemote.makeCreateWeaponRequest(
             CreateWeaponRequest.builder()
                 .isMelee(true)
                 .name(weaponName)
@@ -127,9 +123,10 @@ public class WeaponTest {
         assertThat(response.code()).isEqualTo(400);
 
         // Проверить тело ответа на наличие ожидаемого сообщения об ошибке
-        String responseBody = response.body().string();
+        String responseBody = response.body();
         assertThat(responseBody).contains(expectedErrorMessage);
     }
+
     private static Stream<Arguments> weaponDataProvider() {
         return Stream.of(
             Arguments.of("Тамогавк", "Axe", -2, 0, "Пробив не может быть отрицательным."),
@@ -232,7 +229,7 @@ public class WeaponTest {
 
         // Удалить Оружие
         UUID weaponId = randomUUID();
-        Response response = backendRemote.makeDeleteWeaponRequest(weaponId);
+        HttpResponse response = backendRemote.makeDeleteWeaponRequest(weaponId);
 
         // Проверить удаление Оружия
         Result<WeaponsRecord> result = weaponRepo.getWeaponsById(weaponId);
@@ -294,7 +291,7 @@ public class WeaponTest {
         UserDto defaultAdmin = AppContext.get("defaultAdmin");
         backendRemote.setCurrentUser(defaultAdmin.id(), defaultAdmin.username(), defaultAdmin.username());
 
-        Response response = backendRemote.makeUpdateWeaponRequest(
+        HttpResponse response = backendRemote.makeUpdateWeaponRequest(
             randomUUID(),
             UpdateWeaponRequest.builder()
                 .name("Some Name")
@@ -337,7 +334,7 @@ public class WeaponTest {
         Result<WeaponsRecord> weaponRecord = weaponRepo.getWeaponsByName(weaponName);
 
         String updatedWeaponName = "UPDATED" + randomUUID();
-        Response response = backendRemote.makeUpdateWeaponRequest(
+        HttpResponse response = backendRemote.makeUpdateWeaponRequest(
             weaponRecord.get(0).getId(), UpdateWeaponRequest.builder()
                 .name(updatedWeaponName)
                 .isMelee(true)
@@ -348,7 +345,4 @@ public class WeaponTest {
 
         assertThat(response.code()).isEqualTo(400);
     }
-
-
-
 }

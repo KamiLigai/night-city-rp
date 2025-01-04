@@ -3,7 +3,6 @@ package ru.nightcityroleplay.tests;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.qameta.allure.Description;
 import lombok.SneakyThrows;
-import okhttp3.Response;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
@@ -90,7 +89,7 @@ public class CharacterTest {
     void createCharacterWithBadRequest(CreateCharacterRequest request, String expectedMessage) {
         // Создать персонажа
         String charName = randomUUID().toString();
-        Response response = backendRemote.makeCreateCharacterRequest(
+        HttpResponse response = backendRemote.makeCreateCharacterRequest(
             CreateCharacterRequest.builder()
                 .name(charName)
                 .age(request.age())
@@ -98,7 +97,7 @@ public class CharacterTest {
                 .build()
         );
         assertThat(response.code()).isEqualTo(400);
-        var body = objectMapper.readValue(response.body().string(), ErrorResponse.class);
+        var body = objectMapper.readValue(response.body(), ErrorResponse.class);
         assertThat(body.message()).isEqualTo(expectedMessage);
 
         // Проверить что новый персонаж не был создан
@@ -141,7 +140,7 @@ public class CharacterTest {
             .where(CHARACTERS.NAME.eq(charName))
             .fetch();
 
-        Response response2 = backendRemote.makeCreateCharacterRequest(
+        HttpResponse response2 = backendRemote.makeCreateCharacterRequest(
             CreateCharacterRequest.builder()
                 .name(charName)
                 .age(22)
@@ -149,7 +148,7 @@ public class CharacterTest {
                 .build()
         );
         assertThat(response2.code()).isEqualTo(422);
-        assertThat(response2.body().string()).contains("Персонаж с таким именем уже есть");
+        assertThat(response2.body()).contains("Персонаж с таким именем уже есть");
         assertThat(result).size().isEqualTo(1);
     }
 
@@ -199,7 +198,7 @@ public class CharacterTest {
     void deleteNonExistingCharacter() {
         // Удалить персонажа
         UUID charId = randomUUID();
-        Response response = backendRemote.makeDeleteCharacterRequest(charId);
+        HttpResponse response = backendRemote.makeDeleteCharacterRequest(charId);
 
         // Проверить удаление персонажа
         Result<Record> result = dbContext.select().from(CHARACTERS)
@@ -207,7 +206,7 @@ public class CharacterTest {
             .fetch();
 
         assertThat(response.code()).isEqualTo(404);
-        assertThat(response.body().string()).contains("не найден");
+        assertThat(response.body()).contains("не найден");
         assertThat(result).size().isEqualTo(0);
     }
 
@@ -237,10 +236,10 @@ public class CharacterTest {
         backendRemote.setCurrentUser(userDto.id(), username, password);
 
         // Удалить персонажа
-        Response response = backendRemote.makeDeleteCharacterRequest(responseChar.id());
+        HttpResponse response = backendRemote.makeDeleteCharacterRequest(responseChar.id());
 
         assertThat(response.code()).isEqualTo(403);
-        assertThat(response.body().string()).contains("Удалить чужого персонажа вздумал? а ты хорош.");
+        assertThat(response.body()).contains("Удалить чужого персонажа вздумал? а ты хорош.");
 
         Result<CharactersRecord> charRecord = dbContext.select().from(CHARACTERS)
             .where(CHARACTERS.NAME.eq(charName))
@@ -296,10 +295,10 @@ public class CharacterTest {
             .where(CHARACTERS.NAME.eq(newCharName))
             .fetchInto(CHARACTERS);
 
-        Response response = backendRemote.makeGetCharacterRequest(randomUUID());
+        HttpResponse response = backendRemote.makeGetCharacterRequest(randomUUID());
 
         assertThat(charRecord).hasSize(0);
-        assertThat(response.body().string()).contains("не найден");
+        assertThat(response.body()).contains("не найден");
         assertThat(response.code()).isEqualTo(404);
     }
 
@@ -392,7 +391,7 @@ public class CharacterTest {
         """)
     void updateNonExistingCharacter() {
         //Изменить персонажа
-        Response response = backendRemote.makeUpdateCharacterRequest(
+        HttpResponse response = backendRemote.makeUpdateCharacterRequest(
             randomUUID(),
             UpdateCharacterRequest.builder()
                 .name(randomUUID().toString())
@@ -402,7 +401,7 @@ public class CharacterTest {
         );
 
         assertThat(response.code()).isEqualTo(404);
-        assertThat(response.body().string()).contains("не найден");
+        assertThat(response.body()).contains("не найден");
     }
 
     @ParameterizedTest(name = "guardTest")
@@ -430,7 +429,7 @@ public class CharacterTest {
         UUID charId = charRecord.get(0).getId();
 
         //Изменить персонажа
-        Response response = backendRemote.makeUpdateCharacterRequest(
+        HttpResponse response = backendRemote.makeUpdateCharacterRequest(
             charId,
             UpdateCharacterRequest.builder()
                 .name(request.name())
@@ -480,7 +479,7 @@ public class CharacterTest {
             .fetchInto(CHARACTERS);
 
         UpdateCharacterRequest request = createUpdateCharacterRequest();
-        Response response = backendRemote.makeUpdateCharacterRequest(charRecord.get(0).getId(),
+        HttpResponse response = backendRemote.makeUpdateCharacterRequest(charRecord.get(0).getId(),
             UpdateCharacterRequest.builder()
                 .name(request.name())
                 .age(request.age())
@@ -491,7 +490,7 @@ public class CharacterTest {
         assertThat(charRecord).hasSize(1);
         assertThat(charRecord.get(0).getOwnerId().equals(userId)).isFalse();
         assertThat(response.code()).isEqualTo(403);
-        assertThat(response.body().string()).contains("Изменить чужого персонажа вздумал? а ты хорош.");
+        assertThat(response.body()).contains("Изменить чужого персонажа вздумал? а ты хорош.");
     }
 
     @Test
@@ -520,7 +519,7 @@ public class CharacterTest {
 
         //Изменить персонажа
         UpdateCharacterRequest request = createUpdateCharacterRequest();
-        Response response = backendRemote.makeUpdateCharacterWithoutAutentication(
+        HttpResponse response = backendRemote.makeUpdateCharacterWithoutAuthentication(
             charId,
             UpdateCharacterRequest.builder()
                 .name(request.name())
