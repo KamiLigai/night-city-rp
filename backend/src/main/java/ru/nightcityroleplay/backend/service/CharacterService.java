@@ -20,7 +20,6 @@ import ru.nightcityroleplay.backend.repo.WeaponRepository;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static ru.nightcityroleplay.backend.util.BooleanUtils.not;
 
 @Service
@@ -209,25 +208,35 @@ public class CharacterService {
 
     @Transactional
     public void putCharacterWeapon(UpdateCharacterWeaponRequest request, UUID characterId, Authentication auth) {
-        CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
-            new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж не найден"));
+        // Получение персонажа по ID
+        CharacterEntity character = characterRepo.findById(characterId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж не найден"));
 
         // Получить текущего пользователя
-        Object principal = auth.getPrincipal();
-        User user = (User) principal;
-        UUID userid = user.getId();
+        User user = (User) auth.getPrincipal();
+        UUID userId = user.getId();
 
         // Проверка прав доступа
-        if (!character.getOwnerId().equals(userid)) {
+        if (!character.getOwnerId().equals(userId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Нельзя добавлять оружие не своему персонажу!");
         }
 
-        List<Weapon> newWeapons = weaponRepo.findAllByIdIn(request.getWeaponIds());
-        if (newWeapons.size() != request.getWeaponIds().size()) {
-            throw new ResponseStatusException(NOT_FOUND, "Не удалось найти все оружие");
+        // Получение списка айди оружия из запроса
+        Collection<UUID> weaponIds = request.getWeaponIds(); // Предполагается, что в запросе есть метод getWeaponIds()
+
+        // Найти все оружия по списку ID
+        List<Weapon> weapons = weaponRepo.findAllByIdIn(weaponIds);
+        if (weapons.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Оружие не найдено");
         }
-        // todo: сделать проверку очков
-        character.setWeapons(newWeapons);
+
+        // Добавьте все найденные оружия к персонажу
+        for (Weapon weapon : weapons) {
+            if (!character.getWeapons().contains(weapon)) {
+                character.getWeapons().add(weapon);
+            }
+        }
+
         characterRepo.save(character);
     }
 

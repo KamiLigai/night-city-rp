@@ -16,7 +16,6 @@ import ru.nightcityroleplay.backend.dto.UpdateWeaponRequest;
 import ru.nightcityroleplay.backend.dto.WeaponDto;
 import ru.nightcityroleplay.backend.entity.CharacterEntity;
 import ru.nightcityroleplay.backend.entity.Weapon;
-import ru.nightcityroleplay.backend.exception.NightCityRpException;
 import ru.nightcityroleplay.backend.repo.WeaponRepository;
 
 import java.util.*;
@@ -170,21 +169,25 @@ public class WeaponServiceTest {
         when(repo.findById(nonExistentWeaponId)).thenReturn(Optional.empty());
 
         // when/then
-        assertThrows(NightCityRpException.class, () ->
+        assertThrows(ResponseStatusException.class, () ->
             service.updateWeapon(request, nonExistentWeaponId)
         );
     }
 
     @Test
-    void deleteWeapon_ShouldDeleteWeapon_WhenWeaponNotExist() {
+    void deleteWeapon_ShouldThrowNotFound_WhenWeaponNotExist() {
         // given
         UUID nonexistentWeaponId = randomUUID();
         when(repo.findById(nonexistentWeaponId)).thenReturn(Optional.empty());
 
-        // when
-        service.deleteWeapon(nonexistentWeaponId);
+        // when & then
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+            service.deleteWeapon(nonexistentWeaponId);
+        });
 
-        // then
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        assertEquals("Оружие не найдено", exception.getReason());
+
         verify(repo).findById(nonexistentWeaponId);
         verify(repo, never()).delete(any());
     }

@@ -1,7 +1,7 @@
 package ru.nightcityroleplay.tests;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jdk.jfr.Description;
+import io.qameta.allure.Description;
 import lombok.SneakyThrows;
 import okhttp3.Response;
 import org.jooq.DSLContext;
