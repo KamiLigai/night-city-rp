@@ -171,7 +171,6 @@ public class AppContext {
             .set(USERS_ROLES.ROLE_ID, adminRoleId) // ID роли "ADMIN"
             .execute();
     }
-
     private static void createWeaponRepo() {
         WeaponRepo weaponRepo = new WeaponRepo(get(DSLContext.class));
         put(weaponRepo);
