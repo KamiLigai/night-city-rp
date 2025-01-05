@@ -56,7 +56,7 @@ class CharacterServiceTest {
     }
 
     @Test
-    void getCharacterWhenCharacterIsAbsent() {
+    void getCharacter_characterIsAbsent_throw404() {
         // given
         UUID id = randomUUID();
         when(charRepo.findById(id))
@@ -64,12 +64,16 @@ class CharacterServiceTest {
 
         // then
         assertThatThrownBy(() -> service.getCharacter(id))
-            .hasMessage("404 NOT_FOUND \"Персонаж " + id + " не найден\"")
-            .isInstanceOf(ResponseStatusException.class);
+            .isInstanceOf(ResponseStatusException.class)
+            .hasMessageContaining("Персонаж " + id + " не найден")
+            .extracting(ResponseStatusException.class::cast)
+            .extracting(ErrorResponseException::getStatusCode)
+            .isEqualTo(HttpStatus.NOT_FOUND);
+
     }
 
     @Test
-    void createCharacterIsSave() {
+    void createCharacter_characterExists_success() {
         // given
         var request = new CreateCharacterRequest();
         request.setName("Илон");
@@ -97,7 +101,7 @@ class CharacterServiceTest {
 
 
     @Test
-    void toDtoIsNotNull() {
+    void getCharacter_characterData_isNotNull() {
         // given
         UUID owId = randomUUID();
         UUID charId = randomUUID();
@@ -127,7 +131,7 @@ class CharacterServiceTest {
     }
 
     @Test
-    void getCharacterPage_Success() {
+    void getCharacterPage_characterPageExists_success() {
         // given
         CharacterEntity character1 = new CharacterEntity();
         character1.setId(UUID.randomUUID());
@@ -155,7 +159,7 @@ class CharacterServiceTest {
     }
 
     @Test
-    void getCharacterPage_Empty() {
+    void getCharacterPage_characterPageNotExists_isEmpty() {
         // given
         Page<CharacterEntity> characterPage = new PageImpl<>(Collections.emptyList(), pageable, 0);
         when(charRepo.findAll(pageable)).thenReturn(characterPage);
@@ -170,7 +174,7 @@ class CharacterServiceTest {
 
 
     @Test
-    void updateCharacterNotFound() {
+    void updateCharacter_characterIsAbsent_throw404() {
         // given
         var request = new UpdateCharacterRequest();
         UUID characterId = UUID.randomUUID();
@@ -184,8 +188,11 @@ class CharacterServiceTest {
 
         // then
         assertThatThrownBy(() -> service.updateCharacter(request, characterId, auth))
-            .hasMessage("404 NOT_FOUND \"Персонаж " + characterId + " не найден\"")
-            .isInstanceOf(ResponseStatusException.class);
+            .isInstanceOf(ResponseStatusException.class)
+            .hasMessageContaining("Персонаж " + characterId + " не найден")
+            .extracting(ResponseStatusException.class::cast)
+            .extracting(ErrorResponseException::getStatusCode)
+            .isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
@@ -212,12 +219,16 @@ class CharacterServiceTest {
 
         // then
         assertThatThrownBy(() -> service.updateCharacter(request, characterId, auth))
-            .hasMessage(("403 FORBIDDEN \"Изменить чужого персонажа вздумал? а ты хорош.\""))
-            .isInstanceOf(ResponseStatusException.class);
+            .isInstanceOf(ResponseStatusException.class)
+            .hasMessageContaining(("Изменить чужого персонажа вздумал? а ты хорош."))
+            .extracting(ResponseStatusException.class::cast)
+            .extracting(ErrorResponseException::getStatusCode)
+            .isEqualTo(HttpStatus.FORBIDDEN);
+
     }
 
     @Test
-    void updateCharacterSkillNotFound() {
+    void updateCharacterSkill_characterNotExists_throw404() {
         // given
         var request = new UpdateCharacterSkillRequest();
         UUID characterId = UUID.randomUUID();
@@ -229,11 +240,15 @@ class CharacterServiceTest {
         // then
         assertThatThrownBy(() -> service.updateCharacterSkill(request, characterId, auth))
             .isInstanceOf(ResponseStatusException.class)
-            .hasMessageContaining("Персонаж " + characterId + " не найден");
+            .hasMessageContaining("Персонаж " + characterId + " не найден")
+            .extracting(ResponseStatusException.class::cast)
+            .extracting(ErrorResponseException::getStatusCode)
+            .isEqualTo(HttpStatus.NOT_FOUND);
+
     }
 
     @Test
-    void updateCharacterSkillUnauthorized() {
+    void updateCharacterSkill_unauthorized_throw403() {
         // given
         var request = new UpdateCharacterSkillRequest();
         UUID characterId = UUID.randomUUID();
@@ -253,11 +268,14 @@ class CharacterServiceTest {
         // then
         assertThatThrownBy(() -> service.updateCharacterSkill(request, characterId, auth))
             .isInstanceOf(ResponseStatusException.class)
-            .hasMessageContaining("Нельзя добавлять навык не своему персонажу!");
+            .hasMessageContaining("Нельзя добавлять навык не своему персонажу!")
+            .extracting(ResponseStatusException.class::cast)
+            .extracting(ErrorResponseException::getStatusCode)
+            .isEqualTo(HttpStatus.FORBIDDEN);
     }
 
     @Test
-    public void deleteCharacterNotFound() {
+    public void deleteCharacter_characterNotExists_throw404() {
         // given
         UUID characterId = UUID.randomUUID();
         Authentication authentication = mock(Authentication.class);
@@ -268,11 +286,14 @@ class CharacterServiceTest {
         // then
         assertThatThrownBy(() -> service.deleteCharacter(characterId, authentication))
             .isInstanceOf(ResponseStatusException.class)
-            .hasMessageContaining("Персонаж " + characterId + " не найден");
+            .hasMessageContaining("Персонаж " + characterId + " не найден")
+            .extracting(ResponseStatusException.class::cast)
+            .extracting(ErrorResponseException::getStatusCode)
+            .isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
-    public void deleteCharacterUnauthorized() {
+    public void deleteCharacter_unauthorized_throw403() {
         // given
         UUID characterId = UUID.randomUUID();
         Authentication authentication = mock(Authentication.class);
@@ -300,7 +321,7 @@ class CharacterServiceTest {
     }
 
     @Test
-    void updatedCharacterOwnedByUser() {
+    void updatedCharacter_ownedByUser_success() {
         // given
         UpdateCharacterRequest request = new UpdateCharacterRequest();
         request.setAge(42);
@@ -334,7 +355,7 @@ class CharacterServiceTest {
     }
 
     @Test
-    void putCharacterWeapon_CharacterNotFound() {
+    void putCharacterWeapon_characterNotExists_throw404() {
         //given
         UUID characterId = randomUUID();
         UUID weaponId = randomUUID();
@@ -357,9 +378,8 @@ class CharacterServiceTest {
 
 
     @Test
-    void putCharacterWeapon_UserNotOwner() {
+    void putCharacterWeapon_userNotOwner_throw403() {
         //given
-
         var user = new User();
         user.setId(UUID.randomUUID()); // Должен отличаться от ID владельца персонажа
         UUID characterId = randomUUID();
@@ -373,6 +393,7 @@ class CharacterServiceTest {
 
         //when
         Call call = () -> service.putCharacterWeapon(request, characterId, auth);
+
         //then
         assertThatThrownBy(call)
             .isInstanceOf(ResponseStatusException.class)
@@ -383,7 +404,7 @@ class CharacterServiceTest {
     }
 
     @Test
-    void deleteWeaponSuccessful() {
+    void deleteWeapon_weaponExists_success() {
         // given
         UUID weaponId = UUID.randomUUID();
         UUID characterId = UUID.randomUUID();
@@ -414,7 +435,7 @@ class CharacterServiceTest {
     }
 
     @Test
-    void deleteWeaponCharacterNotFound() {
+    void deleteWeaponCharacter_characterNotExists_throw404() {
         // given
         UUID weaponId = UUID.randomUUID();
         UUID characterId = UUID.randomUUID();
@@ -431,7 +452,7 @@ class CharacterServiceTest {
     }
 
     @Test
-    void deleteWeaponUnauthorizedAccess() {
+    void deleteWeapon_unauthorized_throw403() {
         // given
         UUID weaponId = UUID.randomUUID();
         UUID characterId = UUID.randomUUID();
@@ -456,7 +477,7 @@ class CharacterServiceTest {
     }
 
     @Test
-    void deleteWeaponNotFound() {
+    void deleteWeapon_weaponNotExists_throw404() {
         // given
         UUID weaponId = UUID.randomUUID();
         UUID characterId = UUID.randomUUID();

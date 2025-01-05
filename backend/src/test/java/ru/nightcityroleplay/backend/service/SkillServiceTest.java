@@ -2,7 +2,9 @@ package ru.nightcityroleplay.backend.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.ErrorResponseException;
 import org.springframework.web.server.ResponseStatusException;
 import ru.nightcityroleplay.backend.dto.CreateSkillRequest;
 import ru.nightcityroleplay.backend.dto.UpdateSkillRequest;
@@ -32,7 +34,7 @@ class SkillServiceTest {
     }
 
     @Test
-    void getSkillWhenSkillIsAbsent() {
+    void getSkill_skillIsAbsent_throw404() {
         // given
         UUID id = randomUUID();
         when(skillRepo.findById(id))
@@ -40,11 +42,15 @@ class SkillServiceTest {
 
         // then
         assertThatThrownBy(() -> service.getSkill(id))
-            .isInstanceOf(ResponseStatusException.class);
+            .isInstanceOf(ResponseStatusException.class)
+            .hasMessageContaining("Навык " + id + " не найден")
+            .extracting(ResponseStatusException.class::cast)
+            .extracting(ErrorResponseException::getStatusCode)
+            .isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
-    void createSkillIsSave() {
+    void createSkill_skillExists_success() {
         // given
         var request = new CreateSkillRequest();
         request.setName("Что-то");
@@ -76,7 +82,7 @@ class SkillServiceTest {
     }
 
     @Test
-    void toDtoIsNotNull() {
+    void getSkill_skillWithData_isNotNull() {
         // given
         UUID skillId = randomUUID();
         Skill skill = new Skill();
@@ -104,7 +110,7 @@ class SkillServiceTest {
     }
 
     @Test
-    void updateSkillNotFound() {
+    void updateSkill_skillNotExists_throw404() {
         // given
         var request = new UpdateSkillRequest();
         UUID skillId = UUID.randomUUID();
@@ -114,11 +120,14 @@ class SkillServiceTest {
         // then
         assertThatThrownBy(() -> service.updateSkill(request, skillId))
             .isInstanceOf(ResponseStatusException.class)
-            .hasMessageContaining("Навык " + skillId + " не найден");
+            .hasMessageContaining("Навык " + skillId + " не найден")
+            .extracting(ResponseStatusException.class::cast)
+            .extracting(ErrorResponseException::getStatusCode)
+            .isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
-    public void deleteSkillSuccess() {
+    public void deleteSkill_skillExists_success() {
         // given
         UUID skillId = UUID.randomUUID();
 
@@ -136,7 +145,7 @@ class SkillServiceTest {
     }
 
     @Test
-    public void deleteSkillNotFound() {
+    public void deleteSkill_skillNotExists_throw404() {
         // given
         UUID skillId = UUID.randomUUID();
 
@@ -146,11 +155,14 @@ class SkillServiceTest {
         // then
         assertThatThrownBy(() -> service.deleteSkill(skillId))
             .isInstanceOf(ResponseStatusException.class)
-            .hasMessageContaining("Навык " + skillId + " не найден");
+            .hasMessageContaining("Навык " + skillId + " не найден")
+            .extracting(ResponseStatusException.class::cast)
+            .extracting(ErrorResponseException::getStatusCode)
+            .isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
-    public void deleteSkillUnauthorized() {
+    public void deleteSkill_unauthorized_throw422() {
         // given
         UUID skillId = UUID.randomUUID();
 
@@ -163,6 +175,9 @@ class SkillServiceTest {
         // then
         assertThatThrownBy(() -> service.deleteSkill(skillId))
             .isInstanceOf(ResponseStatusException.class)
-            .hasMessageContaining("Этот навык есть как минимум у одного персонажа!");
+            .hasMessageContaining("Этот навык есть как минимум у одного персонажа!")
+            .extracting(ResponseStatusException.class::cast)
+            .extracting(ErrorResponseException::getStatusCode)
+            .isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
     }
 }
