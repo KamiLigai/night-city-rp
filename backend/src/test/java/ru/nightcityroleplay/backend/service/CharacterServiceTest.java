@@ -505,7 +505,7 @@ class CharacterServiceTest {
     }
 
     @Test
-    void deleteWeaponNotFoundInCharacter() {
+    void deleteWeapon_characterDontHaveWeapon_throw400() {
         // given
         UUID weaponId = UUID.randomUUID();
         UUID characterId = UUID.randomUUID();
@@ -532,7 +532,7 @@ class CharacterServiceTest {
 
 
     @Test
-    public void giveReputationSuccess() {
+    public void giveReputation_characterExists_success() {
         // given
         UUID characterId = UUID.randomUUID();
         CharacterEntity character = new CharacterEntity();
@@ -560,7 +560,7 @@ class CharacterServiceTest {
     }
 
     @Test
-    public void getCharacterImplantsSuccess() {
+    public void getCharacterImplants_characterExists_success() {
         // given
         UUID characterId = UUID.randomUUID();
 
@@ -581,10 +581,9 @@ class CharacterServiceTest {
     }
 
     @Test
-    public void getCharactersImplantsCharacterNotFound() {
+    public void getCharactersImplants_characterNotExists_throw404() {
         // given
         UUID characterId = UUID.randomUUID();
-        Authentication auth = mock(Authentication.class);
 
         when(charRepo.findById(characterId)).thenReturn(Optional.empty());
 
@@ -600,7 +599,7 @@ class CharacterServiceTest {
     }
 
     @Test
-    public void getCharactersImplantsNoImplants() {
+    public void getCharactersImplants_implantNotExists_success() {
         // given
         UUID characterId = UUID.randomUUID();
 
@@ -619,7 +618,7 @@ class CharacterServiceTest {
     }
 
     @Test
-    public void putCharacterImplantReputationInsufficient() {
+    public void putCharacterImplantReputation_reputationInsufficient_throw400() {
         // given
         UUID characterId = UUID.randomUUID();
         User user = new User();
@@ -658,7 +657,7 @@ class CharacterServiceTest {
     }
 
     @Test
-    public void putCharacterImplantInsufficientPoints() {
+    public void putCharacterImplant_pointsInsufficient_throw400() {
         // given
         UUID characterId = UUID.randomUUID();
         User user = new User();
@@ -696,7 +695,7 @@ class CharacterServiceTest {
     }
 
     @Test
-    public void deleteCharacterImplantSuccess() {
+    public void deleteCharacterImplant_implantExists_success() {
         // given
         UUID characterId = UUID.randomUUID();
         UUID implantId = UUID.randomUUID();
@@ -733,7 +732,7 @@ class CharacterServiceTest {
     }
 
     @Test
-    public void deleteCharacterImplantCharacterNotFound() {
+    public void deleteCharacterImplant_characterNotExists_throw404() {
         // given
         UUID characterId = UUID.randomUUID();
         UUID implantId = UUID.randomUUID();
@@ -755,7 +754,7 @@ class CharacterServiceTest {
     }
 
     @Test
-    public void deleteCharacterImplantForbidden() {
+    public void deleteCharacterImplant_characterNotOwned_throw403() {
         // given
         UUID characterId = UUID.randomUUID();
         UUID implantId = UUID.randomUUID();
@@ -780,7 +779,7 @@ class CharacterServiceTest {
     }
 
     @Test
-    public void deleteCharacterImplantImplantNotFound() {
+    public void deleteCharacterImplant_implantNotExists_throw404() {
         // given
         UUID characterId = UUID.randomUUID();
         UUID implantId = UUID.randomUUID();
@@ -808,7 +807,7 @@ class CharacterServiceTest {
     }
 
     @Test
-    public void deleteCharacterImplantNotInList() {
+    public void deleteCharacterImplant_implantNotInList_throw400() {
         // given
         UUID characterId = UUID.randomUUID();
         UUID implantId = UUID.randomUUID();
