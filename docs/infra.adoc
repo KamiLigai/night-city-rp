@@ -9,30 +9,42 @@ image::media/deployment-diagram.svg[format=svg,opts=inline]
 Разведены на test и prod среды.
 
 |===
-|Сервис | Адрес
+| Сервис | Адрес | Описание
 
 |Prod Frontend
 |https://night-city-rp.ntrubkin.ru
+|
 
 |Prod Backend
 |https://night-city-rp.ntrubkin.ru/api
+|
 
 |Test Frontend
 |https://night-city-rp-test.ntrubkin.ru
+|
 
 |Test Backend
 |https://night-city-rp-test.ntrubkin.ru/api
+|
 
 |Github
 |https://github.com/KamiLigai/night-city-rp
+|
 
 |Gitlab
 |https://gitlab.ntrubkin.ru/ntrubkin/night-city-rp
+|
 
 |OpenSearch
 |https://opensearch.ntrubkin.ru
+|
 
 |Grafana
 |https://grafana.ntrubkin.ru
+|
+
+|BetterUptime
+|https://uptime.betterstack.com/team/226146/monitors
+|Мониторинг доступности приложения
 
 |===

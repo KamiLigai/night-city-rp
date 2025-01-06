@@ -12,16 +12,21 @@ import ru.nightcityroleplay.tests.dto.UserDto;
 import ru.nightcityroleplay.tests.entity.tables.records.UsersRecord;
 import ru.nightcityroleplay.tests.exception.AppContextException;
 import ru.nightcityroleplay.tests.remote.BackendRemote;
+import ru.nightcityroleplay.tests.repo.WeaponRepo;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
+import static java.util.UUID.randomUUID;
 import static org.jooq.SQLDialect.POSTGRES;
 import static ru.nightcityroleplay.tests.entity.Tables.USERS;
+import static ru.nightcityroleplay.tests.entity.tables.Roles.ROLES;
+import static ru.nightcityroleplay.tests.entity.tables.UsersRoles.USERS_ROLES;
 
 
 @UtilityClass
@@ -40,6 +45,8 @@ public class AppContext {
             createBackendRemoteComponent();
             checkApplication();
             createTestUser();
+            createAdminUser();
+            createWeaponRepo();
         } catch (Exception e) {
             throw new AppContextException("Ошибка инициализации контекста", e);
         }
@@ -92,7 +99,7 @@ public class AppContext {
     private static void createJackson() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule())
-                .disable(FAIL_ON_UNKNOWN_PROPERTIES);
+            .disable(FAIL_ON_UNKNOWN_PROPERTIES);
         put(objectMapper);
     }
 
@@ -137,5 +144,33 @@ public class AppContext {
         UserDto userDto = backendRemoteComponent.createUser(username, username);
         backendRemoteComponent.setCurrentUser(userDto.id(), username, username);
         put("defaultUser", userDto);
+    }
+
+    @SneakyThrows
+    private static void createAdminUser() {
+        String username = "admin-" + randomUUID();
+        var backendRemoteComponent = get(BackendRemoteComponent.class);
+
+        UserDto adminDto = backendRemoteComponent.createUser(username, username);
+        put("defaultAdmin", adminDto);
+        DSLContext dbContext = AppContext.get(DSLContext.class);
+        // Получаем ID роли "ADMIN"
+        UUID adminRoleId = dbContext.select(ROLES.ID)
+            .from(ROLES)
+            .where(ROLES.NAME.eq("ADMIN"))
+            .fetchOne(ROLES.ID);
+
+        // Получаем ID созданного пользователя из adminDto
+        UUID userId = adminDto.id();
+
+        // Вставляем данные в USERS_ROLES
+        dbContext.insertInto(USERS_ROLES)
+            .set(USERS_ROLES.USER_ID, userId) // ID пользователя
+            .set(USERS_ROLES.ROLE_ID, adminRoleId) // ID роли "ADMIN"
+            .execute();
+    }
+    private static void createWeaponRepo() {
+        WeaponRepo weaponRepo = new WeaponRepo(get(DSLContext.class));
+        put(weaponRepo);
     }
 }

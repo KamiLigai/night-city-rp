@@ -1,4 +1,4 @@
-import axios, {type AxiosResponse} from 'axios'
+import axios, {AxiosError, type AxiosInstance, type AxiosResponse} from 'axios'
 import {useUserStore} from '@/stores/userStore'
 import type {UserDto} from '@/dto/users/UserDto'
 import {CreateUserRequest} from '@/dto/users/CreateUserRequest'
@@ -20,14 +20,31 @@ import type {UpdateCharacterRequest} from "@/dto/characters/UpdateCharacterReque
 import type {UpdateImplantRequest} from "@/dto/implants/UpdateImplantRequest";
 import type {UpdateSkillRequest} from "@/dto/skills/UpdateSkillRequest";
 import type {UpdateWeaponRequest} from "@/dto/weapons/UpdateWeaponRequest";
+import router from "@/router";
 
 // todo: make useUserStore() lazy loading field
 class Client {
 
-    axiosClient = axios.create({
-        baseURL: import.meta.env.VITE_BACKEND_BASE_URL || '/api',
-        headers: {'X-Requested-With': 'XMLHttpRequest'}
-    })
+    private axiosClient: AxiosInstance
+
+    public constructor() {
+        this.axiosClient = axios.create({
+            baseURL: import.meta.env.VITE_BACKEND_BASE_URL || '/api',
+            headers: {'X-Requested-With': 'XMLHttpRequest'}
+        })
+        this.axiosClient.interceptors.response.use(
+            (response: AxiosResponse) => response,
+            (error: AxiosError) => {
+                if (
+                    error.response
+                    && error.response.status === 401
+                    && router.currentRoute.value.path !== '/login'
+                ) {
+                    Promise.resolve(error).then(() => router.push('/login').then())
+                }
+                return Promise.reject(error)
+            })
+    }
 
     public login(username: string, password: string): Promise<AxiosResponse<UserDto>> {
         const creds = Base64.encode(`${username}:${password}`)
