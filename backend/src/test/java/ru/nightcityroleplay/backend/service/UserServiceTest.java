@@ -56,7 +56,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testGetCurrentUser() {
+    public void testGetCurrentUser_userCreated_success() {
         //given
         UUID userId = UUID.randomUUID();
         User user = new User(userId, "testUser", "password", List.of());

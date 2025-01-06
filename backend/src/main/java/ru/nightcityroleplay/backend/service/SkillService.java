@@ -80,13 +80,17 @@ public class SkillService {
     @Transactional
     public void updateSkill(UpdateSkillRequest skillDto, UUID skillId) {
         log.info("Навык {} обновляется", skillDto.getName());
+        Optional<Skill> oldSkill = skillRepo.findById(skillId);
         Skill newSkill = new Skill();
-        if (skillRepo.findById(skillId).isEmpty()) {
+        if (oldSkill.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Навык " + skillId + " не найден");
         }
         newSkill.setId(skillId);
         newSkill.setName(skillDto.getName());
         newSkill.setDescription(skillDto.getDescription());
+        newSkill.setLevel(oldSkill.get().getLevel());
+        newSkill.setType(skillDto.getType());
+        newSkill.setCost(oldSkill.get().getCost());
         skillRepo.save(newSkill);
         log.info("Навык {} обновлен", skillDto.getName());
     }

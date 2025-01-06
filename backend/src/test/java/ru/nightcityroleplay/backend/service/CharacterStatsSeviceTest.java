@@ -56,7 +56,7 @@ public class CharacterStatsSeviceTest {
     }
 
     @Test
-    void calculateBattlePoints_youngAge() {
+    void calculateBattlePoints_youngAge_success() {
         // given
         int age = 20;
 
@@ -68,7 +68,7 @@ public class CharacterStatsSeviceTest {
     }
 
     @Test
-    void calculateBattlePoints_middleAge() {
+    void calculateBattlePoints_middleAge_success() {
         // given
         int age = 30;
 
@@ -80,7 +80,7 @@ public class CharacterStatsSeviceTest {
     }
 
     @Test
-    void calculateBattlePoints_oldAge() {
+    void calculateBattlePoints_oldAge_success() {
         // given
         int age = 50;
 
@@ -93,7 +93,7 @@ public class CharacterStatsSeviceTest {
 
 
     @Test
-    void calculateCivilPoints_isAlwaysThirteen() {
+    void calculateCivilPoints_isAlwaysThirteen_success() {
         // when
         int result = characterStatsService.calculateCivilPoints();
 

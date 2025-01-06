@@ -50,7 +50,7 @@ public class CharacterTest {
         Действие: Добавить персонажа методом POST /characters.
         Ожидается: Персонаж добавлен в бд.
         """)
-    void createCharacter() {
+    void createCharacter_characterCreated_success() {
         // Создать персонажа
         String charName = randomUUID().toString();
         backendRemote.createCharacter(
@@ -86,7 +86,7 @@ public class CharacterTest {
         Ожидается: 400 Bad_Request.
                    Новый персонаж не создан в бд.
         """)
-    void createCharacterWithBadRequest(CreateCharacterRequest request, String expectedMessage) {
+    void createCharacter_badRequest_throw400(CreateCharacterRequest request, String expectedMessage) {
         // Создать персонажа
         String charName = randomUUID().toString();
         HttpResponse response = backendRemote.makeCreateCharacterRequest(
@@ -127,7 +127,7 @@ public class CharacterTest {
         Ожидается: 422 UNPROCESSABLE_ENTITY.
                    Новый персонаж не создан в бд.
         """)
-    void createCharacterWithSameName() {
+    void createCharacter_sameName_throw422() {
         String charName = randomUUID().toString();
         backendRemote.makeCreateCharacterRequest(
             CreateCharacterRequest.builder()
@@ -158,7 +158,7 @@ public class CharacterTest {
         Действие: Удалить персонажа методом DELETE /characters/{id}.
         Ожидается: Персонаж удалён из бд.
         """)
-    void deleteCharacter() {
+    void deleteCharacter_characterExists_success() {
         // Создать персонажа
         String charName = randomUUID().toString();
         backendRemote.createCharacter(
@@ -195,7 +195,7 @@ public class CharacterTest {
         Ожидается: 404 Not Found.
                    Никакой персонаж не удалён.
         """)
-    void deleteNonExistingCharacter() {
+    void deleteCharacter_characterNotExists_throw404() {
         // Удалить персонажа
         UUID charId = randomUUID();
         HttpResponse response = backendRemote.makeDeleteCharacterRequest(charId);
@@ -218,7 +218,7 @@ public class CharacterTest {
         Ожидается: 403 Forbidden.
                    Никакой персонаж не удалён.
         """)
-    void deleteNotOwnedCharacter() {
+    void deleteCharacter_characterNotOwned_throw403() {
         // Создать персонажа
         String charName = randomUUID().toString();
         CreateCharacterResponse responseChar = backendRemote.createCharacter(
@@ -254,7 +254,7 @@ public class CharacterTest {
         Действие: Получить персонажа методом GET /characters/{id}.
         Ожидается: Получены данные персонажа
         """)
-    void getCharacter() {
+    void getCharacter_characterExists_success() {
         // Создать персонажа
         String charName = randomUUID().toString();
         backendRemote.createCharacter(
@@ -285,7 +285,7 @@ public class CharacterTest {
         Ожидается: 404 Not found.
                    Данные персонажа не получены.
         """)
-    void getNonExistingCharacter() {
+    void getCharacter_characterNotExists_throw404() {
 
         String newCharName = randomUUID().toString();
 
@@ -310,7 +310,7 @@ public class CharacterTest {
                   Размер страницы меньше чем персонажей в бд.
         Ожидается: Получена страница данных персонажей.
         """)
-    void getCharacterPage() {
+    void getCharacterPage_characterExists_success() {
         // Создать несколько персонажей
         backendRemote.createCharacter(
             CreateCharacterRequest.builder()
@@ -348,7 +348,7 @@ public class CharacterTest {
         Действие: Изменить персонажа по id методом PUT /characters/{id}.
         Ожидается: Персонаж в бд обновлен.
         """)
-    void updateCharacter() {
+    void updateCharacter_characterExists_success() {
         String charName = randomUUID().toString();
         backendRemote.createCharacter(
             CreateCharacterRequest.builder()
@@ -389,7 +389,7 @@ public class CharacterTest {
           Действие: Изменить персонажа по id методом PUT /characters/{id}
           Ожидается: Ошибка 404, персонаж не найден
         """)
-    void updateNonExistingCharacter() {
+    void updateCharacter_characterNotExists_throw404() {
         //Изменить персонажа
         HttpResponse response = backendRemote.makeUpdateCharacterRequest(
             randomUUID(),
@@ -404,7 +404,7 @@ public class CharacterTest {
         assertThat(response.body()).contains("не найден");
     }
 
-    @ParameterizedTest(name = "guardTest")
+    @ParameterizedTest(name = "{index} - Проверка с данными: {0}, ожидаемое сообщение: {1}")
     @MethodSource("updateCharacterWithBadRequestData")
     @Description("""
         Дано: Персонаж с id.
@@ -412,7 +412,7 @@ public class CharacterTest {
         Ожидается: 400 Bad_Request.
                    Никакой персонаж не был изменён.
         """)
-    void updateCharacterWithBadRequest(UpdateCharacterRequest request) {
+    void updateCharacter_badRequest_throw400(UpdateCharacterRequest request) {
         String charName = randomUUID().toString();
         backendRemote.createCharacter(
             CreateCharacterRequest.builder()
@@ -443,6 +443,8 @@ public class CharacterTest {
 
     public static Stream<Arguments> updateCharacterWithBadRequestData() {
         return Stream.of(
+            Arguments.of(UpdateCharacterRequest.builder().name("UPDATED" + randomUUID()).age(null).reputation(445).build()),
+            Arguments.of(UpdateCharacterRequest.builder().name("UPDATED" + randomUUID()).age(445).reputation(null).build()),
             Arguments.of(UpdateCharacterRequest.builder().name("UPDATED" + randomUUID()).age(null).reputation(null).build()));
     }
 
@@ -455,7 +457,7 @@ public class CharacterTest {
         Ожидается: Ошибка 403, нельзя менять чужого персонажа.
                    Никакой персонаж не был изменён.
         """)
-    void updateNotOwnedCharacter() {
+    void updateCharacter_characterNotOwned_throw403() {
         // Создать персонажа
         String charName = randomUUID().toString();
         backendRemote.createCharacter(
@@ -500,7 +502,7 @@ public class CharacterTest {
         Ожидается: Ошибка 401, юзер не аутентифицирован.
                    Никакой персонаж не был изменён.
         """)
-    void updateCharacterWithoutAuthentication() {
+    void updateCharacter_withoutAuthentication_throw401() {
 
         String charName = randomUUID().toString();
         backendRemote.createCharacter(
