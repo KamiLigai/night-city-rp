@@ -40,7 +40,7 @@ public class WeaponServiceTest {
     }
 
     @Test
-    void createWeapon() {
+    void createWeapon_weaponCreated_success() {
         // given
         var request = new CreateWeaponRequest();
         request.setName("test-name");
@@ -75,7 +75,7 @@ public class WeaponServiceTest {
 
 
     @Test
-    void getWeaponPageTest() {
+    void getWeaponPage_weaponExists_success() {
         // given
         Pageable pageable = mock();
         Page<Weapon> weaponPage = mock();
@@ -101,7 +101,7 @@ public class WeaponServiceTest {
     }
 
     @Test
-    void getWeapon_ShouldReturnWeaponDto_WhenWeaponExists() {
+    void getWeaponDto_weaponExists_success() {
         // given
         UUID weaponId = randomUUID();
         Weapon weaponEntity = new Weapon();
@@ -128,7 +128,7 @@ public class WeaponServiceTest {
     }
 
     @Test
-    void updateWeapon_ShouldUpdateWeapon_WhenWeaponExists() {
+    void updateWeapon_weaponExists_success() {
         // given
         UUID weaponId = randomUUID();
         UpdateWeaponRequest request = new UpdateWeaponRequest();
@@ -160,7 +160,7 @@ public class WeaponServiceTest {
 
 
     @Test
-    void updateWeapon_ShouldThrowException_WhenWeaponDoesNotExist() {
+    void updateWeapon_weaponNotExists_throw404() {
         // given
         UUID nonExistentWeaponId = randomUUID(); // создаем UUID, для которого оружие не будет найдено
         UpdateWeaponRequest request = new UpdateWeaponRequest();
@@ -176,7 +176,7 @@ public class WeaponServiceTest {
     }
 
     @Test
-    void deleteWeapon_ShouldDeleteWeapon_WhenWeaponNotExist() {
+    void deleteWeapon_weaponNotExists_throw404() {
         // given
         UUID nonexistentWeaponId = randomUUID();
         when(repo.findById(nonexistentWeaponId)).thenReturn(Optional.empty());
@@ -190,7 +190,7 @@ public class WeaponServiceTest {
     }
 
     @Test
-    void deleteWeapon_ShouldDeleteWeapon_WhenWeaponHasNoChars() {
+    void deleteWeapon_weaponExists_success() {
         // given
         UUID weaponId = randomUUID();
         Weapon weapon = new Weapon();
@@ -207,7 +207,7 @@ public class WeaponServiceTest {
     }
 
     @Test
-    void deleteWeapon_ShouldThrowException_WhenWeaponHasChars() {
+    void deleteWeapon_weaponExistsAndJoined_throw422() {
         // given
         UUID weaponId = randomUUID();
         Weapon weapon = new Weapon();
@@ -230,7 +230,7 @@ public class WeaponServiceTest {
     }
 
     @Test
-    void getWeaponsBulk() {
+    void getWeaponsBulk_weaponExists_success() {
         // given
         when(repo.findAllByIdIn(any()))
             .thenReturn(List.of(new Weapon().setName("a"), new Weapon().setName("b")));
