@@ -106,8 +106,6 @@ public class ImplantService {
         Optional<Implant> implantById = implantRepo.findById(implantId);
         return implantById.map(this::toDto).orElse(null);
     }
-
-    @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
     @Transactional
     public void updateImplant(UpdateImplantRequest request, UUID implantId, String name) {
         log.info("Администратор пытается создать имплант с именем: {} с id {}", name, implantId);

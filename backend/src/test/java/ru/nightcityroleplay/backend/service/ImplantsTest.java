@@ -2,12 +2,13 @@ package ru.nightcityroleplay.backend.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.server.ResponseStatusException;
 import ru.nightcityroleplay.backend.dto.CreateImplantRequest;
 import ru.nightcityroleplay.backend.dto.UpdateImplantRequest;
 import ru.nightcityroleplay.backend.entity.Implant;
 import ru.nightcityroleplay.backend.entity.User;
-import ru.nightcityroleplay.backend.exception.NightCityRpException;
 import ru.nightcityroleplay.backend.repo.ImplantRepository;
 
 import java.util.List;
@@ -18,6 +19,7 @@ import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -139,17 +141,24 @@ public class ImplantsTest {
     void updateImplantNotFound() {
         // given
         var request = new UpdateImplantRequest();
+        request.setName("Valid Name");
+        request.setImplantType("Valid Type");
+        request.setDescription("Valid Description");
+        request.setReputationRequirement(10);
+        request.setImplantPointsCost(20);
+        request.setSpecialImplantPointsCost(5);
+
         UUID implantId = UUID.randomUUID();
         String implantName = "Клинки Богомолла TEST";
 
+        // when
         when(implantRepo.findById(implantId)).thenReturn(Optional.empty());
 
         // then
         assertThatThrownBy(() -> service.updateImplant(request, implantId, implantName))
-            .isInstanceOf(NightCityRpException.class)
+            .isInstanceOf(ResponseStatusException.class)
             .hasMessageContaining("Имплант не найден");
     }
-
     @Test
     public void deleteImplantSuccess() {
         // given
@@ -174,11 +183,11 @@ public class ImplantsTest {
         when(implantRepo.findById(implantId)).thenReturn(Optional.empty());
 
         // when
-        service.deleteImplant(implantId);
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> service.deleteImplant(implantId));
+        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 
         // then
         verify(implantRepo, never()).delete(any(Implant.class));
     }
-
 }
 
