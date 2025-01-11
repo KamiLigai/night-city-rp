@@ -8,6 +8,9 @@ import ru.nightcityroleplay.backend.dto.CreateUserRequest;
 import ru.nightcityroleplay.backend.dto.UserDto;
 import ru.nightcityroleplay.backend.service.UserService;
 
+import java.util.List;
+import java.util.UUID;
+
 @RestController
 @RequestMapping("users")
 @RequiredArgsConstructor
@@ -25,5 +28,16 @@ public class UserController {
     public UserDto getCurrentUser(Authentication auth) {
         meterRegistry.counter("current_user_requested").increment();
         return userService.getCurrentUser(auth);
+    }
+
+    @GetMapping
+    public List<UserDto> getAllUsers() {
+        meterRegistry.counter("users_list_requested").increment();
+        return userService.getAllUsers();
+    }
+    @GetMapping("{userId}")
+    public UserDto getUserById(@PathVariable UUID userId) {
+        meterRegistry.counter("user_by_id_requested").increment();
+        return userService.getUserById(userId);
     }
 }
