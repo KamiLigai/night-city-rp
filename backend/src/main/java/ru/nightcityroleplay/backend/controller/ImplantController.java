@@ -41,8 +41,8 @@ public class ImplantController {
 
     @PutMapping("{implantId}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void updateImplant(@RequestBody UpdateImplantRequest request, @PathVariable UUID implantId, String name) {
-        implantService.updateImplant(request, implantId, name);
+    public void updateImplant(@RequestBody UpdateImplantRequest request, @PathVariable UUID implantId, String name, Authentication auth) {
+        implantService.updateImplant(request, implantId, name, auth);
     }
 
     @DeleteMapping("{implantId}")
