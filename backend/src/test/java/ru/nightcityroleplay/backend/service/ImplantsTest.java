@@ -104,7 +104,7 @@ public class ImplantsTest {
     }
 
     @Test
-    public void updateImplantSuccess() {
+    public void updateImplant_Success() {
         // given
         UUID implantId = UUID.randomUUID();
         Implant existingImplant = new Implant();

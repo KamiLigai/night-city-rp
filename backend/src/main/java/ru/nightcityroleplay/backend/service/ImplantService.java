@@ -109,8 +109,8 @@ public class ImplantService {
 
     @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
     @Transactional
-    public void updateImplant(UpdateImplantRequest request, UUID implantId, String name, Authentication auth) {
-        log.info("Администратор {} пытается создать имплант с именем: {} с id {}", auth.getName(), name, implantId);
+    public void updateImplant(UpdateImplantRequest request, UUID implantId, String name) {
+        log.info("Администратор пытается создать имплант с именем: {} с id {}", name, implantId);
         if (request.getReputationRequirement() < 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Требование к репутации не может быть отрицательным");
         }
