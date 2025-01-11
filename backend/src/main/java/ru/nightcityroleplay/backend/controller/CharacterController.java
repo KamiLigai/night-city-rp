@@ -63,6 +63,10 @@ public class CharacterController {
     public void putCharacterImplant(@RequestBody UpdateCharacterImplantRequest request, @PathVariable UUID characterId, Authentication auth) {
         characterService.putCharacterImplant(request, characterId, auth);
     }
+    @PutMapping("{characterId}/implants-list")
+    public void updateCharacterImplants(@RequestBody UpdateCharacterImplantRequest request, @PathVariable UUID characterId, Authentication auth) {
+        characterService.updateCharacterImplants(request, characterId, auth);
+    }
 
     @DeleteMapping("{characterId}/implants/{implantId}")
     public void deleteCharacterImplant(@PathVariable UUID characterId, @PathVariable UUID implantId, Authentication auth) {

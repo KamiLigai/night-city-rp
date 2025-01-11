@@ -291,8 +291,61 @@ public class CharacterService {
         character.setSpecialImplantPoints(character.getSpecialImplantPoints() - totalSpecialImplantPointsCost);
         characterRepo.save(character);
     }
+    public void updateCharacterImplants(UpdateCharacterImplantRequest request, UUID characterId, Authentication auth) {
+        CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж не найден"));
+        User user = (User) auth.getPrincipal();
+        UUID userId = user.getId();
+        if (!character.getOwnerId().equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Вы не можете добавлять импланты чужому персонажу");
+        }
 
+        // Собираем импланты и проверяем доступные ресурсы
+        List<Implant> implantsToAdd = validateAndCollectImplants(request, character);
 
+        // Обновляем характеристики персонажа и сохраняем
+        character.getImplants().addAll(implantsToAdd);
+        character.setImplantPoints(character.getImplantPoints() - calculateTotalPoints(implantsToAdd, false));
+        character.setSpecialImplantPoints(character.getSpecialImplantPoints() - calculateTotalPoints(implantsToAdd, true));
+        characterRepo.save(character);
+    }
+
+    // Проверяет импланты и возвращает список имплантов, которые можно добавить
+    private List<Implant> validateAndCollectImplants(UpdateCharacterImplantRequest request, CharacterEntity character) {
+        List<Implant> implants = new ArrayList<>();
+        int totalImplantPointsCost = 0;
+        int totalSpecialImplantPointsCost = 0;
+
+        for (UUID implantId : request.getImplantIds()) {
+            Implant implant = implantRepo.findById(implantId).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Имплант с ID " + implantId + " не найден"));
+
+            if (character.getReputation() < implant.getReputationRequirement()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Недостаточная репутация для импланта с ID " + implantId);
+            }
+
+            // Добавляем имплант в список проверенных
+            implants.add(implant);
+            totalImplantPointsCost += implant.getImplantPointsCost();
+            totalSpecialImplantPointsCost += implant.getSpecialImplantPointsCost();
+        }
+
+        // Проверяем, достаточно ли ресурсов у персонажа
+        if (character.getImplantPoints() < totalImplantPointsCost) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Недостаточно ОИ для добавления имплантов");
+        }
+        if (character.getSpecialImplantPoints() < totalSpecialImplantPointsCost) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Недостаточно ОИ* для специальных имплантов");
+        }
+
+        return implants;
+    }
+    // Подсчитывает общую стоимость имплантов
+    private int calculateTotalPoints(List<Implant> implants, boolean special) {
+        return implants.stream()
+            .mapToInt(implant -> special ? implant.getSpecialImplantPointsCost() : implant.getImplantPointsCost())
+            .sum();
+    }
     @Transactional
     public void deleteCharacterImplant(UUID implantId, UUID characterId, Authentication auth) {
         CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
