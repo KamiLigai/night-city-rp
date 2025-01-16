@@ -155,7 +155,7 @@ public class ImplantService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Имплант не найден");
         }
         // Если имплант встроен в персонажей, выбросить ошибку 422
-        if (!implant.getCharsId().isEmpty()) {
+        if (!implant.getChars().isEmpty()) {
             log.info("Не удалось удалить имплант с ID {}: связано с характеристиками", implantId);
             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Запрещено удаление импланта, так как он связан с характеристиками");
         }

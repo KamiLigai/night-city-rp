@@ -26,6 +26,6 @@ public class Implant {
     private int implantPointsCost;
     private int specialImplantPointsCost;
     @ManyToMany(mappedBy = "implants")
-    private List<CharacterEntity> charsId;
+    private List<CharacterEntity> chars;
 }
 
