@@ -64,7 +64,7 @@ public class CharacterController {
         characterService.putCharacterImplant(request, characterId, auth);
     }
     @PutMapping("{characterId}/implants-list")
-    public void updateCharacterImplants(@RequestBody UpdateCharacterImplantRequest request, @PathVariable UUID characterId, Authentication auth) {
+    public void updateCharacterImplants(@RequestBody UpdateCharacterImplantsRequest request, @PathVariable UUID characterId, Authentication auth) {
         characterService.updateCharacterImplants(request, characterId, auth);
     }
 

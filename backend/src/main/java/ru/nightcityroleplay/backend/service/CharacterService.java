@@ -291,7 +291,7 @@ public class CharacterService {
         character.setSpecialImplantPoints(character.getSpecialImplantPoints() - totalSpecialImplantPointsCost);
         characterRepo.save(character);
     }
-    public void updateCharacterImplants(UpdateCharacterImplantRequest request, UUID characterId, Authentication auth) {
+    public void updateCharacterImplants(UpdateCharacterImplantsRequest request, UUID characterId, Authentication auth) {
         CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
             new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж не найден"));
         User user = (User) auth.getPrincipal();
@@ -311,7 +311,7 @@ public class CharacterService {
     }
 
     // Проверяет импланты и возвращает список имплантов, которые можно добавить
-    private List<Implant> validateAndCollectImplants(UpdateCharacterImplantRequest request, CharacterEntity character) {
+    private List<Implant> validateAndCollectImplants(UpdateCharacterImplantsRequest request, CharacterEntity character) {
         List<Implant> implants = new ArrayList<>();
         int totalImplantPointsCost = 0;
         int totalSpecialImplantPointsCost = 0;
