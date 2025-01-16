@@ -37,7 +37,7 @@ public class ImplantsTest {
     }
 
     @Test
-    void createImplantIsSave() {
+    void createImplant_implantIsSaved_success() {
         // given
         var request = new CreateImplantRequest();
         request.setName("Клинки Богомолла TEST");
@@ -72,7 +72,7 @@ public class ImplantsTest {
     }
 
     @Test
-    void toDtoIsNotNull() {
+    void getImplant_implantIsNotNull_success() {
         // given
         UUID implantId = randomUUID();
         Implant implant = new Implant();
@@ -106,7 +106,7 @@ public class ImplantsTest {
     }
 
     @Test
-    public void updateImplant_Success() {
+    public void updateImplant_implantExists_success() {
         // given
         UUID implantId = UUID.randomUUID();
         Implant existingImplant = new Implant();
@@ -138,7 +138,7 @@ public class ImplantsTest {
 
 
     @Test
-    void updateImplantNotFound() {
+    void updateImplant_implantIsAbsent_throwException() {
         // given
         var request = new UpdateImplantRequest();
         request.setName("Valid Name");
@@ -157,10 +157,11 @@ public class ImplantsTest {
         // then
         assertThatThrownBy(() -> service.updateImplant(request, implantId, implantName))
             .isInstanceOf(ResponseStatusException.class)
-            .hasMessageContaining("Имплант не найден");
+            .hasMessageContaining("Имплант не найден")
+            .matches(exception -> ((ResponseStatusException) exception).getStatusCode() == HttpStatus.NOT_FOUND);
     }
     @Test
-    public void deleteImplantSuccess() {
+    public void deleteImplant_implantExists_success() {
         // given
         UUID implantId = UUID.randomUUID();
         Implant implant = new Implant();
@@ -177,16 +178,21 @@ public class ImplantsTest {
     }
 
     @Test
-    public void deleteImplantNotFound() {
+    public void deleteImplant_implantIsAbsent_throw404() {
         // given
         UUID implantId = UUID.randomUUID();
         when(implantRepo.findById(implantId)).thenReturn(Optional.empty());
 
         // when
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> service.deleteImplant(implantId));
-        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        ResponseStatusException exception = assertThrows(
+            ResponseStatusException.class,
+            () -> service.deleteImplant(implantId)
+        );
 
         // then
+        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(exception.getMessage()).contains("Имплант не найден");
+
         verify(implantRepo, never()).delete(any(Implant.class));
     }
 }

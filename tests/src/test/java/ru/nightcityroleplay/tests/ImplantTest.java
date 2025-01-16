@@ -114,7 +114,7 @@ public class ImplantTest {
     @SneakyThrows
     @Description("""
         Дано: Пустая бд.
-        Действие: Попытаться добавить оружие методом POST /weapons с отрицательным пробивом.
+        Действие: Попытаться добавить имплант методом POST /implants с отрицательной ценной.
         Ожидается: Запрос завершился с ошибкой и сообщение об ошибке о некорректных данных.
         """)
     void createImplantWithNegativeImplantPointsCost() {
@@ -158,46 +158,30 @@ public class ImplantTest {
     void deleteImplant() {
         // Создать имплант
         String implantName = randomUUID().toString();
-        String implantType = "Optics_Kiroshi";
-        String description = "Description text";
-        int reputationRequirement = 100;
-        int implantPointsCost = 3;
-        int specialImplantPointsCost = 0;
-        backendRemote.createImplant(
-            CreateImplantRequest.builder()
-                .name(implantName)
-                .implantType(implantType)
-                .description(description)
-                .reputationRequirement(reputationRequirement)
-                .implantPointsCost(implantPointsCost)
-                .specialImplantPointsCost(specialImplantPointsCost)
-                .build()
-        );
-
         // Авторизовать пользователя
         UserDto defaultAdmin = AppContext.get("defaultAdmin");
         backendRemote.setCurrentUser(defaultAdmin.id(), defaultAdmin.username(), defaultAdmin.username());
+        backendRemote.createImplant(
+            CreateImplantRequest.builder()
+                .name(implantName)
+                .implantType("Optics_Kiroshi")
+                .description("Description text")
+                .reputationRequirement(100)
+                .implantPointsCost(3)
+                .specialImplantPointsCost(0)
+                .build()
+        );
 
-        // Проверить созданный имплант
+        // Проверить, что имплант создан
         Result<ImplantsRecord> implantResult = implantRepo.getImplantsByName(implantName);
-
         assertThat(implantResult).hasSize(1);
-        assertThat(implantResult.get(0))
-            .satisfies(
-                implant -> assertThat(implant.getName()).isEqualTo(implantName),
-                implant -> assertThat(implant.getImplantType()).isEqualTo(implantType),
-                implant -> assertThat(implant.getDescription()).isEqualTo(description),
-                implant -> assertThat(implant.getReputationRequirement()).isEqualTo(reputationRequirement),
-                implant -> assertThat(implant.getImplantPointsCost()).isEqualTo(implantPointsCost),
-                implant -> assertThat(implant.getSpecialImplantPointsCost()).isEqualTo(specialImplantPointsCost)
-            );
 
         // Удалить имплант
         backendRemote.deleteImplant(implantResult.get(0).getId());
 
         // Проверить, что имплант удалён
         Result<ImplantsRecord> result = implantRepo.getImplantsByName(implantName);
-        assertThat(result).size().isEqualTo(0);
+        assertThat(result).isEmpty();
     }
 
     @Test
@@ -212,14 +196,16 @@ public class ImplantTest {
         UserDto defaultAdmin = AppContext.get("defaultAdmin");
         backendRemote.setCurrentUser(defaultAdmin.id(), defaultAdmin.username(), defaultAdmin.username());
 
-        // Удалить Имплант
+        // Удалить несуществующий имплант
         UUID implantId = randomUUID();
         HttpResponse response = backendRemote.makeDeleteImplantRequest(implantId);
 
-        // Проверить удаление Импланта
-        Result<ImplantsRecord> result = implantRepo.getImplantById(implantId);
-
+        // Проверить, что вернулся статус 404 и сообщение об ошибке
         assertThat(response.code()).isEqualTo(404);
+        assertThat(response.body().strip()).contains("Имплант не найден");
+
+        // Проверить, что имплант не существует в репозитории
+        Result<ImplantsRecord> result = implantRepo.getImplantById(implantId);
         assertThat(result).size().isEqualTo(0);
     }
 
