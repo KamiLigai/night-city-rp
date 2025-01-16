@@ -166,7 +166,7 @@ public class ImplantsTest {
         UUID implantId = UUID.randomUUID();
         Implant implant = new Implant();
         implant.setId(implantId);
-        implant.setCharsId(List.of());
+        implant.setChars(List.of());
 
         when(implantRepo.findById(implantId)).thenReturn(Optional.of(implant));
 
