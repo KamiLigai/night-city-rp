@@ -1,6 +1,9 @@
 package ru.nightcityroleplay.backend.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -37,34 +40,30 @@ public class UserService {
         userRepo.save(user);
         return toDto(user);
     }
-
-    private UserDto toDto(User user) {
-        List<String> roles = new ArrayList<>();
-        for (int i = 0; i < user.getRoles().size(); i++) {
-            Role role = user.getRoles().get(i);
-            roles.add(role.getName());
-        }
-
+    @Transactional
+    public UserDto toDto(User user) {
         return UserDto.builder()
             .id(user.getId())
             .username(user.getUsername())
-            .roles(roles)
             .build();
     }
-
+    @Transactional
     public UserDto getCurrentUser(Authentication auth) {
         Object principal = auth.getPrincipal();
         User user = (User) principal;
         return toDto(user);
     }
 
-    public List<UserDto> getAllUsers() {
-        List<User> users = (List<User>) userRepo.findAll();
-        return users.stream()
+    @Transactional
+    public Page<UserDto> getUserPage(Pageable pageable) {
+        Page<User> userPage = userRepo.findAll(pageable);
+        List<User> users = userPage.toList();
+        List<UserDto> userDtos = users.stream()
             .map(this::toDto)
             .collect(Collectors.toList());
+        return new PageImpl<>(userDtos, pageable, userPage.getTotalElements());
     }
-
+    @Transactional
     public UserDto getUserById(UUID userId) {
         User user = userRepo.findById(userId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with ID: " + userId));
