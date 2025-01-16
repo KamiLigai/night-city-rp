@@ -197,13 +197,8 @@ public class CharacterService {
         Object principal = auth.getPrincipal();
         User user = (User) principal;
         UUID userid = user.getId();
-
-        // Проверка прав доступа
-        if (not(character.get().getOwnerId().equals(userid))) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Удалить чужого персонажа вздумал? а ты хорош.");
-        }
         characterRepo.deleteById(characterId);
-        log.info("Персонаж {} был удалён", characterId);
+        log.info("Персонаж {} был удалён Администратором {}", characterId, userid);
     }
 
     @Transactional

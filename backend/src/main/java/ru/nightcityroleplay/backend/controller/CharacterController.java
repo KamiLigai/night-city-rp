@@ -2,6 +2,7 @@ package ru.nightcityroleplay.backend.controller;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import ru.nightcityroleplay.backend.dto.*;
@@ -40,6 +41,7 @@ public class CharacterController {
     }
 
     @DeleteMapping("{characterId}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void deleteCharacter(@PathVariable UUID characterId, Authentication auth) {
         characterService.deleteCharacter(characterId, auth);
     }
