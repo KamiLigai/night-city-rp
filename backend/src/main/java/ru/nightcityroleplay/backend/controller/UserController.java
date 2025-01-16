@@ -2,13 +2,14 @@ package ru.nightcityroleplay.backend.controller;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import ru.nightcityroleplay.backend.dto.CreateUserRequest;
 import ru.nightcityroleplay.backend.dto.UserDto;
 import ru.nightcityroleplay.backend.service.UserService;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -31,13 +32,11 @@ public class UserController {
     }
 
     @GetMapping
-    public List<UserDto> getAllUsers() {
-        meterRegistry.counter("users_list_requested").increment();
-        return userService.getAllUsers();
+    public Page<UserDto> getAllUsers(Pageable pageble) {
+        return userService.getUserPage(pageble);
     }
     @GetMapping("{userId}")
     public UserDto getUserById(@PathVariable UUID userId) {
-        meterRegistry.counter("user_by_id_requested").increment();
         return userService.getUserById(userId);
     }
 }
