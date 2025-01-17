@@ -3,3 +3,5 @@
 = Документация
 
 * <<infra.adoc#header,Инфраструктура>>
+* <<conventions.adoc#header,Конвенции>>
+* <<local-env.adoc#header,Локальная среда>>
