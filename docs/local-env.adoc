@@ -1,7 +1,8 @@
 [[header]]
 = Локальная среда
 
-. Скопировать файл `compose-local-template.yml` в файл `compose-local.yml`
+. Перейти в корень проекта
+. Скопировать файл `compose-local-template.yml` в новый файл `compose-local.yml`
 . Скорректировать `compose-local.yml`, если необходимо (например, заняты порты)
 . Собрать образы контейнеров
 +
