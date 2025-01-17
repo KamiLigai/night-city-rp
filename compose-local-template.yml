@@ -1,0 +1,42 @@
+services:
+  night-city-rp-backend:
+    image: night-city-rp-backend:latest
+    build:
+      context: backend/
+      dockerfile: Local.Dockerfile
+    restart:
+      unless-stopped
+    environment:
+      - app.enable-cors=false
+      - spring.datasource.url=jdbc:postgresql://night-city-rp-db:5432/night_city_rp
+      - spring.datasource.username=night-city-rp
+      - spring.datasource.password=postgres
+    depends_on:
+      - night-city-rp-db
+    ports:
+      - "8090:8080"
+
+  night-city-rp-db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=night_city_rp
+      - POSTGRES_USER=night-city-rp
+      - POSTGRES_PASSWORD=postgres
+      - PGDATA=/data/postgres
+    volumes:
+      - postgres:/data/postgres
+    restart: unless-stopped
+    ports:
+      - "8091:5432"
+
+  night-city-rp-frontend:
+    image: night-city-rp-frontend:latest
+    build:
+      context: frontend/
+    restart:
+      unless-stopped
+    ports:
+      - "8092:80"
+
+volumes:
+  postgres:
