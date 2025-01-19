@@ -53,6 +53,8 @@ checkstyle:
   script:
     - cd backend
     - mvn checkstyle:check --no-transfer-progress
+    - cd ../tests
+    - mvn checkstyle:check --no-transfer-progress
 
 deploy-on-test:
   stage: deploy
