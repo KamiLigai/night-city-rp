@@ -305,8 +305,8 @@ public class CharacterService {
 
         // Обновляем характеристики персонажа и сохраняем
         character.getImplants().addAll(implantsToAdd);
-        character.setImplantPoints(character.getImplantPoints() - calculateTotalPoints(implantsToAdd, false));
-        character.setSpecialImplantPoints(character.getSpecialImplantPoints() - calculateTotalPoints(implantsToAdd, true));
+        character.setImplantPoints(character.getImplantPoints() - calculateTotalPointsForImplants(implantsToAdd));
+        character.setSpecialImplantPoints(character.getSpecialImplantPoints() - calculateTotalPointsForSpecialImplants(implantsToAdd));
         characterRepo.save(character);
     }
 
@@ -341,9 +341,15 @@ public class CharacterService {
         return implants;
     }
     // Подсчитывает общую стоимость имплантов
-    private int calculateTotalPoints(List<Implant> implants, boolean special) {
+    private int calculateTotalPointsForImplants(List<Implant> implants) {
         return implants.stream()
-            .mapToInt(implant -> special ? implant.getSpecialImplantPointsCost() : implant.getImplantPointsCost())
+            .mapToInt(implant -> implant.getImplantPointsCost())
+            .sum();
+    }
+
+    private int calculateTotalPointsForSpecialImplants(List<Implant> implants) {
+        return implants.stream()
+            .mapToInt(implant -> implant.getSpecialImplantPointsCost())
             .sum();
     }
     @Transactional
