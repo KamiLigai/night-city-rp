@@ -8,6 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import ru.nightcityroleplay.backend.dto.CreateUserRequest;
 import ru.nightcityroleplay.backend.dto.UserDto;
+import ru.nightcityroleplay.backend.dto.UserWithoutRolesDto;
 import ru.nightcityroleplay.backend.service.UserService;
 
 import java.util.UUID;
@@ -32,7 +33,7 @@ public class UserController {
     }
 
     @GetMapping
-    public Page<UserDto> getAllUsers(Pageable pageble) {
+    public Page<UserWithoutRolesDto> getAllUsers(Pageable pageble) {
         return userService.getUserPage(pageble);
     }
     @GetMapping("{userId}")

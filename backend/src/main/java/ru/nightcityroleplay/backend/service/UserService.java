@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import ru.nightcityroleplay.backend.dto.CreateUserRequest;
 import ru.nightcityroleplay.backend.dto.UserDto;
+import ru.nightcityroleplay.backend.dto.UserWithoutRolesDto;
 import ru.nightcityroleplay.backend.entity.Role;
 import ru.nightcityroleplay.backend.entity.User;
 import ru.nightcityroleplay.backend.repo.UserRepository;
@@ -40,11 +41,17 @@ public class UserService {
         userRepo.save(user);
         return toDto(user);
     }
-    @Transactional
-    public UserDto toDto(User user) {
+    private UserDto toDto(User user) {
+        List<String> roles = new ArrayList<>();
+        for (int i = 0; i < user.getRoles().size(); i++) {
+            Role role = user.getRoles().get(i);
+            roles.add(role.getName());
+        }
+
         return UserDto.builder()
             .id(user.getId())
             .username(user.getUsername())
+            .roles(roles)
             .build();
     }
     @Transactional
@@ -55,13 +62,20 @@ public class UserService {
     }
 
     @Transactional
-    public Page<UserDto> getUserPage(Pageable pageable) {
+    public Page<UserWithoutRolesDto> getUserPage(Pageable pageable) {
         Page<User> userPage = userRepo.findAll(pageable);
         List<User> users = userPage.toList();
-        List<UserDto> userDtos = users.stream()
-            .map(this::toDto)
+        List<UserWithoutRolesDto> userDtos = users.stream()
+            .map(this::toDtoWithoutRoles)
             .collect(Collectors.toList());
         return new PageImpl<>(userDtos, pageable, userPage.getTotalElements());
+    }
+
+    private UserWithoutRolesDto toDtoWithoutRoles(User user) {
+        return UserWithoutRolesDto.builder()
+            .id(user.getId())
+            .username(user.getUsername())
+            .build();
     }
     @Transactional
     public UserDto getUserById(UUID userId) {
