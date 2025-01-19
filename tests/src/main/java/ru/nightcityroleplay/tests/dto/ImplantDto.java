@@ -1,16 +1,12 @@
 package ru.nightcityroleplay.tests.dto;
 
-import lombok.Data;
-
 import java.util.UUID;
 
-@Data
-public class ImplantDto {
-    private UUID id;
-    private String name;
-    private String implantType;
-    private String description;
-    private int reputationRequirement;
-    private int implantPointsCost;
-    private int specialImplantPointsCost;
+public record ImplantDto(UUID id,
+    String name,
+    String implantType,
+    String description,
+    int reputationRequirement,
+    int implantPointsCost,
+    int specialImplantPointsCost) {
 }

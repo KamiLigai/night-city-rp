@@ -131,11 +131,11 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
         }
     }
 
+
     public void updateWeapon(UUID weaponId, UpdateWeaponRequest request) {
-        try (Response response = remote.updateWeapon(weaponId, request)) {
-            if (!response.isSuccessful()) {
-                fail("Не удалось обновить Оружие " + weaponId.toString() + ", " + response);
-            }
+        @Cleanup Response response = remote.updateWeapon(weaponId, request);
+        if (!response.isSuccessful()) {
+            fail("Не удалось обновить Оружие " + weaponId.toString() + ", " + response);
         }
     }
 
@@ -166,11 +166,11 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
         return objectMapper.readValue(jsonBody, ImplantDto.class);
     }
 
+    @SneakyThrows
     public void updateImplant(UUID implantid, UpdateImplantRequest request) {
-        try (Response response = remote.updateImplant(implantid, request)) {
-            if (!response.isSuccessful()) {
-                fail("Не удалось обновить Имплант " + implantid.toString() + ", " + response);
-            }
+        @Cleanup Response response = remote.updateImplant(implantid, request);
+        if (!response.isSuccessful()) {
+            fail("Не удалось обновить Имплант " + implantid.toString() + ", " + response);
         }
     }
 

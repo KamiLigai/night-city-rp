@@ -1,9 +1,10 @@
 package ru.nightcityroleplay.tests;
 
-import jdk.jfr.Description;
+import io.qameta.allure.Description;
 import lombok.SneakyThrows;
 import org.jooq.DSLContext;
 import org.jooq.Result;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.nightcityroleplay.tests.component.AppContext;
 import ru.nightcityroleplay.tests.component.BackendRemoteComponent;
@@ -23,12 +24,19 @@ public class ImplantTest {
     BackendRemoteComponent backendRemote = AppContext.get(BackendRemoteComponent.class);
     ImplantRepo implantRepo = AppContext.get(ImplantRepo.class);
 
+
+    @BeforeEach
+    @Test
+    void setUserAdmin(){
+        UserDto defaultAdmin = AppContext.get("defaultAdmin");
+        backendRemote.setCurrentUser(defaultAdmin.id(), defaultAdmin.username(), defaultAdmin.username());
+    }
     @Test
     @SneakyThrows
     @Description("""
         Дано: Пустая бд.
-        Действие: Добавить оружие методом POST /implants с валидными данными.
-        Ожидается: имплант успешно добавлено в бд. ID оружия в ответе соответствует созданному в бд.
+        Действие: Добавить имплант методом POST /implants с валидными данными.
+        Ожидается: имплант успешно добавлено в бд. ID импланта в ответе соответствует созданному в бд.
         """)
     void createImplant() {
         // Создать имплант
@@ -38,10 +46,6 @@ public class ImplantTest {
         int reputationRequirement = 100;
         int implantPointsCost = 2;
         int specialImplantPointsCost = 0;
-
-        UserDto defaultAdmin = AppContext.get("defaultAdmin");
-        backendRemote.setCurrentUser(defaultAdmin.id(), defaultAdmin.username(), defaultAdmin.username());
-
 
         backendRemote.createImplant(
             CreateImplantRequest.builder()
@@ -87,10 +91,6 @@ public class ImplantTest {
         int implantPointsCost = 2;
         int specialImplantPointsCost = 0;
 
-        UserDto defaultAdmin = AppContext.get("defaultAdmin");
-        backendRemote.setCurrentUser(defaultAdmin.id(), defaultAdmin.username(), defaultAdmin.username());
-
-
         HttpResponse response = backendRemote.makeCreateImplantRequest(
             CreateImplantRequest.builder()
                 .name(implantName)
@@ -126,10 +126,6 @@ public class ImplantTest {
         int implantPointsCost = -2;
         int specialImplantPointsCost = 0;
 
-        UserDto defaultAdmin = AppContext.get("defaultAdmin");
-        backendRemote.setCurrentUser(defaultAdmin.id(), defaultAdmin.username(), defaultAdmin.username());
-
-
         HttpResponse response = backendRemote.makeCreateImplantRequest(
             CreateImplantRequest.builder()
                 .name(implantName)
@@ -158,9 +154,6 @@ public class ImplantTest {
     void deleteImplant() {
         // Создать имплант
         String implantName = randomUUID().toString();
-        // Авторизовать пользователя
-        UserDto defaultAdmin = AppContext.get("defaultAdmin");
-        backendRemote.setCurrentUser(defaultAdmin.id(), defaultAdmin.username(), defaultAdmin.username());
         backendRemote.createImplant(
             CreateImplantRequest.builder()
                 .name(implantName)
@@ -193,9 +186,6 @@ public class ImplantTest {
                Никакой имплант не удалён.
     """)
     void deleteNonExistingImplant() {
-        UserDto defaultAdmin = AppContext.get("defaultAdmin");
-        backendRemote.setCurrentUser(defaultAdmin.id(), defaultAdmin.username(), defaultAdmin.username());
-
         // Удалить несуществующий имплант
         UUID implantId = randomUUID();
         HttpResponse response = backendRemote.makeDeleteImplantRequest(implantId);
@@ -224,10 +214,6 @@ public class ImplantTest {
         int implantPointsCost = 3;
         int specialImplantPointsCost = 0;
 
-        // Авторизовать пользователя
-        UserDto defaultAdmin = AppContext.get("defaultAdmin");
-        backendRemote.setCurrentUser(defaultAdmin.id(), defaultAdmin.username(), defaultAdmin.username());
-
         backendRemote.createImplant(
             CreateImplantRequest.builder()
                 .name(implantName)
@@ -238,18 +224,17 @@ public class ImplantTest {
                 .specialImplantPointsCost(specialImplantPointsCost)
                 .build()
         );
-
         // Проверить новый имплант
         Result<ImplantsRecord> implantRecord = implantRepo.getImplantsByName(implantName);
         ImplantDto implantDto = backendRemote.getImplant(implantRecord.get(0).getId());
 
         assertThat(implantRecord).hasSize(1);
-        assertThat(implantDto.getName()).isEqualTo(implantRecord.get(0).getName());
-        assertThat(implantDto.getImplantType()).isEqualTo(implantRecord.get(0).getImplantType());
-        assertThat(implantDto.getDescription()).isEqualTo(implantRecord.get(0).getDescription());
-        assertThat(implantDto.getReputationRequirement()).isEqualTo(implantRecord.get(0).getReputationRequirement());
-        assertThat(implantDto.getImplantPointsCost()).isEqualTo(implantRecord.get(0).getImplantPointsCost());
-        assertThat(implantDto.getSpecialImplantPointsCost()).isEqualTo(implantRecord.get(0).getSpecialImplantPointsCost());
+        assertThat(implantDto.name()).isEqualTo(implantRecord.get(0).getName());
+        assertThat(implantDto.implantType()).isEqualTo(implantRecord.get(0).getImplantType());
+        assertThat(implantDto.description()).isEqualTo(implantRecord.get(0).getDescription());
+        assertThat(implantDto.reputationRequirement()).isEqualTo(implantRecord.get(0).getReputationRequirement());
+        assertThat(implantDto.implantPointsCost()).isEqualTo(implantRecord.get(0).getImplantPointsCost());
+        assertThat(implantDto.specialImplantPointsCost()).isEqualTo(implantRecord.get(0).getSpecialImplantPointsCost());
     }
 
     @Test
@@ -266,9 +251,6 @@ public class ImplantTest {
         int reputationRequirement = 1001;
         int implantPointsCost = 3;
         int specialImplantPointsCost = 0;
-        // Авторизовать пользователя
-        UserDto defaultAdmin = AppContext.get("defaultAdmin");
-        backendRemote.setCurrentUser(defaultAdmin.id(), defaultAdmin.username(), defaultAdmin.username());
         backendRemote.createImplant(
             CreateImplantRequest.builder()
                 .name(implantName)
@@ -300,12 +282,12 @@ public class ImplantTest {
         ImplantDto updatedImplantDto = backendRemote.getImplant(implantRecord.get(0).getId());
 
         // Проверить изменения
-        assertThat(updatedImplantDto.getName()).isEqualTo(updatedImplantName);
-        assertThat(updatedImplantDto.getDescription()).isEqualTo(updatedDescription);
-        assertThat(updatedImplantDto.getReputationRequirement()).isEqualTo(100);
-        assertThat(updatedImplantDto.getImplantPointsCost()).isEqualTo(3);
-        assertThat(updatedImplantDto.getSpecialImplantPointsCost()).isEqualTo(0);
-        assertThat(updatedImplantDto.getImplantType()).isEqualTo("NeuralLink");
+        assertThat(updatedImplantDto.name()).isEqualTo(updatedImplantName);
+        assertThat(updatedImplantDto.description()).isEqualTo(updatedDescription);
+        assertThat(updatedImplantDto.reputationRequirement()).isEqualTo(100);
+        assertThat(updatedImplantDto.implantPointsCost()).isEqualTo(3);
+        assertThat(updatedImplantDto.specialImplantPointsCost()).isEqualTo(0);
+        assertThat(updatedImplantDto.implantType()).isEqualTo("NeuralLink");
     }
 
     @Test
@@ -315,10 +297,6 @@ public class ImplantTest {
     Ожидается: Ошибка 404, имплант не найден
     """)
     void updateNonExistingImplant() {
-        // Установить текущего пользователя
-        UserDto defaultAdmin = AppContext.get("defaultAdmin");
-        backendRemote.setCurrentUser(defaultAdmin.id(), defaultAdmin.username(), defaultAdmin.username());
-
         // Пытаться изменить несуществующий имплант
         HttpResponse response = backendRemote.makeUpdateImplantRequest(
             randomUUID(),
@@ -351,8 +329,6 @@ public class ImplantTest {
         int reputationRequirement = 100;
         int implantPointsCost = 5;
         int specialImplantPointsCost = 2;
-        UserDto defaultAdmin = AppContext.get("defaultAdmin");
-        backendRemote.setCurrentUser(defaultAdmin.id(), defaultAdmin.username(), defaultAdmin.username());
 
         backendRemote.createImplant(
             CreateImplantRequest.builder()

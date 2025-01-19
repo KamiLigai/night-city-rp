@@ -157,7 +157,7 @@ public class ImplantService {
         // Если имплант встроен в персонажей, выбросить ошибку 422
         if (!implant.getChars().isEmpty()) {
             log.info("Не удалось удалить имплант с ID {}: связано с характеристиками", implantId);
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Запрещено удаление импланта, так как он связан с характеристиками");
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Запрещено удаление импланта, так как он встроен в персонажей");
         }
         // Удаление импланта
         implantRepo.delete(implant);
