@@ -1,13 +1,16 @@
 package ru.nightcityroleplay.backend.dto;
 
 import lombok.Builder;
+
+import java.util.List;
 import java.util.UUID;
 
-public record UserWithoutRolesDto(
+public record CurrentUserDto(
     UUID id,
-    String username
+    String username,
+    List<String> roles
 ) {
     @Builder
-    public UserWithoutRolesDto {
+    public CurrentUserDto {
     }
 }
