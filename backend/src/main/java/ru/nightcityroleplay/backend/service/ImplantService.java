@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -112,4 +113,19 @@ public class ImplantService {
             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Запрещено удаление импланта, так как оно связано с характеристиками");
         }
     }
+    // Получение списка всех ID имплантов
+    public List<UUID> getAllImplantIds() {
+        return implantRepo.findAll().stream()
+            .map(Implant::getId)
+            .collect(Collectors.toList());
+    }
+
+    // Получение деталей имплантов по списку ID
+    public List<ImplantDto> getBulkImplants(List<UUID> implantIds) {
+        return implantRepo.findAllById(implantIds)
+            .stream()
+            .map(this::toDto)
+            .collect(Collectors.toList());
+    }
+
 }

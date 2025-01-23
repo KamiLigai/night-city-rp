@@ -11,6 +11,7 @@ import ru.nightcityroleplay.backend.dto.ImplantDto;
 import ru.nightcityroleplay.backend.dto.UpdateImplantRequest;
 import ru.nightcityroleplay.backend.service.ImplantService;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -49,5 +50,17 @@ public class ImplantController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void deleteImplant(@PathVariable UUID implantId) {
         implantService.deleteImplant(implantId);
+    }
+
+    // Получение списка всех ID имплантов
+    @GetMapping("/ids")
+    public List<UUID> getImplantIds() {
+        return implantService.getAllImplantIds();
+    }
+
+    // Получение деталей имплантов по запросу с несколькими ID
+    @PostMapping("/get-bulk")
+    public List<ImplantDto> getBulkImplants(@RequestBody List<UUID> implantIds) {
+        return implantService.getBulkImplants(implantIds);
     }
 }
