@@ -79,6 +79,36 @@ public class ImplantTest {
     @SneakyThrows
     @Description("""
         Дано: Пустая бд.
+        Действие: Добавить имплант методом POST /implants с валидными данными.
+        Ожидается: имплант успешно добавлено в бд. ID импланта в ответе соответствует созданному в бд.
+        """)
+    void createImplantByDefaultUser() {
+        // Создать имплант
+        String implantName = randomUUID().toString();
+        String implantType = "Оптика";
+        String description = "йцуйцуйцу";
+        int reputationRequirement = 100;
+        int implantPointsCost = 2;
+        int specialImplantPointsCost = 0;
+
+        HttpResponse response = backendRemote.makeCreateImplantRequest(
+            CreateImplantRequest.builder()
+                .name(implantName)
+                .implantType(implantType)
+                .description(description)
+                .reputationRequirement(reputationRequirement)
+                .implantPointsCost(implantPointsCost)
+                .specialImplantPointsCost(specialImplantPointsCost)
+                .build()
+        );
+
+        assertThat(response.code()).isEqualTo(403);
+    }
+
+    @Test
+    @SneakyThrows
+    @Description("""
+        Дано: Пустая бд.
         Действие: Попытаться добавить имплант методом POST /implants с пустым именем.
         Ожидается: Запрос завершился с ошибкой и сообщение об ошибке о некорректных данных.
         """)
@@ -175,6 +205,40 @@ public class ImplantTest {
         // Проверить, что имплант удалён
         Result<ImplantsRecord> result = implantRepo.getImplantsByName(implantName);
         assertThat(result).isEmpty();
+    }
+
+    @Test
+    @Description("""
+        Дано: Имплант с id.
+        Действие: Удалить имплант методом DELETE /implant/{id} руками Юзера.
+        Ожидается: 403.
+        """)
+    void deleteImplantByDefaultUser() {
+        // Создать имплант
+        String implantName = randomUUID().toString();
+        backendRemote.createImplant(
+            CreateImplantRequest.builder()
+                .name(implantName)
+                .implantType("Optics_Kiroshi")
+                .description("Description text")
+                .reputationRequirement(100)
+                .implantPointsCost(3)
+                .specialImplantPointsCost(0)
+                .build()
+        );
+
+        // Проверить, что имплант создан
+        Result<ImplantsRecord> implantResult = implantRepo.getImplantsByName(implantName);
+        assertThat(implantResult).hasSize(1);
+
+        UserDto user = AppContext.get("defaultUser");
+        backendRemote.setCurrentUser(user.id(), user.username(), user.username());
+
+        // Удалить имплант
+        HttpResponse response = backendRemote.makeDeleteImplantRequest(implantResult.get(0).getId());
+
+        // Проверить, что имплант не удалён и вышло 403
+        assertThat(response.code()).isEqualTo(403);
     }
 
     @Test
