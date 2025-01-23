@@ -37,9 +37,12 @@ public class SkillService {
         skillDto.setId(skill.getId());
         skillDto.setName(skill.getName());
         skillDto.setDescription(skill.getDescription());
+        skillDto.setSkillClass(skill.getSkillClass());
+        skillDto.setTypeIsBattle(skill.getTypeIsBattle());
         skillDto.setLevel(skill.getLevel());
-        skillDto.setType(skill.getType());
-        skillDto.setCost(skill.getCost());
+        skillDto.setBattleCost(skill.getBattleCost());
+        skillDto.setCivilCost(skill.getCivilCost());
+        skillDto.setReputationRequirement(skill.getReputationRequirement());
         return skillDto;
     }
 
@@ -49,9 +52,75 @@ public class SkillService {
         skill.setId(UUID.randomUUID());
         skill.setName(request.getName());
         skill.setDescription(request.getDescription());
+        skill.setSkillClass(request.getSkillClass());
         skill.setLevel(request.getLevel());
-        skill.setType(request.getType());
-        skill.setCost(request.getCost());
+        skill.setTypeIsBattle(request.getTypeIsBattle());
+        if (request.getTypeIsBattle()) {
+            if (request.getLevel() < 1) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Уровень навыка  не может быть меньше 0");
+            }
+            if (request.getLevel() < 6) {
+                skill.setBattleCost(request.getLevel());
+                skill.setReputationRequirement(0);
+            }
+            if (request.getLevel() == 6) {
+                skill.setBattleCost(7);
+                skill.setReputationRequirement(70);
+            }
+            if (request.getLevel() == 7) {
+                skill.setBattleCost(9);
+                skill.setReputationRequirement(100);
+            }
+            if (request.getLevel() == 8) {
+                skill.setBattleCost(12);
+                skill.setReputationRequirement(130);
+            }
+            if (request.getLevel() == 9) {
+                skill.setBattleCost(16);
+                skill.setReputationRequirement(160);
+            }
+            if (request.getLevel() == 10) {
+                skill.setBattleCost(21);
+                skill.setReputationRequirement(200);
+            }
+            if (request.getLevel() > 10) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Уровень навыка не может быть больше 10");
+            }
+            skill.setCivilCost(0);
+        }
+        if (!request.getTypeIsBattle()) {
+            if (request.getLevel() < 1) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Уровень навыка  не может быть меньше 0");
+            }
+            if (request.getLevel() < 6) {
+                skill.setCivilCost(request.getLevel());
+                skill.setReputationRequirement(0);
+            }
+            if (request.getLevel() == 6) {
+                skill.setCivilCost(7);
+                skill.setReputationRequirement(70);
+            }
+            if (request.getLevel() == 7) {
+                skill.setCivilCost(9);
+                skill.setReputationRequirement(100);
+            }
+            if (request.getLevel() == 8) {
+                skill.setCivilCost(12);
+                skill.setReputationRequirement(130);
+            }
+            if (request.getLevel() == 9) {
+                skill.setCivilCost(16);
+                skill.setReputationRequirement(160);
+            }
+            if (request.getLevel() == 10) {
+                skill.setCivilCost(21);
+                skill.setReputationRequirement(200);
+            }
+            if (request.getLevel() > 10) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Уровень навыка не может быть больше 10");
+            }
+            skill.setBattleCost(0);
+        }
         skill = skillRepo.save(skill);
         log.info("Навык {} был создан", skill.getId());
         return new CreateSkillResponse(skill.getId());
@@ -88,9 +157,11 @@ public class SkillService {
         newSkill.setId(skillId);
         newSkill.setName(skillDto.getName());
         newSkill.setDescription(skillDto.getDescription());
+        newSkill.setTypeIsBattle(skillDto.getTypeIsBattle());
         newSkill.setLevel(oldSkill.get().getLevel());
-        newSkill.setType(skillDto.getType());
-        newSkill.setCost(oldSkill.get().getCost());
+        newSkill.setBattleCost(oldSkill.get().getBattleCost());
+        newSkill.setCivilCost(oldSkill.get().getCivilCost());
+        newSkill.setReputationRequirement(oldSkill.get().getReputationRequirement());
         skillRepo.save(newSkill);
         log.info("Навык {} обновлен", skillDto.getName());
     }

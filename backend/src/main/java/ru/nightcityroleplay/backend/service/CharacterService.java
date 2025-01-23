@@ -163,10 +163,35 @@ public class CharacterService {
         if (not(character.getOwnerId().equals(userid))) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Нельзя добавлять навык не своему персонажу!");
         }
-        List<Skill> skills = skillRepo.findAllByIdIn(request.getSkillId());
-        character.setSkills(skills);
+        List<Skill> skills = new ArrayList<>();
+        int totalBattlePoints = 0;
+        int totalCivilPoints = 0;
+        // Проверка наличия навыка и суммирование стоимости
+
+        for (UUID skillId : request.getSkillId()) {
+            Skill skill = skillRepo.findById(skillId).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Навык с ID" + skillId + "не найден"));
+            if (character.getReputation() < skill.getReputationRequirement()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Данный уровень навыка не доступен на вашей репутации");
+            }
+            skills.add(skill);
+            totalBattlePoints += skill.getBattleCost();
+            totalCivilPoints += skill.getCivilCost();
+        }
+        if (character.getBattlePoints() < totalBattlePoints) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Недостаточно БО для выбранного уровня навыка");
+        }
+        if (character.getCivilPoints() < totalCivilPoints){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Недостаточно МО для выбранного уровня навыка");
+        }
+        // Создаем или обновляем список имплантов персонажа
+        if (character.getSkills() == null) {
+            character.setSkills(new ArrayList<>());
+        }
+        character.getSkills().addAll(skills);
+        character.setBattlePoints(character.getBattlePoints() - totalBattlePoints);
+        character.setCivilPoints(character.getCivilPoints() - totalCivilPoints);
         characterRepo.save(character);
-        log.info("Персонажу {} обновлены навыки", character.getId());
     }
 
     @Transactional

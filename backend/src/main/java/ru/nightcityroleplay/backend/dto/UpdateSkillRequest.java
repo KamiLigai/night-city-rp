@@ -7,5 +7,6 @@ public class UpdateSkillRequest {
 
     private String name;
     private String description;
-    private String type;
+    private String skillClass;
+    private Boolean typeIsBattle;
 }
