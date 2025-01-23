@@ -4,12 +4,10 @@ package ru.nightcityroleplay.backend.controller;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
-import ru.nightcityroleplay.backend.dto.CreateSkillRequest;
-import ru.nightcityroleplay.backend.dto.CreateSkillResponse;
-import ru.nightcityroleplay.backend.dto.SkillDto;
-import ru.nightcityroleplay.backend.dto.UpdateSkillRequest;
+import ru.nightcityroleplay.backend.dto.*;
 import ru.nightcityroleplay.backend.service.SkillService;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -28,13 +26,23 @@ public class SkillController {
     }
 
     @GetMapping
-    public Page<SkillDto> getSkills(Pageable pageable) {
+    public Page<SkillDto> getSkillPage(Pageable pageable) {
         return skillService.getSkillPage(pageable);
     }
 
     @GetMapping("{skillId}")
     public SkillDto getSkill(@PathVariable UUID skillId) {
         return skillService.getSkill(skillId);
+    }
+
+    @GetMapping("ids")
+    public List<UUID> getSkillIds() {
+        return skillService.getSkillIds();
+    }
+
+    @PostMapping("get-bulk")
+    public List<SkillDto> getSkillsBulk(@RequestBody IdsRequest request) {
+        return skillService.getSkillsBulk(request);
     }
 
     @PutMapping("{skillId}")
