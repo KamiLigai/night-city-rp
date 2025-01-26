@@ -14,7 +14,7 @@ services:
       - spring.profiles.active=json-logging
       - spring.datasource.url=jdbc:postgresql://night-city-rp-db:5432/night_city_rp
       - spring.datasource.username=${PROD_POSTGRES_USERNAME}
-      - spring.datasource.password=${PROD_POSTGRES_USERNAME}
+      - spring.datasource.password=${PROD_POSTGRES_PASSWORD}
       - spring.main.banner-mode=off
       - springdoc.api-docs.enabled=false
       - springdoc.swagger-ui.enabled=false
