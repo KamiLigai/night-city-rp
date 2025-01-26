@@ -29,7 +29,6 @@ public class UserService {
     private final UserRepository userRepo;
     private final PasswordEncoder passwordEncoder;
 
-    // todo: add validation
     @Transactional
     public CurrentUserDto createUser(CreateUserRequest request) {
         List<Role> roles = new ArrayList<>();

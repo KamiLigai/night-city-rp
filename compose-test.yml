@@ -13,8 +13,8 @@ services:
       - app.enable-cors=false
       - spring.profiles.active=json-logging
       - spring.datasource.url=jdbc:postgresql://night-city-rp-db:5432/night_city_rp
-      - spring.datasource.username=night-city-rp
-      - spring.datasource.password=postgres          # todo: сменить и спрятать в секреты
+      - spring.datasource.username=${TEST_POSTGRES_USERNAME}
+      - spring.datasource.password=${TEST_POSTGRES_PASSWORD}
       - spring.main.banner-mode=off
     depends_on:
       - night-city-rp-db
@@ -25,8 +25,8 @@ services:
     image: postgres:15
     environment:
       - POSTGRES_DB=night_city_rp
-      - POSTGRES_USER=night-city-rp
-      - POSTGRES_PASSWORD=postgres    # todo: сменить и спрятать в секреты
+      - POSTGRES_USER=${TEST_POSTGRES_USERNAME}
+      - POSTGRES_PASSWORD=${TEST_POSTGRES_PASSWORD}
       - PGDATA=/data/postgres
     volumes:
       - /mnt/pool-1/night-city-rp-test/db/data/postgres:/data/postgres
