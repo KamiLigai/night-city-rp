@@ -10,7 +10,7 @@ build:
   image: maven:3-eclipse-temurin-17
   script:
     - cd backend
-    - mvn package -s maven-settings.xml -DskipTests
+    - mvn package -s ../maven-settings.xml -DskipTests
     - cp target/backend-*.jar target/app.jar
   artifacts:
     paths:
@@ -21,7 +21,7 @@ test:
   image: maven:3-eclipse-temurin-17
   script:
     - cd backend
-    - mvn test -s maven-settings.xml --no-transfer-progress
+    - mvn test -s ../maven-settings.xml --no-transfer-progress
 
 system-test:
   stage: build
@@ -53,9 +53,9 @@ checkstyle:
   image: maven:3-eclipse-temurin-17
   script:
     - cd backend
-    - mvn checkstyle:check -s maven-settings.xml --no-transfer-progress
+    - mvn checkstyle:check -s ../maven-settings.xml --no-transfer-progress
     - cd ../tests
-    - mvn checkstyle:check -s maven-settings.xml --no-transfer-progress
+    - mvn checkstyle:check -s ../maven-settings.xml --no-transfer-progress
 
 deploy-on-test:
   stage: deploy
