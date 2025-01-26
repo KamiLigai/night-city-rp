@@ -10,7 +10,7 @@ build:
   image: maven:3-eclipse-temurin-17
   script:
     - cd backend
-    - mvn package -s ../maven-settings.xml -DskipTests
+    - mvn package -s ../maven-settings.xml -DskipTests  --no-transfer-progress
     - cp target/backend-*.jar target/app.jar
   artifacts:
     paths:

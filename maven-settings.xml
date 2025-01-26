@@ -3,7 +3,7 @@
 
     <servers>
         <server>
-            <id>maven-central-mirror</id>
+            <id>maven-central-proxy</id>
             <username>${env.NEXUS_USERNAME}</username>
             <password>${env.NEXUS_PASSWORD}</password>
         </server>
@@ -11,7 +11,7 @@
 
     <mirrors>
         <mirror>
-            <id>maven-central-mirror</id>
+            <id>maven-central-proxy</id>
             <mirrorOf>*</mirrorOf>
             <url>https://nexus.ntrubkin.ru/repository/maven-central/</url>
         </mirror>
