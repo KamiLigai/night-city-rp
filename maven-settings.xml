@@ -1,0 +1,19 @@
+<settings xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <servers>
+        <server>
+            <id>maven-central-mirror</id>
+            <username>${env.NEXUS_USERNAME}</username>
+            <password>${env.NEXUS_PASSWORD}</password>
+        </server>
+    </servers>
+
+    <mirrors>
+        <mirror>
+            <id>maven-central-mirror</id>
+            <mirrorOf>*</mirrorOf>
+            <url>https://nexus.ntrubkin.ru/repository/maven-central/</url>
+        </mirror>
+    </mirrors>
+</settings>
