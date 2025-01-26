@@ -40,6 +40,7 @@ public class UserService {
         userRepo.save(user);
         return toDto(user);
     }
+
     private CurrentUserDto toDto(User user) {
         List<String> roles = new ArrayList<>();
         for (int i = 0; i < user.getRoles().size(); i++) {
@@ -53,6 +54,7 @@ public class UserService {
             .roles(roles)
             .build();
     }
+
     @Transactional
     public CurrentUserDto getCurrentUser(Authentication auth) {
         Object principal = auth.getPrincipal();
@@ -76,6 +78,7 @@ public class UserService {
             .username(user.getUsername())
             .build();
     }
+
     @Transactional
     public CurrentUserDto getUserById(UUID userId) {
         User user = userRepo.findById(userId)
