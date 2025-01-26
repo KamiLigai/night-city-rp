@@ -36,6 +36,7 @@ public class UserController {
     public Page<UserDto> getAllUsers(Pageable pageble) {
         return userService.getUserPage(pageble);
     }
+
     @GetMapping("{userId}")
     public CurrentUserDto getUserById(@PathVariable UUID userId) {
         return userService.getUserById(userId);
