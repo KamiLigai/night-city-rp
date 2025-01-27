@@ -131,12 +131,52 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
         }
     }
 
+
     public void updateWeapon(UUID weaponId, UpdateWeaponRequest request) {
-        try (Response response = remote.updateWeapon(weaponId, request)) {
-            if (!response.isSuccessful()) {
-                fail("Не удалось обновить Оружие " + weaponId.toString() + ", " + response);
-            }
+        @Cleanup Response response = remote.updateWeapon(weaponId, request);
+        if (!response.isSuccessful()) {
+            fail("Не удалось обновить Оружие " + weaponId.toString() + ", " + response);
         }
+    }
+
+    @SneakyThrows
+    public void createImplant(CreateImplantRequest request) {
+        @Cleanup Response response = remote.createImplant(request);
+        if (!response.isSuccessful()) {
+            fail("Не удалось создать имплант " + request.name() + ", " + response);
+        }
+        var jsonBody = response.body().string();
+        objectMapper.readValue(jsonBody, CreateImplantRequest.class);
+    }
+
+    public void deleteImplant(UUID implantid) {
+        @Cleanup Response response = remote.deleteImplant(implantid);
+        if (!response.isSuccessful()) {
+            fail("Не удалось удалить Имплант " + implantid + ", " + response);
+        }
+    }
+
+    @SneakyThrows
+    public ImplantDto getImplant(UUID implantid) {
+        @Cleanup Response response = remote.getImplant(implantid);
+        if (!response.isSuccessful()) {
+            throw new AppContextException("Имплант не найден " + response);
+        }
+        var jsonBody = response.body().string();
+        return objectMapper.readValue(jsonBody, ImplantDto.class);
+    }
+
+    @SneakyThrows
+    public void updateImplant(UUID implantid, UpdateImplantRequest request) {
+        @Cleanup Response response = remote.updateImplant(implantid, request);
+        if (!response.isSuccessful()) {
+            fail("Не удалось обновить Имплант " + implantid.toString() + ", " + response);
+        }
+    }
+
+    public HttpResponse makeCreateImplantRequest(CreateImplantRequest request) {
+        @Cleanup Response response = remote.createImplant(request);
+        return toHttpResponse(response);
     }
 
     public HttpResponse makeCreateWeaponRequest(CreateWeaponRequest request) {
@@ -149,8 +189,18 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
         return toHttpResponse(response);
     }
 
+    public HttpResponse makeUpdateImplantRequest(UUID implantid, UpdateImplantRequest request) {
+        @Cleanup Response response = remote.updateImplant(implantid, request);
+        return toHttpResponse(response);
+    }
+
     public HttpResponse makeDeleteWeaponRequest(UUID weaponId) {
         @Cleanup Response response = remote.deleteWeapon(weaponId);
+        return toHttpResponse(response);
+    }
+
+    public HttpResponse makeDeleteImplantRequest(UUID implantid) {
+        @Cleanup Response response = remote.deleteImplant(implantid);
         return toHttpResponse(response);
     }
 }

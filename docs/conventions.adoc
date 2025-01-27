@@ -5,3 +5,5 @@
 ** deleteCharacter_notFound_throw404
 
 ** Предпочтительные термины: Exist, throw404, success
+
+** Каждый системный тест не полагается на setCurrentUser(), а либо устанавливает сам, либо использует @beforeeach в классе
