@@ -21,6 +21,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.util.stream.Collectors.toList;
+import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
+
 
 @Service
 @Slf4j
@@ -163,5 +166,21 @@ public class ImplantService {
         implantRepo.delete(implant);
         log.info("Имплант с ID {} был успешно удалён", implantId);
     }
+
+    // Получение списка всех ID имплантов
+    public List<UUID> getAllImplantIds() {
+        return implantRepo.findAll().stream()
+            .map(Implant::getId)
+            .collect(toList());
+    }
+
+    // Получение деталей имплантов по списку ID
+    public List<ImplantDto> getBulkImplants(List<UUID> implantIds) {
+        return implantRepo.findAllById(implantIds)
+            .stream()
+            .map(this::toDto)
+            .collect(toList());
+    }
+
 }
 

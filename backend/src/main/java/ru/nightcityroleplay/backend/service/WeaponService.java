@@ -22,6 +22,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
+
 @Service
 @Slf4j
 public class WeaponService {
@@ -56,15 +59,15 @@ public class WeaponService {
 
         //проверка на отрицательные значения
         if (weapon.getName() == null || weapon.getName().isEmpty())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Имя оружия не может быть пустым.");
+            throw new ResponseStatusException(BAD_REQUEST, "Имя оружия не может быть пустым.");
         if (weapon.getIsMelee() == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "'Ближнее?' не может быть null");
+            throw new ResponseStatusException(BAD_REQUEST, "'Ближнее?' не может быть null");
         if (weapon.getWeaponType() == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Тип Оружия не может быть null");
+            throw new ResponseStatusException(BAD_REQUEST, "Тип Оружия не может быть null");
         if (weapon.getPenetration() < 0)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Пробив не может быть отрицательным.");
+            throw new ResponseStatusException(BAD_REQUEST, "Пробив не может быть отрицательным.");
         if (weapon.getReputationRequirement() < 0)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Требование к репутации не может быть отрицательным.");
+            throw new ResponseStatusException(BAD_REQUEST, "Требование к репутации не может быть отрицательным.");
 
         //Сохранение
         weapon = weaponRepo.save(weapon);
@@ -107,15 +110,15 @@ public class WeaponService {
 
         //проверка на отрицательные значения
         if (existingWeapon.getName() == null || existingWeapon.getName().isEmpty())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Имя оружия не может быть пустым.");
+            throw new ResponseStatusException(BAD_REQUEST, "Имя оружия не может быть пустым.");
         if (existingWeapon.getIsMelee() == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "'Ближнее?' не может быть null");
+            throw new ResponseStatusException(BAD_REQUEST, "'Ближнее?' не может быть null");
         if (existingWeapon.getWeaponType() == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Тип Оружия не может быть null");
+            throw new ResponseStatusException(BAD_REQUEST, "Тип Оружия не может быть null");
         if (existingWeapon.getPenetration() < 0)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Пробив не может быть отрицательным.");
+            throw new ResponseStatusException(BAD_REQUEST, "Пробив не может быть отрицательным.");
         if (existingWeapon.getReputationRequirement() < 0)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Требование к репутации не может быть отрицательным.");
+            throw new ResponseStatusException(BAD_REQUEST, "Требование к репутации не может быть отрицательным.");
 
         // Сохранение обновленного оружия
         weaponRepo.save(existingWeapon);
@@ -137,7 +140,9 @@ public class WeaponService {
             log.info("Оружие с ID {} было успешно удалено", weaponId);
         } else {
             log.info("Не удалось удалить оружие с ID {}: связано с характеристиками", weaponId);
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Запрещено удаление оружия, так как оно связано с характеристиками!");
+            throw new ResponseStatusException(
+                    UNPROCESSABLE_ENTITY, "Запрещено удаление оружия, так как оно связано с характеристиками!"
+            );
         }
     }
 

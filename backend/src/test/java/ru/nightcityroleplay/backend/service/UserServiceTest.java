@@ -9,7 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import ru.nightcityroleplay.backend.dto.CreateUserRequest;
-import ru.nightcityroleplay.backend.dto.UserDto;
+import ru.nightcityroleplay.backend.dto.CurrentUserDto;
 import ru.nightcityroleplay.backend.entity.User;
 import ru.nightcityroleplay.backend.repo.UserRepository;
 
@@ -46,7 +46,7 @@ public class UserServiceTest {
         when(passwordEncoder.encode(createUserRequest.password())).thenReturn(encodedPassword);
 
         //when
-        UserDto result = userService.createUser(createUserRequest);
+        CurrentUserDto result = userService.createUser(createUserRequest);
 
         //then
         assertNotNull(result);
@@ -65,7 +65,7 @@ public class UserServiceTest {
         when(auth.getPrincipal()).thenReturn(user);
 
         //when
-        UserDto result = userService.getCurrentUser(auth);
+        CurrentUserDto result = userService.getCurrentUser(auth);
 
         //then
         assertEquals("testUser", result.username());

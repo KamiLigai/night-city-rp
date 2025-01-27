@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import ru.nightcityroleplay.backend.dto.CreateSkillRequest;
@@ -20,6 +19,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 import static ru.nightcityroleplay.backend.util.BooleanUtils.not;
 
 @Service
@@ -72,7 +73,7 @@ public class SkillService {
     public SkillDto getSkill(UUID skillId) {
         Optional<Skill> skillById = skillRepo.findById(skillId);
         if (skillById.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Навык " + skillId + " не найден");
+            throw new ResponseStatusException(NOT_FOUND, "Навык " + skillId + " не найден");
         }
         return toDto(skillById.get());
     }
@@ -83,7 +84,7 @@ public class SkillService {
         Optional<Skill> oldSkill = skillRepo.findById(skillId);
         Skill newSkill = new Skill();
         if (oldSkill.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Навык " + skillId + " не найден");
+            throw new ResponseStatusException(NOT_FOUND, "Навык " + skillId + " не найден");
         }
         newSkill.setId(skillId);
         newSkill.setName(skillDto.getName());
@@ -99,10 +100,10 @@ public class SkillService {
     public void deleteSkill(UUID skillId) {
         Skill skill = skillRepo.findById(skillId).orElse(null);
         if (skill == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Навык " + skillId + " не найден");
+            throw new ResponseStatusException(NOT_FOUND, "Навык " + skillId + " не найден");
         }
         if (not(skill.getCharacters().isEmpty())) {
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Этот навык есть как минимум у одного персонажа!");
+            throw new ResponseStatusException(UNPROCESSABLE_ENTITY, "Этот навык есть как минимум у одного персонажа!");
         }
         skillRepo.delete(skill);
         log.info("Навык {} удалён", skillId);

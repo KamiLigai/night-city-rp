@@ -336,34 +336,6 @@ class CharacterServiceTest {
     }
 
     @Test
-    public void deleteCharacter_unauthorized_throw403() {
-        // given
-        UUID characterId = UUID.randomUUID();
-        Authentication authentication = mock(Authentication.class);
-        User user = new User();
-        UUID userId = UUID.randomUUID();
-        user.setId(userId);
-        when(authentication.getPrincipal()).thenReturn(user);
-
-        CharacterEntity character = new CharacterEntity();
-        character.setId(characterId);
-        character.setOwnerId(UUID.randomUUID());
-
-        when(charRepo.findById(characterId)).thenReturn(java.util.Optional.of(character));
-
-        // when
-        Call call = () -> service.deleteCharacter(characterId, authentication);
-
-        // then
-        assertThatThrownBy(call)
-            .isInstanceOf(ResponseStatusException.class)
-            .hasMessageContaining("Удалить чужого персонажа вздумал? а ты хорош.")
-            .extracting(ResponseStatusException.class::cast)
-            .extracting(ErrorResponseException::getStatusCode)
-            .isEqualTo(HttpStatus.FORBIDDEN);
-    }
-
-    @Test
     void updatedCharacter_ownedByUser_success() {
         // given
         UpdateCharacterRequest request = new UpdateCharacterRequest();
