@@ -7,6 +7,7 @@ import ru.nightcityroleplay.tests.entity.tables.records.ImplantsRecord;
 import java.util.UUID;
 
 import static ru.nightcityroleplay.tests.entity.Tables.IMPLANTS;
+
 public class ImplantRepo {
     private final DSLContext dbContext;
 

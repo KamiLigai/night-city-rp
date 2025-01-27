@@ -22,7 +22,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.stream.Collectors.toList;
-import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 
 
 @Service
@@ -54,28 +53,40 @@ public class ImplantService {
 
         // Валидация входных данных
         if (request.getName() == null || request.getName().isBlank()) {
-            log.info("Ошибка: Имя импланта не может быть пустым. Пользователь: {}", auth.getName());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Имя импланта не может быть пустым.");
+            log.info("Ошибка: Имя импланта не может быть пустым. Пользователь: {}",
+                auth.getName());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Имя импланта не может быть пустым.");
         }
         if (request.getImplantType() == null || request.getImplantType().isBlank()) {
-            log.info("Ошибка: Тип импланта не может быть пустым. Пользователь: {}", auth.getName());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Тип импланта не может быть пустым.");
+            log.info("Ошибка: Тип импланта не может быть пустым. Пользователь: {}",
+                auth.getName());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Тип импланта не может быть пустым.");
         }
         if (request.getDescription() == null || request.getDescription().isBlank()) {
-            log.info("Ошибка: Описание не может быть пустым. Пользователь: {}", auth.getName());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Описание не может быть пустым.");
+            log.info("Ошибка: Описание не может быть пустым. Пользователь: {}",
+                auth.getName());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Описание не может быть пустым.");
         }
         if (request.getReputationRequirement() < 0) {
-            log.info("Ошибка: Требование к репутации не может быть отрицательным. Пользователь: {}", auth.getName());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Требование к репутации не может быть отрицательным.");
+            log.info("Ошибка: Требование к репутации не может быть отрицательным. Пользователь: {}",
+                auth.getName());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Требование к репутации не может быть отрицательным.");
         }
         if (request.getImplantPointsCost() < 0) {
-            log.info("Ошибка: Стоимость очков импланта не может быть отрицательной. Пользователь: {}", auth.getName());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Стоимость очков импланта не может быть отрицательной.");
+            log.info("Ошибка: Стоимость очков импланта не может быть отрицательной. Пользователь: {}",
+                auth.getName());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Стоимость очков импланта не может быть отрицательной.");
         }
         if (request.getSpecialImplantPointsCost() < 0) {
-            log.info("Ошибка: Стоимость особых имплантных очков не может быть отрицательной. Пользователь: {}", auth.getName());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Стоимость особых имплантных очков не может быть отрицательной.");
+            log.info("Ошибка: Стоимость особых имплантных очков не может быть отрицательной. Пользователь: {}",
+                auth.getName());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Стоимость особых имплантных очков не может быть отрицательной.");
         }
 
         // Создание импланта
@@ -89,7 +100,8 @@ public class ImplantService {
         implant.setSpecialImplantPointsCost(request.getSpecialImplantPointsCost());
         implant = implantRepo.save(implant);
 
-        log.info("Имплант с именем {} успешно создан пользователем {}", request.getName(), auth.getName());
+        log.info("Имплант с именем {} успешно создан пользователем {}",
+            request.getName(), auth.getName());
         return new CreateImplantResponse(implant.getId());
     }
 
@@ -109,26 +121,33 @@ public class ImplantService {
         Optional<Implant> implantById = implantRepo.findById(implantId);
         return implantById.map(this::toDto).orElse(null);
     }
+
     @Transactional
     public void updateImplant(UpdateImplantRequest request, UUID implantId, String name) {
         log.info("Администратор пытается создать имплант с именем: {} с id {}", name, implantId);
         if (request.getReputationRequirement() < 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Требование к репутации не может быть отрицательным");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Требование к репутации не может быть отрицательным");
         }
         if (request.getImplantPointsCost() < 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Стоимость очков импланта не может быть отрицательной");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Стоимость очков импланта не может быть отрицательной");
         }
         if (request.getSpecialImplantPointsCost() < 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Стоимость особых очков импланта не может быть отрицательной");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Стоимость особых очков импланта не может быть отрицательной");
         }
         if (request.getName() == null || request.getName().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Имя импланта не должно быть пустым");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Имя импланта не должно быть пустым");
         }
         if (request.getImplantType() == null || request.getImplantType().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Тип импланта не должен быть пустым");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Тип импланта не должен быть пустым");
         }
         if (request.getDescription() == null || request.getDescription().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Описание не должно быть пустым");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Описание не должно быть пустым");
         }
         // Проверка, существует ли имплант с указанным ID
         Implant existingImplant = implantRepo.findById(implantId).orElseThrow(() ->
@@ -145,6 +164,7 @@ public class ImplantService {
         implantRepo.save(existingImplant);
         log.info("Имплант с ID: {} был успешно обновлен", implantId);
     }
+
     @Transactional
     public void deleteImplant(UUID implantId) {
         log.info("Запрос на удаление импланта с ID: {}", implantId);
@@ -160,7 +180,8 @@ public class ImplantService {
         // Если имплант встроен в персонажей, выбросить ошибку 422
         if (!implant.getChars().isEmpty()) {
             log.info("Не удалось удалить имплант с ID {}: так как он встроен в персонажей", implantId);
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Запрещено удаление импланта, так как он встроен в персонажей");
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+                "Запрещено удаление импланта, так как он встроен в персонажей");
         }
         // Удаление импланта
         implantRepo.delete(implant);

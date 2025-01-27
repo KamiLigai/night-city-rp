@@ -42,7 +42,8 @@ public class ImplantsTest {
         var request = new CreateImplantRequest();
         request.setName("Клинки Богомолла TEST");
         request.setImplantType("Конечности");
-        request.setDescription("Боевой кибернетический имплант, смертоносные клинки которого исходят из предплечья, что позволяет использовать их как оружие ближнего боя.\n" +
+        request.setDescription("Боевой кибернетический имплант, смертоносные клинки которого исходят из предплечья," +
+            " что позволяет использовать их как оружие ближнего боя.\n" +
             "\n" +
             "Уровень Пробивной мощности: 3");
         request.setReputationRequirement(70);
@@ -97,7 +98,8 @@ public class ImplantsTest {
         assertThat(result.getId()).isEqualTo(implantId);
         assertThat(result.getName()).isEqualTo("Клинки Богомолла TEST");
         assertThat(result.getImplantType()).isEqualTo("Конечности");
-        assertThat(result.getDescription()).isEqualTo("Боевой кибернетический имплант, смертоносные клинки которого исходят из предплечья, что позволяет использовать их как оружие ближнего боя.\n" +
+        assertThat(result.getDescription()).isEqualTo("Боевой кибернетический имплант, смертоносные " +
+            "клинки которого исходят из предплечья, что позволяет использовать их как оружие ближнего боя.\n" +
             "\n" +
             "Уровень Пробивной мощности: 3");
         assertThat(result.getReputationRequirement()).isEqualTo(70);
