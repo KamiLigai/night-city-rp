@@ -192,7 +192,6 @@ public class ImplantsTest {
         // then
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(exception.getMessage()).contains("Имплант не найден");
-
         verify(implantRepo, never()).delete(any(Implant.class));
     }
 }
