@@ -6,6 +6,9 @@ import org.jooq.DSLContext;
 import org.jooq.Result;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import ru.nightcityroleplay.tests.component.AppContext;
 import ru.nightcityroleplay.tests.component.BackendRemoteComponent;
 import ru.nightcityroleplay.tests.dto.*;
@@ -13,6 +16,7 @@ import ru.nightcityroleplay.tests.entity.tables.records.ImplantsRecord;
 import ru.nightcityroleplay.tests.repo.ImplantRepo;
 
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,7 +42,7 @@ public class ImplantTest {
         Действие: Добавить имплант методом POST /implants с валидными данными.
         Ожидается: имплант успешно добавлено в бд. ID импланта в ответе соответствует созданному в бд.
         """)
-    void createImplant() {
+    void createImplant_validData_success() {
         // Создать имплант
         String implantName = randomUUID().toString();
         String implantType = "Оптика";
@@ -82,7 +86,12 @@ public class ImplantTest {
         Действие: Добавить имплант методом POST /implants с валидными данными.
         Ожидается: имплант успешно добавлено в бд. ID импланта в ответе соответствует созданному в бд.
         """)
-    void createImplantByDefaultUser() {
+    void createImplant_byDefaultUser_throw403() {
+
+        UserDto user = AppContext.get("defaultUser");
+        AppContext.get(BackendRemoteComponent.class)
+            .setCurrentUser(user.id(), user.username(), user.username());
+
         // Создать имплант
         String implantName = randomUUID().toString();
         String implantType = "Оптика";
@@ -105,62 +114,21 @@ public class ImplantTest {
         assertThat(response.code()).isEqualTo(403);
     }
 
-    @Test
+    @ParameterizedTest
+    @MethodSource("implantDataProvider")
     @SneakyThrows
     @Description("""
-        Дано: Пустая бд.
-        Действие: Попытаться добавить имплант методом POST /implants с пустым именем.
-        Ожидается: Запрос завершился с ошибкой и сообщение об ошибке о некорректных данных.
-        """)
-    void createImplantWithBadName() {
-        // Создать имплант
-        String implantName = "";
-        String implantType = "Оптика";
-        String description = "йцуйцуйцу";
-        int reputationRequirement = 100;
-        int implantPointsCost = 2;
-        int specialImplantPointsCost = 0;
-
+    Дано: Пустая БД.
+    Действие: Попытаться добавить имплант методом POST /implants с некорректными данными.
+    Ожидается: Запрос завершился с ошибкой и сообщение об ошибке о некорректных данных.
+    """)
+    void createImplant_WithInvalidData_throw400(String implantName, String implantType, int implantPointsCost, int specialImplantPointsCost, int reputationRequirement, String expectedErrorMessage) {
+        // Попытаться создать имплант с некорректными данными
         HttpResponse response = backendRemote.makeCreateImplantRequest(
             CreateImplantRequest.builder()
                 .name(implantName)
                 .implantType(implantType)
-                .description(description)
-                .reputationRequirement(reputationRequirement)
-                .implantPointsCost(implantPointsCost)
-                .specialImplantPointsCost(specialImplantPointsCost)
-                .build()
-        );
-
-        // Проверить статус кода ответа
-        assertThat(response.code()).isEqualTo(400);
-
-        // Проверить тело ответа на наличие ожидаемого сообщения
-        String responseBody = response.body();
-        assertThat(responseBody).contains("Имя импланта не может быть пустым.");
-    }
-
-    @Test
-    @SneakyThrows
-    @Description("""
-        Дано: Пустая бд.
-        Действие: Попытаться добавить имплант методом POST /implants с отрицательной ценной.
-        Ожидается: Запрос завершился с ошибкой и сообщение об ошибке о некорректных данных.
-        """)
-    void createImplantWithNegativeImplantPointsCost() {
-        // Создать имплант
-        String implantName = "Кироши v.2";
-        String implantType = "Оптика";
-        String description = "йцуйцуйцу";
-        int reputationRequirement = 100;
-        int implantPointsCost = -2;
-        int specialImplantPointsCost = 0;
-
-        HttpResponse response = backendRemote.makeCreateImplantRequest(
-            CreateImplantRequest.builder()
-                .name(implantName)
-                .implantType(implantType)
-                .description(description)
+                .description("Описание")
                 .reputationRequirement(reputationRequirement)
                 .implantPointsCost(implantPointsCost)
                 .specialImplantPointsCost(specialImplantPointsCost)
@@ -172,7 +140,14 @@ public class ImplantTest {
 
         // Проверить тело ответа на наличие ожидаемого сообщения об ошибке
         String responseBody = response.body();
-        assertThat(responseBody).contains("Стоимость очков импланта не может быть отрицательной.");
+        assertThat(responseBody).contains(expectedErrorMessage);
+    }
+
+    private static Stream<Arguments> implantDataProvider() {
+        return Stream.of(
+            Arguments.of("", "Оптика", 2, 0, 100, "Имя импланта не может быть пустым."),
+            Arguments.of("Кироши v.2", "Оптика", -2, 0, 100, "Стоимость очков импланта не может быть отрицательной.")
+        );
     }
 
     @Test
@@ -181,7 +156,7 @@ public class ImplantTest {
         Действие: Удалить имплант методом DELETE /implant/{id}.
         Ожидается: Имплант удалён из бд.
         """)
-    void deleteImplant() {
+    void deleteImplant_existingImplant_success() {
         // Создать имплант
         String implantName = randomUUID().toString();
         backendRemote.createImplant(
@@ -213,7 +188,7 @@ public class ImplantTest {
         Действие: Удалить имплант методом DELETE /implant/{id} руками Юзера.
         Ожидается: 403.
         """)
-    void deleteImplantByDefaultUser() {
+    void deleteImplantByDefaultUser_byDefaultUser_throw403() {
         // Создать имплант
         String implantName = randomUUID().toString();
         backendRemote.createImplant(
@@ -249,7 +224,7 @@ public class ImplantTest {
     Ожидается: 404 Not Found.
                Никакой имплант не удалён.
     """)
-    void deleteNonExistingImplant() {
+    void deleteNonExistingImplant_whenImplantDoesNotExist_throw404() {
         // Удалить несуществующий имплант
         UUID implantId = randomUUID();
         HttpResponse response = backendRemote.makeDeleteImplantRequest(implantId);
@@ -269,7 +244,7 @@ public class ImplantTest {
         Действие: Получить имплант методом GET /implants/{id}.
         Ожидается: Получены данные импланта.
         """)
-    void getImplant() {
+    void getImplant_whenDataIsValid_success() {
         // Создать имплант
         String implantName = randomUUID().toString();
         String implantType = "Optics";
@@ -307,7 +282,7 @@ public class ImplantTest {
     Действие: Изменить имплант по id методом PUT /implants/{id}.
     Ожидается: Имплант в бд обновлён.
     """)
-    void updateImplant() {
+    void updateImplant_whenDataIsValid_success() {
         // Создать имплант
         String implantName = randomUUID().toString();
         String implantType = "Optics1";
@@ -360,7 +335,7 @@ public class ImplantTest {
     Действие: Изменить имплант по id методом PUT /implants/{id}
     Ожидается: Ошибка 404, имплант не найден
     """)
-    void updateNonExistingImplant() {
+    void updateImplant_whenNonExistingImplant_throw404() {
         // Пытаться изменить несуществующий имплант
         HttpResponse response = backendRemote.makeUpdateImplantRequest(
             randomUUID(),
@@ -385,7 +360,7 @@ public class ImplantTest {
     Ожидается: 400 Bad_Request.
                Никакой Имплант не был изменен.
     """)
-    void updateImplantWithBadRequest() {
+    void updateImplant_withBadRequest_throw400() {
         // Создать имплант
         String implantName = randomUUID().toString();
         String implantType = "NeuralLink";
@@ -421,8 +396,6 @@ public class ImplantTest {
                 .specialImplantPointsCost(-10)
                 .build()
         );
-
-        // Проверить, что ответ имеет статус 400
         assertThat(response.code()).isEqualTo(400);
     }
 }
