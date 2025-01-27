@@ -153,4 +153,14 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
         @Cleanup Response response = remote.deleteWeapon(weaponId);
         return toHttpResponse(response);
     }
+
+    @SneakyThrows
+    public void createSkill(CreateSkillRequest request) {
+        @Cleanup Response response = remote.createSkill(request);
+        if (!response.isSuccessful()) {
+            fail("Не удалось создать навык " + request.name() + ", " + response);
+        }
+        var jsonBody = response.body().string();
+        objectMapper.readValue(jsonBody, CreateWeaponResponse.class);
+    }
 }

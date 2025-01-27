@@ -47,6 +47,7 @@ public class AppContext {
             createTestUser();
             createAdminUser();
             createWeaponRepo();
+            createSkillRepo();
         } catch (Exception e) {
             throw new AppContextException("Ошибка инициализации контекста", e);
         }
@@ -172,5 +173,10 @@ public class AppContext {
     private static void createWeaponRepo() {
         WeaponRepo weaponRepo = new WeaponRepo(get(DSLContext.class));
         put(weaponRepo);
+    }
+
+    private static void createSkillRepo() {
+        SkillRepo skillRepo = new SkillRepo(get(DSLContext.class));
+        put(skillRepo);
     }
 }
