@@ -9,6 +9,7 @@ import ru.nightcityroleplay.tests.dto.*;
 import ru.nightcityroleplay.tests.exception.AppContextException;
 import ru.nightcityroleplay.tests.remote.BackendRemote;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.fail;
@@ -16,13 +17,13 @@ import static org.assertj.core.api.Assertions.fail;
 public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMapper) {
 
     @SneakyThrows
-    public CreateCharacterResponse createCharacter(CreateCharacterRequest request) {
+    public CharacterDto createCharacter(CreateCharacterRequest request) {
         @Cleanup Response response = remote.createCharacter(request);
         if (!response.isSuccessful()) {
             fail("Не удалось создать персонажа " + request.name() + ", " + response);
         }
         var jsonBody = response.body().string();
-        return objectMapper.readValue(jsonBody, CreateCharacterResponse.class);
+        return objectMapper.readValue(jsonBody, CharacterDto.class);
     }
 
     @SneakyThrows
@@ -137,6 +138,36 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
                 fail("Не удалось обновить Оружие " + weaponId.toString() + ", " + response);
             }
         }
+    }
+
+    @SneakyThrows
+    public SkillDto createSkill(CreateSkillRequest request) {
+        @Cleanup Response response = remote.createSkill(request);
+        if (!response.isSuccessful()) {
+            fail("Не удалось создать навык " + request.name() + ", " + response);
+        }
+        var jsonBody = response.body().string();
+        return objectMapper.readValue(jsonBody, SkillDto.class);
+    }
+
+    @SneakyThrows
+    public SkillDto getSkill(UUID skillId) {
+        @Cleanup Response response = remote.getSkill(skillId);
+        if (!response.isSuccessful()) {
+            throw new AppContextException("Не удалось получить навык " + response);
+        }
+        var jsonBody = response.body().string();
+        return objectMapper.readValue(jsonBody, SkillDto.class);
+    }
+
+    @SneakyThrows
+    public List<SkillDto> getSkillsBulk(IdsRequest request) {
+        @Cleanup Response response = remote.getSkillsBulk(request);
+        if (!response.isSuccessful()) {
+            throw new AppContextException("Не удалось получить навыки " + response);
+        }
+        var jsonBody = response.body().string();
+        return objectMapper.readValue(jsonBody, new TypeReference<>() {});
     }
 
     public HttpResponse makeCreateWeaponRequest(CreateWeaponRequest request) {
