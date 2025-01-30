@@ -5,11 +5,11 @@ import lombok.Data;
 import java.util.UUID;
 
 @Data
-public class CharacterDto {
+public class SkillDto {
     private UUID id;
-    private UUID ownerId;
     private String name;
-    private int reputation;
-    private int age;
+    private String description;
+    private Integer level;
+    private String type;
+    private Integer cost;
 }
-

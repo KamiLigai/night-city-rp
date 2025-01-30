@@ -7,10 +7,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import ru.nightcityroleplay.backend.dto.CreateSkillRequest;
-import ru.nightcityroleplay.backend.dto.CreateSkillResponse;
-import ru.nightcityroleplay.backend.dto.SkillDto;
-import ru.nightcityroleplay.backend.dto.UpdateSkillRequest;
+import ru.nightcityroleplay.backend.dto.*;
 import ru.nightcityroleplay.backend.entity.Skill;
 import ru.nightcityroleplay.backend.repo.SkillRepository;
 
@@ -107,5 +104,17 @@ public class SkillService {
         }
         skillRepo.delete(skill);
         log.info("Навык {} удалён", skillId);
+    }
+
+    @Transactional
+    public List<UUID> getSkillIds() {
+        return skillRepo.findAllSkillIds();
+    }
+
+    @Transactional
+    public List<SkillDto> getSkillsBulk(IdsRequest request) {
+        return skillRepo.findAllByIdIn(request.getIds())
+            .stream().map(this::toDto)
+            .toList();
     }
 }
