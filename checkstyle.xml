@@ -22,7 +22,7 @@
   </module>
   <module name="LineLength">
     <property name="fileExtensions" value="java"/>
-    <property name="max" value="150"/>  <!-- todo: постепенно уменьшать вплоть до 120 -->
+    <property name="max" value="120"/>
   </module>
 
   <!-- Checks for whitespace                               -->
@@ -70,6 +70,9 @@
     <!-- Checks for whitespace                               -->
     <!-- See https://checkstyle.org/checks/whitespace/index.html -->
     <module name="EmptyForIteratorPad"/>
+    <module name="EmptyLineSeparator">
+      <property name="tokens" value="PACKAGE_DEF, IMPORT, STATIC_IMPORT, CLASS_DEF, INTERFACE_DEF, ENUM_DEF, STATIC_INIT, INSTANCE_INIT, METHOD_DEF, CTOR_DEF, RECORD_DEF, COMPACT_CTOR_DEF"/>
+    </module>
     <module name="GenericWhitespace"/>
     <module name="MethodParamPad">
       <property name="allowLineBreaks" value="true"/>

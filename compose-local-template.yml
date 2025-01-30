@@ -1,27 +1,20 @@
-version: '3.6'
-
 services:
   night-city-rp-backend:
     image: night-city-rp-backend:latest
     build:
       context: backend/
+      dockerfile: Local.Dockerfile
     restart:
       unless-stopped
-    ports:
-      - "10037:8080"
     environment:
-      - NEXUS_USERNAME=${NEXUS_USERNAME}
-      - NEXUS_PASSWORD=${NEXUS_PASSWORD}
       - app.enable-cors=false
-      - spring.profiles.active=json-logging
       - spring.datasource.url=jdbc:postgresql://night-city-rp-db:5432/night_city_rp
       - spring.datasource.username=night-city-rp
       - spring.datasource.password=postgres
-      - spring.main.banner-mode=off
     depends_on:
       - night-city-rp-db
-    networks:
-      - system-tests
+    ports:
+      - "8090:8080"
 
   night-city-rp-db:
     image: postgres:15
@@ -30,22 +23,20 @@ services:
       - POSTGRES_USER=night-city-rp
       - POSTGRES_PASSWORD=postgres
       - PGDATA=/data/postgres
-    ports:
-      - "10038:5432"
+    volumes:
+      - postgres:/data/postgres
     restart: unless-stopped
-    networks:
-      - system-tests
+    ports:
+      - "8091:5432"
 
   night-city-rp-frontend:
     image: night-city-rp-frontend:latest
     build:
       context: frontend/
-    ports:
-      - "10039:5432"
     restart:
       unless-stopped
-    networks:
-      - system-tests
+    ports:
+      - "8092:80"
 
-networks:
-  system-tests:
+volumes:
+  postgres:

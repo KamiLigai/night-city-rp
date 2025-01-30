@@ -11,6 +11,7 @@ import org.hibernate.annotations.UuidGenerator;
 
 import java.util.List;
 import java.util.UUID;
+
 @Entity
 @Table(name = "weapons")
 @Setter

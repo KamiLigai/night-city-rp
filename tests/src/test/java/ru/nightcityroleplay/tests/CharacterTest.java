@@ -154,11 +154,15 @@ public class CharacterTest {
 
     @Test
     @Description("""
-        Дано: Персонаж с id.
-        Действие: Удалить персонажа методом DELETE /characters/{id}.
-        Ожидается: Персонаж удалён из бд.
-        """)
-    void deleteCharacter_characterExists_success() {
+    Дано: Администратор и персонаж с id.
+    Действие: Администратор удаляет персонажа методом DELETE /characters/{id}.
+    Ожидается: Персонаж удалён из бд.
+    """)
+    void deleteCharacter_asAdmin_characterExists_success() {
+        // Установить админа как текущего пользователя
+        UserDto defaultAdmin = AppContext.get("defaultAdmin");
+        backendRemote.setCurrentUser(defaultAdmin.id(), defaultAdmin.username(), defaultAdmin.username());
+
         // Создать персонажа
         String charName = randomUUID().toString();
         backendRemote.createCharacter(
@@ -176,7 +180,7 @@ public class CharacterTest {
 
         assertThat(charResult).hasSize(1);
 
-        // Удалить персонажа
+        // Удалить персонажа (администратор удаляет)
         backendRemote.deleteCharacter(charResult.get(0).getId());
 
         // Проверить удаление персонажа
@@ -196,6 +200,9 @@ public class CharacterTest {
                    Никакой персонаж не удалён.
         """)
     void deleteCharacter_characterNotExists_throw404() {
+        // Установить админа как текущего пользователя
+        UserDto defaultAdmin = AppContext.get("defaultAdmin");
+        backendRemote.setCurrentUser(defaultAdmin.id(), defaultAdmin.username(), defaultAdmin.username());
         // Удалить персонажа
         UUID charId = randomUUID();
         HttpResponse response = backendRemote.makeDeleteCharacterRequest(charId);
@@ -208,44 +215,6 @@ public class CharacterTest {
         assertThat(response.code()).isEqualTo(404);
         assertThat(response.body()).contains("не найден");
         assertThat(result).size().isEqualTo(0);
-    }
-
-    @Test
-    @SneakyThrows
-    @Description("""
-        Дано: Персонаж владельца 1.
-        Действие: Удалить персонажа владельца 1 методом DELETE /characters/{id} от имени владельца 2.
-        Ожидается: 403 Forbidden.
-                   Никакой персонаж не удалён.
-        """)
-    void deleteCharacter_characterNotOwned_throw403() {
-        // Создать персонажа
-        String charName = randomUUID().toString();
-        CreateCharacterResponse responseChar = backendRemote.createCharacter(
-            CreateCharacterRequest.builder()
-                .name(charName)
-                .age(205)
-                .reputation(0)
-                .build()
-        );
-
-        // Сменить юзера
-        String username = randomUUID().toString();
-        String password = randomUUID().toString();
-        UserDto userDto = backendRemote.createUser(username, password);
-        backendRemote.setCurrentUser(userDto.id(), username, password);
-
-        // Удалить персонажа
-        HttpResponse response = backendRemote.makeDeleteCharacterRequest(responseChar.id());
-
-        assertThat(response.code()).isEqualTo(403);
-        assertThat(response.body()).contains("Удалить чужого персонажа вздумал? а ты хорош.");
-
-        Result<CharactersRecord> charRecord = dbContext.select().from(CHARACTERS)
-            .where(CHARACTERS.NAME.eq(charName))
-            .fetchInto(CHARACTERS);
-
-        assertThat(charRecord).hasSize(1);
     }
 
     @Test

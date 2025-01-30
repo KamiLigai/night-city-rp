@@ -88,7 +88,6 @@ public class AppContext {
         var props = get(PropertiesComponent.class);
         System.setProperty("org.jooq.no-logo", "true");
         System.setProperty("org.jooq.no-tips", "true");
-        // todo: вынести в параметры
         String url = props.getProperty("datasource.url");
         String userName = props.getProperty("datasource.username");
         String password = props.getProperty("datasource.password");
@@ -170,6 +169,7 @@ public class AppContext {
             .set(USERS_ROLES.ROLE_ID, adminRoleId) // ID роли "ADMIN"
             .execute();
     }
+
     private static void createWeaponRepo() {
         WeaponRepo weaponRepo = new WeaponRepo(get(DSLContext.class));
         put(weaponRepo);
