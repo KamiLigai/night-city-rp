@@ -211,6 +211,17 @@ public class BackendRemote {
     }
 
     @SneakyThrows
+    public Response getSkillIds() {
+        Request httpRequest = new Request.Builder()
+            .url(baseUrl + "skills/ids")
+            .get()
+            .header(AUTHORIZATION, getBasicAuthorization(username, password))
+            .build();
+        Call call = client.newCall(httpRequest);
+        return call.execute();
+    }
+
+    @SneakyThrows
     public Response getSkillsBulk(IdsRequest request) {
         byte[] body = objectMapper.writeValueAsBytes(request);
         Request httpRequest = new Request.Builder()

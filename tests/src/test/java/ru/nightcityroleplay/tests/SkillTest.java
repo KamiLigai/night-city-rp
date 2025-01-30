@@ -97,4 +97,32 @@ public class SkillTest {
         assertThat(skillsBulk.get(0).getId()).isEqualTo(listIds.get(0));
         assertThat(skillsBulk.get(1).getId()).isEqualTo(listIds.get(1));
     }
+
+    @Test
+    void getSkillIds_skillExists_success() {
+        // Создать навык
+        String skillName = "testName" + randomUUID();
+        String skillDescription = "testDescription" + randomUUID();
+        Integer skillLevel = 1;
+        String skillType = "testType" + randomUUID();
+        Integer skillCost = 100;
+
+        backendRemote.createSkill(
+            CreateSkillRequest.builder()
+                .name(skillName)
+                .description(skillDescription)
+                .level(skillLevel)
+                .type(skillType)
+                .cost(skillCost)
+                .build()
+        );
+
+        // Получить все навыки
+        Result<SkillsRecord> skillsRecords = dbContext.select().from(SKILLS)
+            .fetchInto(SKILLS);
+
+        List<UUID> ids = backendRemote.getSkillIds();
+
+        assertThat(skillsRecords.size()).isEqualTo(ids.size());
+    }
 }

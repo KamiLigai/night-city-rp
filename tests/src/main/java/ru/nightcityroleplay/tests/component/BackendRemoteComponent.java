@@ -161,6 +161,16 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
     }
 
     @SneakyThrows
+    public List<UUID> getSkillIds() {
+        @Cleanup Response response = remote.getSkillIds();
+        if (!response.isSuccessful()) {
+            throw new AppContextException("Не удалось получить id навыков " + response);
+        }
+        var jsonBody = response.body().string();
+        return objectMapper.readValue(jsonBody, new TypeReference<>() {});
+    }
+
+    @SneakyThrows
     public List<SkillDto> getSkillsBulk(IdsRequest request) {
         @Cleanup Response response = remote.getSkillsBulk(request);
         if (!response.isSuccessful()) {
