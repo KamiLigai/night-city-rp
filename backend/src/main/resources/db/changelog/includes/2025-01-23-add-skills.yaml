@@ -14,6 +14,12 @@ databaseChangeLog:
                     unique: true
                     nullable: false
               - column:
+                  name: skill_family
+                  type: varchar
+                  constraints:
+                    unique: false
+                    nullable: false
+              - column:
                   name: name
                   type: varchar
                   constraints:

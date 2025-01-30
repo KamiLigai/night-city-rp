@@ -8,6 +8,7 @@ import java.util.UUID;
 public class SkillDto {
 
     private UUID id;
+    private String skillFamily;
     private String name;
     private String description;
     private String skillClass;

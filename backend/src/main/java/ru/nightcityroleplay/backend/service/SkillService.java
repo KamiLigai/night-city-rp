@@ -37,6 +37,7 @@ public class SkillService {
     private SkillDto toDto(Skill skill) {
         SkillDto skillDto = new SkillDto();
         skillDto.setId(skill.getId());
+        skillDto.setSkillFamily(skill.getSkillFamily());
         skillDto.setName(skill.getName());
         skillDto.setDescription(skill.getDescription());
         skillDto.setSkillClass(skill.getSkillClass());
@@ -67,6 +68,7 @@ public class SkillService {
     private Skill buildSkill(CreateSkillRequest request, int level) {
         Skill skill = new Skill();
         skill.setId(UUID.randomUUID());
+        skill.setSkillFamily(request.getSkillFamily());
         skill.setName(request.getName());
         skill.setDescription(request.getDescription());
         skill.setSkillClass(request.getSkillClass());
