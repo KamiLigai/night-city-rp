@@ -174,7 +174,6 @@ public class BackendRemote {
         return call.execute();
     }
 
-
     @SneakyThrows
     public Response updateWeapon(UUID weaponId, UpdateWeaponRequest request) {
         byte[] body = objectMapper.writeValueAsBytes(request);
@@ -227,6 +226,52 @@ public class BackendRemote {
         Request httpRequest = new Request.Builder()
             .url(baseUrl + "skills/get-bulk")
             .post(RequestBody.create(body, APP_JSON))
+            .header(AUTHORIZATION, getBasicAuthorization(username, password))
+            .build();
+        Call call = client.newCall(httpRequest);
+        return call.execute();
+    }
+
+    @SneakyThrows
+    public Response createImplant(CreateImplantRequest request) {
+        byte[] body = objectMapper.writeValueAsBytes(request);
+        Request httpRequest = new Request.Builder()
+            .url(baseUrl + "implants")
+            .post(RequestBody.create(body, APP_JSON))
+            .header(AUTHORIZATION, getBasicAuthorization(username, password))
+            .build();
+        Call call = client.newCall(httpRequest);
+        return call.execute();
+    }
+
+    @SneakyThrows
+    public Response deleteImplant(UUID implantid) {
+        Request httpRequest = new Request.Builder()
+            .url(baseUrl + "implants/" + implantid)
+            .delete()
+            .header(AUTHORIZATION, getBasicAuthorization(username, password))
+            .build();
+        Call call = client.newCall(httpRequest);
+        return call.execute();
+    }
+
+    @SneakyThrows
+    public Response getImplant(UUID implantd) {
+        Request httpRequest = new Request.Builder()
+            .url(baseUrl + "implants/" + implantd)
+            .get()
+            .header(AUTHORIZATION, getBasicAuthorization(username, password))
+            .build();
+        Call call = client.newCall(httpRequest);
+        return call.execute();
+    }
+
+    @SneakyThrows
+    public Response updateImplant(UUID implantd, UpdateImplantRequest request) {
+        byte[] body = objectMapper.writeValueAsBytes(request);
+        Request httpRequest = new Request.Builder()
+            .url(baseUrl + "implants/" + implantd)
+            .put(RequestBody.create(body, APP_JSON))
             .header(AUTHORIZATION, getBasicAuthorization(username, password))
             .build();
         Call call = client.newCall(httpRequest);

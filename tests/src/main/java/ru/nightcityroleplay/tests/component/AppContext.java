@@ -12,6 +12,7 @@ import ru.nightcityroleplay.tests.dto.UserDto;
 import ru.nightcityroleplay.tests.entity.tables.records.UsersRecord;
 import ru.nightcityroleplay.tests.exception.AppContextException;
 import ru.nightcityroleplay.tests.remote.BackendRemote;
+import ru.nightcityroleplay.tests.repo.ImplantRepo;
 import ru.nightcityroleplay.tests.repo.WeaponRepo;
 
 import java.sql.Connection;
@@ -47,6 +48,7 @@ public class AppContext {
             createTestUser();
             createAdminUser();
             createWeaponRepo();
+            createImplantRepo();
         } catch (Exception e) {
             throw new AppContextException("Ошибка инициализации контекста", e);
         }
@@ -87,7 +89,6 @@ public class AppContext {
         var props = get(PropertiesComponent.class);
         System.setProperty("org.jooq.no-logo", "true");
         System.setProperty("org.jooq.no-tips", "true");
-        // todo: вынести в параметры
         String url = props.getProperty("datasource.url");
         String userName = props.getProperty("datasource.username");
         String password = props.getProperty("datasource.password");
@@ -173,5 +174,10 @@ public class AppContext {
     private static void createWeaponRepo() {
         WeaponRepo weaponRepo = new WeaponRepo(get(DSLContext.class));
         put(weaponRepo);
+    }
+
+    private static void createImplantRepo() {
+        ImplantRepo implantRepo = new ImplantRepo(get(DSLContext.class));
+        put(implantRepo);
     }
 }

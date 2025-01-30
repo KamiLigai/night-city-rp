@@ -10,7 +10,7 @@ build:
   image: maven:3-eclipse-temurin-17
   script:
     - cd backend
-    - mvn package -DskipTests --no-transfer-progress
+    - mvn package -s ../maven-settings.xml -DskipTests  --no-transfer-progress
     - cp target/backend-*.jar target/app.jar
   artifacts:
     paths:
@@ -21,7 +21,7 @@ test:
   image: maven:3-eclipse-temurin-17
   script:
     - cd backend
-    - mvn test --no-transfer-progress
+    - mvn test -s ../maven-settings.xml --no-transfer-progress
 
 system-test:
   stage: build
@@ -31,6 +31,7 @@ system-test:
     - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
       when: manual
   before_script:
+    - cp maven-settings.xml tests
     - docker-compose -f compose-ci-cd.yml --project-name night-city-rp-ci-cd build
     - docker-compose -f compose-ci-cd.yml --project-name night-city-rp-ci-cd down
     - docker-compose -f compose-ci-cd.yml --project-name night-city-rp-ci-cd up -d
@@ -38,7 +39,7 @@ system-test:
     - cp tests/src/main/resources/jooq-config-ci-cd.xml tests/src/main/resources/jooq-config.xml
   script:
     - cd tests
-    - docker run --network=night-city-rp-ci-cd_system-tests --rm $(docker build -f ci-cd-dockerfile -q .)
+    - docker run --network=night-city-rp-ci-cd_system-tests -e NEXUS_USERNAME="$NEXUS_USERNAME" -e NEXUS_PASSWORD="$NEXUS_PASSWORD" --rm $(docker build -f ci-cd-dockerfile -q .)
     - exit $(echo $?)
   after_script:
     - docker-compose -f compose-ci-cd.yml --project-name night-city-rp-ci-cd down -v
@@ -52,9 +53,9 @@ checkstyle:
   image: maven:3-eclipse-temurin-17
   script:
     - cd backend
-    - mvn checkstyle:check --no-transfer-progress
+    - mvn checkstyle:check -s ../maven-settings.xml --no-transfer-progress
     - cd ../tests
-    - mvn checkstyle:check --no-transfer-progress
+    - mvn checkstyle:check -s ../maven-settings.xml --no-transfer-progress
 
 deploy-on-test:
   stage: deploy

@@ -72,7 +72,7 @@ public class WeaponTest {
         Действие: Попытаться добавить оружие методом POST /weapons с пустым именем.
         Ожидается: Запрос завершился с ошибкой и сообщение об ошибке о некорректных данных.
         """)
-    void createWeaponWithBadOrSameName() {
+    void createWeaponWithBadName() {
         UserDto defaultAdmin = AppContext.get("defaultAdmin");
         backendRemote.setCurrentUser(defaultAdmin.id(), defaultAdmin.username(), defaultAdmin.username());
 
@@ -316,7 +316,10 @@ public class WeaponTest {
         Boolean isMelee = true;
         String weaponType = "Sword1";
         int penetration = 201;
-        int reputationRequirement = 1001;
+        int reputationRequirement = 100;
+        UserDto defaultAdmin = AppContext.get("defaultAdmin");
+        backendRemote.setCurrentUser(defaultAdmin.id(), defaultAdmin.username(), defaultAdmin.username());
+
         backendRemote.createWeapon(
             CreateWeaponRequest.builder()
                 .isMelee(isMelee)
@@ -326,8 +329,6 @@ public class WeaponTest {
                 .reputationRequirement(reputationRequirement)
                 .build()
         );
-        UserDto defaultAdmin = AppContext.get("defaultAdmin");
-        backendRemote.setCurrentUser(defaultAdmin.id(), defaultAdmin.username(), defaultAdmin.username());
 
         // Проверить новое оружие
         Result<WeaponsRecord> weaponRecord = weaponRepo.getWeaponsByName(weaponName);

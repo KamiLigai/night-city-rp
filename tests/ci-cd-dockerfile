@@ -1,5 +1,6 @@
 FROM maven:3-eclipse-temurin-17
 WORKDIR /app
 COPY pom.xml /app/pom.xml
+COPY maven-settings.xml /app/maven-settings.xml
 COPY src /app/src
-ENTRYPOINT ["mvn", "clean", "test", "--no-transfer-progress"]
+ENTRYPOINT ["mvn", "clean", "test", "-s", "maven-settings.xml", "--no-transfer-progress"]
