@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import ru.nightcityroleplay.backend.dto.CreateSkillRequest;
@@ -47,6 +48,132 @@ public class SkillService {
         return skillDto;
     }
 
+    /// Область приколов
+
+    @Transactional
+    public List<CreateSkillResponse> createSkillx10(CreateSkillRequest baseRequest) {
+        List<CreateSkillResponse> responses = new ArrayList<>();
+
+        for (int level = 1; level <= 10; level++) {
+            Skill skill = buildSkill(baseRequest, level);
+            skill = skillRepo.save(skill);
+            log.info("Навык {} уровня {} был создан", skill.getId(), level);
+            responses.add(new CreateSkillResponse(skill.getId()));
+        }
+
+        return responses;
+    }
+
+    private Skill buildSkill(CreateSkillRequest request, int level) {
+        Skill skill = new Skill();
+        skill.setId(UUID.randomUUID());
+        skill.setName(request.getName());
+        skill.setDescription(request.getDescription());
+        skill.setSkillClass(request.getSkillClass());
+        skill.setLevel(level);
+        skill.setTypeIsBattle(request.getTypeIsBattle());
+
+        if (level < 1 || level > 10) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Уровень навыка должен быть от 1 до 10");
+        }
+
+        if (request.getTypeIsBattle()) {
+            setBattleCostAndReputationRequirement(skill, level);
+            skill.setCivilCost(0);
+        } else {
+            setCivilCostAndReputationRequirement(skill, level);
+            skill.setBattleCost(0);
+        }
+
+        return skill;
+    }
+
+    private void setBattleCostAndReputationRequirement(Skill skill, int level) {
+        if (level < 6) {
+            skill.setBattleCost(level);
+            skill.setReputationRequirement(0);
+        } else {
+            if (level == 6) {
+                skill.setBattleCost(7);
+                skill.setReputationRequirement(70);
+            } else if (level == 7) {
+                skill.setBattleCost(9);
+                skill.setReputationRequirement(100);
+            } else if (level == 8) {
+                skill.setBattleCost(12);
+                skill.setReputationRequirement(130);
+            } else if (level == 9) {
+                skill.setBattleCost(16);
+                skill.setReputationRequirement(160);
+            } else if (level == 10) {
+                skill.setBattleCost(21);
+                skill.setReputationRequirement(200);
+            }
+        }
+    }
+
+    private void setCivilCostAndReputationRequirement(Skill skill, int level) {
+        if (level < 6) {
+            skill.setCivilCost(level);
+            skill.setReputationRequirement(0);
+        } else {
+            if (level == 6) {
+                skill.setCivilCost(7);
+                skill.setReputationRequirement(70);
+            } else if (level == 7) {
+                skill.setCivilCost(9);
+                skill.setReputationRequirement(100);
+            } else if (level == 8) {
+                skill.setCivilCost(12);
+                skill.setReputationRequirement(130);
+            } else if (level == 9) {
+                skill.setCivilCost(16);
+                skill.setReputationRequirement(160);
+            } else if (level == 10) {
+                skill.setCivilCost(21);
+                skill.setReputationRequirement(200);
+            }
+        }
+    }
+
+    @Transactional
+    public void updateSkillx10ByName(UpdateSkillRequest updateRequest, String oldName) {
+        log.info("Навыки с названием {} обновляются на новое название {}", oldName, updateRequest.getName());
+
+        List<Skill> skills = skillRepo.findByName(oldName);
+
+        if (skills.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Навыки с названием " + oldName + " не найдены");
+        }
+
+        for (Skill oldSkill : skills) {
+            oldSkill.setName(updateRequest.getName());
+            oldSkill.setDescription(updateRequest.getDescription());
+            oldSkill.setTypeIsBattle(updateRequest.getTypeIsBattle());
+            skillRepo.save(oldSkill);
+            log.info("Навык с id {} обновлён", oldSkill.getId());
+        }
+    }
+
+    @Transactional
+    public void deleteSkillsByNames(List<String> skillNames) {
+        for (String skillName : skillNames) {
+            List<Skill> skills = skillRepo.findByName(skillName);
+            if (skills == null || skills.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Навык " + skillName + " не найден");
+            }
+            for (Skill skill : skills) {
+                if (!skill.getCharacters().isEmpty()) {
+                    throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+                        "Этот навык есть как минимум у одного персонажа!");
+                }
+                skillRepo.delete(skill);
+                log.info("Навык {} удалён", skillName);
+            }
+        }
+    }
+
+    // Шутки кончились.
     @Transactional
     public CreateSkillResponse createSkill(CreateSkillRequest request) {
         Skill skill = new Skill();

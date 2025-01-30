@@ -10,6 +10,7 @@ import ru.nightcityroleplay.backend.dto.SkillDto;
 import ru.nightcityroleplay.backend.dto.UpdateSkillRequest;
 import ru.nightcityroleplay.backend.service.SkillService;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -27,6 +28,24 @@ public class SkillController {
         return skillService.createSkill(request);
     }
 
+    // область приколов
+    @PostMapping("{x10}")
+    public List<CreateSkillResponse> createSkillx10(@RequestBody CreateSkillRequest request) {
+        return skillService.createSkillx10(request);
+    }
+
+    @PutMapping("/x10/{oldName}")
+    public String updateSkillsByName(@RequestBody UpdateSkillRequest updateRequest, @PathVariable String oldName) {
+        skillService.updateSkillx10ByName(updateRequest, oldName);
+        return "Навыки успешно обновлены";
+    }
+
+    @DeleteMapping("/x10/{skillName}")
+    public void deleteSkillsByName(@PathVariable String skillName) {
+        skillService.deleteSkillsByNames(List.of(skillName));
+    }
+
+    // Шутки кончились
     @GetMapping
     public Page<SkillDto> getSkills(Pageable pageable) {
         return skillService.getSkillPage(pageable);
