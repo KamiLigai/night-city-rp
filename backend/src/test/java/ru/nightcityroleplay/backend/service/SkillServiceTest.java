@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.ErrorResponseException;
 import org.springframework.web.server.ResponseStatusException;
 import ru.nightcityroleplay.backend.dto.CreateSkillRequest;
+import ru.nightcityroleplay.backend.dto.CreateSkillResponse;
 import ru.nightcityroleplay.backend.dto.SkillDto;
 import ru.nightcityroleplay.backend.dto.UpdateSkillRequest;
 import ru.nightcityroleplay.backend.entity.CharacterEntity;
@@ -101,6 +102,8 @@ class SkillServiceTest {
         // when
         when(skillRepo.save(any(Skill.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
+        List<CreateSkillResponse> responses = service.createSkillx10(request);
+
         ArgumentCaptor<Skill> skillCaptor = ArgumentCaptor.forClass(Skill.class);
         verify(skillRepo, times(10)).save(skillCaptor.capture());
 
@@ -126,6 +129,8 @@ class SkillServiceTest {
 
         // when
         when(skillRepo.save(any(Skill.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        List<CreateSkillResponse> responses = service.createSkillx10(request);
 
         ArgumentCaptor<Skill> skillCaptor = ArgumentCaptor.forClass(Skill.class);
         verify(skillRepo, times(10)).save(skillCaptor.capture());
