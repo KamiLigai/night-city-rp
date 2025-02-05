@@ -61,11 +61,10 @@ public class SkillService {
             log.info("Навык {} уровня {} был создан", skill.getId(), level);
             responses.add(new CreateSkillResponse(skill.getId()));
         }
-
         return responses;
     }
 
-    private Skill buildSkill(CreateSkillRequest request, int level) {
+    Skill buildSkill(CreateSkillRequest request, int level) {
         Skill skill = new Skill();
         skill.setId(UUID.randomUUID());
         skill.setSkillFamily(request.getSkillFamily());
@@ -177,7 +176,7 @@ public class SkillService {
 
     // Шутки кончились.
     @Transactional
-    public CreateSkillResponse createSkill(CreateSkillRequest request) {
+    public CreateSkillResponse createSkill(CreateSkillRequest request) { // не актуальный метод. Возможно стоит удалить?
         Skill skill = new Skill();
         skill.setId(UUID.randomUUID());
         skill.setName(request.getName());
@@ -265,6 +264,37 @@ public class SkillService {
             skillDtos.add(toDto(skill));
         }
         return new PageImpl<>(skillDtos, pageable, skillPage.getTotalElements());
+    }
+
+    @Transactional
+    public Page<SkillDto> getUniqueSkillPage(Pageable pageable) {
+        Page<Skill> skillPage = skillRepo.findAll(pageable);
+        List<Skill> skills = skillPage.toList();
+        List<Skill> uniqueSkills = new ArrayList<>();
+        List<SkillDto> skillDtos = new ArrayList<>();
+
+        for (Skill skill : skills) {
+            boolean isUnique = true;
+            for (Skill uniqueSkill : uniqueSkills) {
+                if (isSameSkill(uniqueSkill, skill) && uniqueSkill.getLevel() <= skill.getLevel()) {
+                    isUnique = false;
+                    break;
+                }
+            }
+            if (isUnique) {
+                uniqueSkills.add(skill);
+            }
+        }
+
+        for (Skill uniqueSkill : uniqueSkills) {
+            skillDtos.add(toDto(uniqueSkill));
+        }
+
+        return new PageImpl<>(skillDtos, pageable, skillPage.getTotalElements());
+    }
+
+    private boolean isSameSkill(Skill skill1, Skill skill2) {
+        return skill1.getSkillFamily().equals(skill2.getSkillFamily()) && skill1.getName().equals(skill2.getName());
     }
 
     @Transactional

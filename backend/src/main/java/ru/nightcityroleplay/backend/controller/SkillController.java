@@ -51,6 +51,11 @@ public class SkillController {
         return skillService.getSkillPage(pageable);
     }
 
+    @GetMapping("/unique")
+    public Page<SkillDto> getUniqueSkills(Pageable pageable) {
+        return skillService.getUniqueSkillPage(pageable);
+    }
+
     @GetMapping("{skillId}")
     public SkillDto getSkill(@PathVariable UUID skillId) {
         return skillService.getSkill(skillId);
