@@ -187,7 +187,7 @@ class SkillServiceTest {
     }
 
     @Test
-    void testUpdateSkillx10ByName_Success() {
+    void testUpdateSkillTimes10ByName_Success() {
         //given
         String oldName = "Old Name";
         String newName = "New Name";
@@ -203,7 +203,7 @@ class SkillServiceTest {
         skill.setDescription("Old Description");
         skill.setTypeIsBattle(false);
         when(skillRepo.findByName(oldName)).thenReturn(Collections.singletonList(skill));
-        service.updateSkillx10ByName(updateRequest, oldName);
+        service.updateSkillTimes10ByName(updateRequest, oldName);
 
         // when
         verify(skillRepo, times(1)).save(skill);
@@ -215,7 +215,7 @@ class SkillServiceTest {
     }
 
     @Test
-    void testUpdateSkillx10ByName_NotFound() {
+    void testUpdateSkillTimes10ByName_NotFound() {
         // given
         String oldName = "Nonexistent Name";
         String newName = "New Name";
@@ -227,7 +227,7 @@ class SkillServiceTest {
         when(skillRepo.findByName(oldName)).thenReturn(Collections.emptyList());
 
         // then
-        assertThatThrownBy(() -> service.updateSkillx10ByName(updateRequest, oldName))
+        assertThatThrownBy(() -> service.updateSkillTimes10ByName(updateRequest, oldName))
             .isInstanceOf(ResponseStatusException.class)
             .hasMessageContaining("Навыки с названием")
             .hasMessageContaining("не найдены")

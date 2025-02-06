@@ -11,7 +11,8 @@ import ru.nightcityroleplay.tests.entity.tables.records.SkillsRecord;
 import ru.nightcityroleplay.tests.repo.SkillRepo;
 
 import static java.util.UUID.randomUUID;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.as;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 public class SkillTest {
@@ -29,19 +30,17 @@ public class SkillTest {
     void createSkill() {
         // Данные для нового навыка
         String skillName = randomUUID().toString();
+        String skillFamily = "Short Blade";
         String skillDescription = "Skill description example";
-        int skillLevel = 5;
         String skillType = "Active";
-        int skillCost = 1;
 
         // Выполнить создание навыка
         backendRemote.createSkill(
             CreateSkillRequest.builder()
                 .name(skillName)
+                .skillFamily(skillFamily)
                 .description(skillDescription)
-                .level(skillLevel)
                 .type(skillType)
-                .cost(skillCost)
                 .build()
         );
 
@@ -53,10 +52,10 @@ public class SkillTest {
         assertThat(skillResult.get(0))
             .satisfies(
                 skill -> assertThat(skill.getName()).isEqualTo(skillName),
+                skill -> assertThat(skill.getSkillFamily()).isEqualTo(skillFamily),
                 skill -> assertThat(skill.getDescription()).isEqualTo(skillDescription),
                 skill -> assertThat(skill.getLevel()).isEqualTo(skillLevel),
-                skill -> assertThat(skill.getType()).isEqualTo(skillType),
-                skill -> assertThat(skill.getCost()).isEqualTo(skillCost)
+                skill -> assertThat(skill.getType()).isEqualTo(skillType)
             );
     }
 }

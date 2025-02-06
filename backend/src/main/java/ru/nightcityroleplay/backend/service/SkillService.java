@@ -138,7 +138,7 @@ public class SkillService {
     }
 
     @Transactional
-    public void updateSkillx10ByName(UpdateSkillRequest updateRequest, String oldName) {
+    public void updateSkillTimes10ByName(UpdateSkillRequest updateRequest, String oldName) {
         log.info("Навыки с названием {} обновляются на новое название {}", oldName, updateRequest.getName());
 
         List<Skill> skills = skillRepo.findByName(oldName);

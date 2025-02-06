@@ -36,7 +36,7 @@ public class SkillController {
 
     @PutMapping("/x10/{oldName}")
     public String updateSkillsByName(@RequestBody UpdateSkillRequest updateRequest, @PathVariable String oldName) {
-        skillService.updateSkillx10ByName(updateRequest, oldName);
+        skillService.updateSkillTimes10ByName(updateRequest, oldName);
         return "Навыки успешно обновлены";
     }
 

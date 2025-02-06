@@ -12,6 +12,7 @@ import ru.nightcityroleplay.tests.dto.UserDto;
 import ru.nightcityroleplay.tests.entity.tables.records.UsersRecord;
 import ru.nightcityroleplay.tests.exception.AppContextException;
 import ru.nightcityroleplay.tests.remote.BackendRemote;
+import ru.nightcityroleplay.tests.repo.SkillRepo;
 import ru.nightcityroleplay.tests.repo.WeaponRepo;
 
 import java.sql.Connection;
