@@ -37,9 +37,9 @@ public class CharacterController {
 
     @PutMapping("{characterId}")
     public void updateCharacter(
-            @RequestBody UpdateCharacterRequest request,
-            @PathVariable UUID characterId,
-            Authentication auth
+        @RequestBody UpdateCharacterRequest request,
+        @PathVariable UUID characterId,
+        Authentication auth
     ) {
         characterService.updateCharacter(request, characterId, auth);
     }
@@ -52,20 +52,40 @@ public class CharacterController {
 
     @PostMapping("{characterId}/reputation/give")
     public void giveReputation(
-            @RequestBody GiveReputationRequest request,
-            @PathVariable UUID characterId,
-            Authentication auth
+        @RequestBody GiveReputationRequest request,
+        @PathVariable UUID characterId,
+        Authentication auth
     ) {
         characterService.giveReputation(request, characterId, auth);
     }
 
     @PutMapping("{characterId}/skills")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void updateCharacterSkill(
-            @RequestBody UpdateCharacterSkillRequest request,
-            @PathVariable UUID characterId,
-            Authentication auth
+        @RequestBody UpdateCharacterSkillRequest request,
+        @PathVariable UUID characterId,
+        Authentication auth
     ) {
         characterService.updateCharacterSkill(request, characterId, auth);
+    }
+
+    @PutMapping("{characterId}/skills/upgrade")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public void upgradeCharacterSkill(
+        @RequestBody UpdateCharacterSkillRequest request,
+        @PathVariable UUID characterId,
+        Authentication auth
+    ) {
+        characterService.upgradeCharacterSkill(request, characterId, auth);
+    }
+
+    //todo сделать deleteSkillRequest и перенести skillId в RequestBody
+    @DeleteMapping("/{characterId}/skills/{skillId}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public void removeSkillFromCharacter(@PathVariable UUID characterId,
+                                         @PathVariable UUID skillId,
+                                         Authentication auth) {
+        characterService.removeSkillFromCharacter(characterId, skillId, auth);
     }
 
     @GetMapping("{characterId}/implants")
@@ -75,45 +95,45 @@ public class CharacterController {
 
     @PutMapping("{characterId}/implants")
     public void putCharacterImplant(
-            @RequestBody UpdateCharacterImplantRequest request,
-            @PathVariable UUID characterId,
-            Authentication auth
+        @RequestBody UpdateCharacterImplantRequest request,
+        @PathVariable UUID characterId,
+        Authentication auth
     ) {
         characterService.putCharacterImplant(request, characterId, auth);
     }
 
     @PutMapping("{characterId}/implants-list")
     public void updateCharacterImplants(
-            @RequestBody UpdateCharacterImplantsRequest request,
-            @PathVariable UUID characterId,
-            Authentication auth
+        @RequestBody UpdateCharacterImplantsRequest request,
+        @PathVariable UUID characterId,
+        Authentication auth
     ) {
         characterService.updateCharacterImplants(request, characterId, auth);
     }
 
     @DeleteMapping("{characterId}/implants/{implantId}")
     public void deleteCharacterImplant(
-            @PathVariable UUID characterId,
-            @PathVariable UUID implantId,
-            Authentication auth
+        @PathVariable UUID characterId,
+        @PathVariable UUID implantId,
+        Authentication auth
     ) {
         characterService.deleteCharacterImplant(characterId, implantId, auth);
     }
 
     @PutMapping("{characterId}/weapons")
     public void putCharacterWeapon(
-            @PathVariable UUID characterId,
-            @RequestBody UpdateCharacterWeaponRequest request,
-            Authentication auth
+        @PathVariable UUID characterId,
+        @RequestBody UpdateCharacterWeaponRequest request,
+        Authentication auth
     ) {
         characterService.putCharacterWeapon(request, characterId, auth);
     }
 
     @DeleteMapping("{characterId}/weapons/{weaponId}")
     public void deleteCharacterWeapon(
-            @PathVariable UUID characterId,
-            @PathVariable UUID weaponId,
-            Authentication auth
+        @PathVariable UUID characterId,
+        @PathVariable UUID weaponId,
+        Authentication auth
     ) {
         characterService.deleteCharacterWeapon(weaponId, characterId, auth);
     }

@@ -155,6 +155,7 @@ public class CharacterService {
     }
 
     @Transactional
+    //todo Нужно будет сделать это админским методом.
     public void updateCharacterSkill(UpdateCharacterSkillRequest request, UUID characterId, Authentication auth) {
         log.info("Навыки персонажа {} обновляются", characterId);
         CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
@@ -169,7 +170,6 @@ public class CharacterService {
         int totalBattlePoints = 0;
         int totalCivilPoints = 0;
         // Проверка наличия навыка и суммирование стоимости
-
         for (UUID skillId : request.getSkillId()) {
             Skill skill = skillRepo.findById(skillId).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "Навык с ID" + skillId + "не найден"));
@@ -192,9 +192,107 @@ public class CharacterService {
             character.setSkills(new ArrayList<>());
         }
         character.getSkills().addAll(skills);
-        character.setBattlePoints(character.getBattlePoints() - totalBattlePoints);
-        character.setCivilPoints(character.getCivilPoints() - totalCivilPoints);
         characterRepo.save(character);
+    }
+
+    @Transactional
+    public void upgradeCharacterSkill(UpdateCharacterSkillRequest request, UUID characterId, Authentication auth) {
+        log.info("Навыки персонажа {} обновляются", characterId);
+        CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
+
+        User user = (User) auth.getPrincipal();
+        UUID userId = user.getId();
+
+        if (!character.getOwnerId().equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Нельзя добавлять навык не своему персонажу!");
+        }
+
+        List<Skill> skillsToAdd = new ArrayList<>();
+        int totalBattlePoints = 0;
+        int totalCivilPoints = 0;
+
+        for (UUID skillId : request.getSkillId()) {
+            Skill currentSkill = skillRepo.findById(skillId).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Навык с ID " + skillId + " не найден"));
+
+            if (character.getReputation() < currentSkill.getReputationRequirement()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Нынешний уровень навыка не доступен на вашей репутации");
+            }
+
+            // Определяем следующий уровень навыка на основе его текущего уровня
+            int nextLevel = currentSkill.getLevel() + 1;
+            if (nextLevel > 10) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Достигнут максимальный уровень навыка");
+            }
+
+            Skill nextSkill = skillRepo.findBySkillFamilyAndLevel(currentSkill.getSkillFamily(), nextLevel)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Навык уровня " + nextLevel + " не найден"));
+
+            // Проверка репутации для следующего уровня навыка
+            if (character.getReputation() < nextSkill.getReputationRequirement()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Следующий уровень навыка не доступен на вашей репутации");
+            }
+
+            Skill existingSkill = character.getSkills().stream()
+                .filter(s -> s.getId().equals(currentSkill.getId()))
+                .findFirst()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Текущий навык не найден у персонажа"));
+
+            character.getSkills().remove(existingSkill);
+            skillsToAdd.add(nextSkill);
+            totalBattlePoints += nextSkill.getBattleCost() - existingSkill.getBattleCost();
+            totalCivilPoints += nextSkill.getCivilCost() - existingSkill.getCivilCost();
+        }
+
+        if (character.getBattlePoints() < totalBattlePoints) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Недостаточно БО для выбранного уровня навыка");
+        }
+
+        if (character.getCivilPoints() < totalCivilPoints) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Недостаточно МО для выбранного уровня навыка");
+        }
+
+        character.getSkills().addAll(skillsToAdd);
+        characterRepo.save(character);
+    }
+
+    @Transactional
+    public void removeSkillFromCharacter(UUID characterId, UUID skillId, Authentication auth) {
+        log.info("Навык с ID {} удаляется у персонажа {}", skillId, characterId);
+
+        // Находим персонажа по его ID
+        CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
+
+        // Получаем информацию о текущем пользователе
+        User user = (User) auth.getPrincipal();
+        UUID userId = user.getId();
+
+        // Проверяем, что персонаж принадлежит текущему пользователю
+        if (!character.getOwnerId().equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                "Нельзя удалять навык у персонажа, который вам не принадлежит!");
+        }
+
+        // Находим навык, который нужно удалить
+        Skill skillToRemove = character.getSkills().stream()
+            .filter(skill -> skill.getId().equals(skillId))
+            .findFirst()
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "Навык с ID " + skillId + " не найден у персонажа"));
+
+        // Удаляем навык из списка навыков персонажа
+        character.getSkills().remove(skillToRemove);
+
+        // Сохраняем обновлённого персонажа в базе данных
+        characterRepo.save(character);
+
+        log.info("Навык с ID {} успешно удалён у персонажа {}", skillId, characterId);
     }
 
     @Transactional
