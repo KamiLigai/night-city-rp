@@ -64,10 +64,9 @@ public class CharacterController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void updateCharacterSkill(
         @RequestBody UpdateCharacterSkillRequest request,
-        @PathVariable UUID characterId,
-        Authentication auth
+        @PathVariable UUID characterId
     ) {
-        characterService.adminUpdateCharacterSkill(request, characterId, auth);
+        characterService.adminUpdateCharacterSkill(request, characterId);
     }
 
     @PutMapping("{characterId}/skills/select")
