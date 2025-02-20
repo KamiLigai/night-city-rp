@@ -165,6 +165,8 @@ public class ImplantService {
         log.info("Имплант с ID: {} был успешно обновлен", implantId);
     }
 
+    //todo В реквесте должен быть true чтобы удалить всё у всех и сам имплант
+
     @Transactional
     public void deleteImplant(UUID implantId) {
         log.info("Запрос на удаление импланта с ID: {}", implantId);
