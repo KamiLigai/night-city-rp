@@ -6,9 +6,10 @@ import lombok.Builder;
 public record CreateSkillRequest(
     String name,
     String skillFamily,
+    String skillClass,
     String description,
     int level,
-    String type,
+    boolean typeIsBattle,
     int cost
 ) {
 }

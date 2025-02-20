@@ -23,15 +23,10 @@ public class SkillController {
         this.skillService = skillService;
     }
 
-    @PostMapping
-    public CreateSkillResponse createSkill(@RequestBody CreateSkillRequest request) {
-        return skillService.createSkill(request);
-    }
-
     // область приколов
     @PostMapping("{x10}")
     public List<CreateSkillResponse> createSkillx10(@RequestBody CreateSkillRequest request) {
-        return skillService.createSkillx10(request);
+        return skillService.createSkill(request);
     }
 
     @PutMapping("/x10/{oldName}")

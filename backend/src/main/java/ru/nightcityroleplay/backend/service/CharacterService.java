@@ -110,7 +110,7 @@ public class CharacterService {
     public CharacterDto getCharacter(UUID characterId) {
         Optional<CharacterEntity> byId = characterRepo.findById(characterId);
         if (byId.isEmpty()) {
-            throw new ResponseStatusException(NOT_FOUND, "Персонаж " + characterId + " не найден");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден");
         }
         return toDto(byId.get());
     }
@@ -120,7 +120,7 @@ public class CharacterService {
         validate(request);
         CharacterEntity newCharacter = new CharacterEntity();
         CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
-            new ResponseStatusException(NOT_FOUND, "Персонаж " + characterId + " не найден"));
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
         Object principal = auth.getPrincipal();
         User user = (User) principal;
         UUID userid = user.getId();
@@ -144,7 +144,7 @@ public class CharacterService {
     @PreAuthorize("hasRole('Role_ADMIN')")
     public void giveReputation(GiveReputationRequest request, UUID characterId, Authentication auth) {
         CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
-            new ResponseStatusException(NOT_FOUND, "Персонаж не найден"));
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж не найден"));
 
         Object principal = auth.getPrincipal();
         User user = (User) principal;
@@ -156,15 +156,15 @@ public class CharacterService {
 
     @Transactional
     //todo Нужно будет сделать это админским методом.
-    public void adminUpdateCharacterSkill(UpdateCharacterSkillRequest request, UUID characterId, Authentication auth) {
+    public void adminUpdateCharacterSkill(UpdateCharacterSkillRequest request, UUID characterId) {
         log.info("Навыки персонажа {} обновляются", characterId);
         CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
-            new ResponseStatusException(NOT_FOUND, "Персонаж " + characterId + " не найден"));
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
         List<Skill> skills = new ArrayList<>();
         int totalBattlePoints = 0;
         int totalCivilPoints = 0;
         // Проверка наличия навыка и суммирование стоимости
-        for (UUID skillId : request.getSkillId()) {
+        for (UUID skillId : request.getSkillIds()) {
             Skill skill = skillRepo.findById(skillId).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "Навык с ID" + skillId + "не найден"));
             if (character.getReputation() < skill.getReputationRequirement()) {
@@ -195,7 +195,7 @@ public class CharacterService {
 
         // Получение персонажа
         CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
-            new ResponseStatusException(NOT_FOUND, "Персонаж " + characterId + " не найден"));
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
 
         // Проверка владельца персонажа
         Object principal = auth.getPrincipal();
@@ -210,7 +210,7 @@ public class CharacterService {
         int totalCivilPoints = 0;
 
         // Проверяем, что все навыки, которые выбираются, находятся на первом уровне
-        for (UUID skillId : request.getSkillId()) {
+        for (UUID skillId : request.getSkillIds()) {
             Skill skill = skillRepo.findById(skillId).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "Навык с ID " + skillId + " не найден"));
 
@@ -254,7 +254,7 @@ public class CharacterService {
         int totalBattlePoints = 0;
         int totalCivilPoints = 0;
 
-        for (UUID skillId : request.getSkillId()) {
+        for (UUID skillId : request.getSkillIds()) {
             Skill currentSkill = skillRepo.findById(skillId).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "Навык с ID " + skillId + " не найден"));
 
@@ -525,7 +525,7 @@ public class CharacterService {
     }
 
     @Transactional
-    public void deleteCharacterImplant(UUID implantId, UUID characterId, Authentication auth) {
+    public void deleteCharacterImplant(UUID characterId, UUID implantId, Authentication auth) {
         CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
             new ResponseStatusException(NOT_FOUND, "Персонаж не найден"));
 

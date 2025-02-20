@@ -102,7 +102,7 @@ class SkillServiceTest {
         // when
         when(skillRepo.save(any(Skill.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        List<CreateSkillResponse> responses = service.createSkillx10(request);
+        List<CreateSkillResponse> responses = service.createSkill(request);
 
         ArgumentCaptor<Skill> skillCaptor = ArgumentCaptor.forClass(Skill.class);
         verify(skillRepo, times(10)).save(skillCaptor.capture());
@@ -130,7 +130,7 @@ class SkillServiceTest {
         // when
         when(skillRepo.save(any(Skill.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        List<CreateSkillResponse> responses = service.createSkillx10(request);
+        List<CreateSkillResponse> responses = service.createSkill(request);
 
         ArgumentCaptor<Skill> skillCaptor = ArgumentCaptor.forClass(Skill.class);
         verify(skillRepo, times(10)).save(skillCaptor.capture());

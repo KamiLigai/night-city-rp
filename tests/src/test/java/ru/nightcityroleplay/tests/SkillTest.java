@@ -3,15 +3,16 @@ package ru.nightcityroleplay.tests;
 import io.qameta.allure.Description;
 import lombok.SneakyThrows;
 import org.jooq.Result;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.nightcityroleplay.tests.component.AppContext;
 import ru.nightcityroleplay.tests.component.BackendRemoteComponent;
 import ru.nightcityroleplay.tests.dto.CreateSkillRequest;
+import ru.nightcityroleplay.tests.dto.UserDto;
 import ru.nightcityroleplay.tests.entity.tables.records.SkillsRecord;
 import ru.nightcityroleplay.tests.repo.SkillRepo;
 
 import static java.util.UUID.randomUUID;
-import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -19,6 +20,12 @@ public class SkillTest {
 
     BackendRemoteComponent backendRemote = AppContext.get(BackendRemoteComponent.class);
     SkillRepo skillRepo = AppContext.get(SkillRepo.class);
+
+    @BeforeEach
+    void setUp() {
+        UserDto defaultAdmin = AppContext.get("defaultAdmin");
+        backendRemote.setCurrentUser(defaultAdmin.id(), defaultAdmin.username(), defaultAdmin.username());
+    }
 
     @Test
     @SneakyThrows
@@ -32,30 +39,31 @@ public class SkillTest {
         String skillName = randomUUID().toString();
         String skillFamily = "Short Blade";
         String skillDescription = "Skill description example";
-        String skillType = "Active";
+        String skillClass = "solo";
+        boolean typeIsBattle = true;
 
         // Выполнить создание навыка
         backendRemote.createSkill(
             CreateSkillRequest.builder()
-                .name(skillName)
                 .skillFamily(skillFamily)
+                .name(skillName)
                 .description(skillDescription)
-                .type(skillType)
+                .skillClass(skillClass)
+                .typeIsBattle(typeIsBattle)
                 .build()
         );
-
         // Проверить созданный навык
         Result<SkillsRecord> skillResult = skillRepo.getSkillsByName(skillName);
 
         // Убедиться, что успешно создан один навык
-        assertThat(skillResult).hasSize(1);
+        assertThat(skillResult).hasSize(10);
         assertThat(skillResult.get(0))
             .satisfies(
                 skill -> assertThat(skill.getName()).isEqualTo(skillName),
                 skill -> assertThat(skill.getSkillFamily()).isEqualTo(skillFamily),
                 skill -> assertThat(skill.getDescription()).isEqualTo(skillDescription),
-                skill -> assertThat(skill.getLevel()).isEqualTo(skillLevel),
-                skill -> assertThat(skill.getType()).isEqualTo(skillType)
+                skill -> assertThat(skill.getSkillClass()).isEqualTo(skillClass),
+                skill -> assertThat(skill.getTypeIsBattle()).isEqualTo(typeIsBattle)
             );
     }
 }

@@ -7,5 +7,5 @@ import java.util.UUID;
 
 @Data
 public class UpdateCharacterSkillRequest {
-    private List<UUID> skillId;
+    private List<UUID> skillIds;
 }

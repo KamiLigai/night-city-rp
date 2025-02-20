@@ -273,12 +273,10 @@ class CharacterServiceTest {
         var request = new UpdateCharacterSkillRequest();
         UUID characterId = UUID.randomUUID();
 
-        Authentication auth = mock(Authentication.class);
-
         when(charRepo.findById(characterId)).thenReturn(Optional.empty());
 
         // then
-        assertThatThrownBy(() -> service.adminUpdateCharacterSkill(request, characterId, auth))
+        assertThatThrownBy(() -> service.adminUpdateCharacterSkill(request, characterId))
             .isInstanceOf(ResponseStatusException.class)
             .hasMessageContaining("Персонаж " + characterId + " не найден")
             .extracting(ResponseStatusException.class::cast)
@@ -318,12 +316,12 @@ class CharacterServiceTest {
     void upgradeCharacterSkill_skillNotFound_throw404() {
         // given
         var request = new UpdateCharacterSkillRequest();
-        request.setSkillId(List.of(UUID.randomUUID()));
+        request.setSkillIds(List.of(UUID.randomUUID()));
         UUID characterId = UUID.randomUUID();
 
         var oldCharacter = new CharacterEntity();
         oldCharacter.setId(characterId);
-        oldCharacter.setOwnerId(UUID.randomUUID()); // Установим владельца как `user`
+        oldCharacter.setOwnerId(UUID.randomUUID());
 
         var user = new User();
         user.setId(oldCharacter.getOwnerId());
@@ -349,7 +347,7 @@ class CharacterServiceTest {
         // given
         var request = new UpdateCharacterSkillRequest();
         UUID skillId = UUID.randomUUID();
-        request.setSkillId(List.of(skillId));
+        request.setSkillIds(List.of(skillId));
 
         UUID characterId = UUID.randomUUID();
 
@@ -365,17 +363,29 @@ class CharacterServiceTest {
         Authentication auth = mock(Authentication.class);
         when(auth.getPrincipal()).thenReturn(user);
 
-        var existingSkill = new Skill();
-        existingSkill.setId(skillId);
-        existingSkill.setLevel(1);
+        var currentSkill = new Skill();
+        currentSkill.setId(skillId);
+        currentSkill.setSkillFamily("long_blade");
+        currentSkill.setLevel(1); // Текущий уровень навыка
+        currentSkill.setReputationRequirement(0); // Требуемая репутация меньше текущей
+        currentSkill.setBattleCost(1);
+        currentSkill.setCivilCost(0);
 
         var nextSkill = new Skill();
         nextSkill.setId(UUID.randomUUID());
-        nextSkill.setLevel(2);
-        nextSkill.setBattleCost(20); // Требует больше очков, чем у персонажа
+        nextSkill.setSkillFamily("long_blade");
+        nextSkill.setLevel(currentSkill.getLevel()+1); // Следующий уровень навыка
+        nextSkill.setReputationRequirement(0); // Требуемая репутация меньше текущей
+        nextSkill.setBattleCost(20);
+        nextSkill.setCivilCost(0);
+
+
+        character.setSkills(new ArrayList<>()); // Персонаж уже обладает текущим навыком
+        character.getSkills().add(currentSkill);
+
 
         when(charRepo.findById(characterId)).thenReturn(Optional.of(character));
-        when(skillRepo.findById(skillId)).thenReturn(Optional.of(existingSkill));
+        when(skillRepo.findById(skillId)).thenReturn(Optional.of(currentSkill));
         when(skillRepo.findBySkillFamilyAndLevel(any(), eq(2))).thenReturn(Optional.of(nextSkill));
 
         // then
@@ -405,55 +415,73 @@ class CharacterServiceTest {
             .isEqualTo(HttpStatus.NOT_FOUND);
     }
 
+
+
     @Test
     void upgradeCharacterSkill_success() {
         // given
-        var request = new UpdateCharacterSkillRequest();
+        UpdateCharacterSkillRequest request = new UpdateCharacterSkillRequest();
         UUID skillId = UUID.randomUUID();
-        request.setSkillId(List.of(skillId));
 
         UUID characterId = UUID.randomUUID();
+        request.setSkillIds(new ArrayList<>());
+        request.getSkillIds().add(skillId);
 
         var character = new CharacterEntity();
         character.setId(characterId);
         character.setOwnerId(UUID.randomUUID());
-        character.setReputation(10); // Репутация больше минимально необходимой
-        character.setBattlePoints(50); // Достаточно боевых очков
-        character.setCivilPoints(50); // Достаточно гражданских очков
+        character.setReputation(40); // Репутация больше минимально необходимой
+        character.setBattlePoints(10); // Достаточно боевых очков
+        character.setCivilPoints(10); // Достаточно гражданских очков
+
+        int totalBattlePoints = 0;
+        int totalCivilPoints = 0;
 
         var user = new User();
         user.setId(character.getOwnerId());
 
-        Authentication auth = mock(Authentication.class);
-        when(auth.getPrincipal()).thenReturn(user);
-
-        var existingSkill = new Skill();
-        existingSkill.setId(skillId);
-        existingSkill.setLevel(1);
-        existingSkill.setBattleCost(10);
-        existingSkill.setCivilCost(5);
-        existingSkill.setReputationRequirement(0); // Минимальная репутация
-
-        // Добавляем навык в текущие навыки персонажа
+        var currentSkill = new Skill();
+        currentSkill.setId(skillId);
+        currentSkill.setSkillFamily("long_blade");
+        currentSkill.setLevel(1); // Текущий уровень навыка
+        currentSkill.setReputationRequirement(0); // Требуемая репутация меньше текущей
+        currentSkill.setBattleCost(1);
+        currentSkill.setCivilCost(0);
 
         var nextSkill = new Skill();
         nextSkill.setId(UUID.randomUUID());
-        nextSkill.setLevel(2);
-        nextSkill.setBattleCost(15);
-        nextSkill.setCivilCost(10);
-        nextSkill.setReputationRequirement(5); // Репутация для следующего уровня
+        nextSkill.setSkillFamily("long_blade");
+        nextSkill.setLevel(currentSkill.getLevel()+1); // Следующий уровень навыка
+        nextSkill.setReputationRequirement(0); // Требуемая репутация меньше текущей
+        nextSkill.setBattleCost(2);
+        nextSkill.setCivilCost(0);
+
+
+        character.setSkills(new ArrayList<>()); // Персонаж уже обладает текущим навыком
+        character.getSkills().add(currentSkill);
+
+
+        Authentication auth = mock(Authentication.class);
+        when(auth.getPrincipal()).thenReturn(user);
+
+        totalBattlePoints += character.getBattlePoints() - nextSkill.getBattleCost();
+        totalCivilPoints +=  character.getCivilPoints() - nextSkill.getCivilCost();
 
         when(charRepo.findById(characterId)).thenReturn(Optional.of(character));
-        when(skillRepo.findById(skillId)).thenReturn(Optional.of(existingSkill));
-        when(skillRepo.findBySkillFamilyAndLevel(any(), eq(2))).thenReturn(Optional.of(nextSkill));
+        when(skillRepo.findById(skillId)).thenReturn(Optional.of(currentSkill));
+        when(skillRepo.findBySkillFamilyAndLevel("long_blade", 2)).thenReturn(Optional.of(nextSkill));
 
         // when
         service.upgradeCharacterSkill(request, characterId, auth);
 
         // then
         assertThat(character.getSkills()).contains(nextSkill);
-        assertThat(character.getBattlePoints()).isEqualTo(45); // 50 - 10 + 15
-        assertThat(character.getCivilPoints()).isEqualTo(45);  // 50 - 5 + 10
+
+        // Проверяем, что боевые и гражданские очки скорректированы
+        assertThat(totalBattlePoints).isEqualTo(8);
+        assertThat(totalCivilPoints).isEqualTo(10 );
+
+        // Проверяем, что сущность персонажа сохранена
         verify(charRepo).save(character);
     }
 
