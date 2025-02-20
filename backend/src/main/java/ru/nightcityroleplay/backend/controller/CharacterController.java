@@ -36,6 +36,7 @@ public class CharacterController {
     }
 
     @PutMapping("{characterId}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void updateCharacter(
         @RequestBody UpdateCharacterRequest request,
         @PathVariable UUID characterId,
@@ -66,7 +67,16 @@ public class CharacterController {
         @PathVariable UUID characterId,
         Authentication auth
     ) {
-        characterService.updateCharacterSkill(request, characterId, auth);
+        characterService.adminUpdateCharacterSkill(request, characterId, auth);
+    }
+
+    @PutMapping("{characterId}/skills/select")
+    public void selectCharacterSkills(
+        @RequestBody UpdateCharacterSkillRequest request,
+        @PathVariable UUID characterId,
+        Authentication auth
+    ) {
+        characterService.firstSelectCharacterSkill(request, characterId, auth);
     }
 
     @PutMapping("{characterId}/skills/upgrade")

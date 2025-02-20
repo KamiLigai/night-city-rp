@@ -156,16 +156,10 @@ public class CharacterService {
 
     @Transactional
     //todo Нужно будет сделать это админским методом.
-    public void updateCharacterSkill(UpdateCharacterSkillRequest request, UUID characterId, Authentication auth) {
+    public void adminUpdateCharacterSkill(UpdateCharacterSkillRequest request, UUID characterId, Authentication auth) {
         log.info("Навыки персонажа {} обновляются", characterId);
         CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
             new ResponseStatusException(NOT_FOUND, "Персонаж " + characterId + " не найден"));
-        Object principal = auth.getPrincipal();
-        User user = (User) principal;
-        UUID userid = user.getId();
-        if (not(character.getOwnerId().equals(userid))) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Нельзя добавлять навык не своему персонажу!");
-        }
         List<Skill> skills = new ArrayList<>();
         int totalBattlePoints = 0;
         int totalCivilPoints = 0;
@@ -175,7 +169,7 @@ public class CharacterService {
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "Навык с ID" + skillId + "не найден"));
             if (character.getReputation() < skill.getReputationRequirement()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Данный уровень навыка не доступен на вашей репутации");
+                    "Данный уровень навыка не доступен на репутации изменяемого персонажа");
             }
             skills.add(skill);
             totalBattlePoints += skill.getBattleCost();
@@ -188,6 +182,54 @@ public class CharacterService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Недостаточно МО для выбранного уровня навыка");
         }
         // Создаем или обновляем список имплантов персонажа
+        if (character.getSkills() == null) {
+            character.setSkills(new ArrayList<>());
+        }
+        character.getSkills().addAll(skills);
+        characterRepo.save(character);
+    }
+
+    @Transactional
+    public void firstSelectCharacterSkill(UpdateCharacterSkillRequest request, UUID characterId, Authentication auth) {
+        log.info("Персонаж {} выбирает стартовые навыки", characterId);
+
+        // Получение персонажа
+        CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
+            new ResponseStatusException(NOT_FOUND, "Персонаж " + characterId + " не найден"));
+
+        // Проверка владельца персонажа
+        Object principal = auth.getPrincipal();
+        User user = (User) principal;
+        UUID userId = user.getId();
+        if (!character.getOwnerId().equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Нельзя добавлять навык не своему персонажу!");
+        }
+
+        List<Skill> skills = new ArrayList<>();
+        int totalBattlePoints = 0;
+        int totalCivilPoints = 0;
+
+        // Проверяем, что все навыки, которые выбираются, находятся на первом уровне
+        for (UUID skillId : request.getSkillId()) {
+            Skill skill = skillRepo.findById(skillId).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Навык с ID " + skillId + " не найден"));
+
+            if (skill.getLevel() != 1) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Можно выбирать только навыки первого уровня!");
+            }
+            skills.add(skill);
+            totalBattlePoints += skill.getBattleCost();
+            totalCivilPoints += skill.getCivilCost();
+        }
+        if (character.getBattlePoints() < totalBattlePoints) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Недостаточно БО для выбранных навыков. Сбавь колличество навыков и повтори попытку");
+        }
+        if (character.getCivilPoints() < totalCivilPoints) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Недостаточно МО для выбранных навыков. Сбавь колличество навыков и повтори попытку");
+        }
         if (character.getSkills() == null) {
             character.setSkills(new ArrayList<>());
         }
