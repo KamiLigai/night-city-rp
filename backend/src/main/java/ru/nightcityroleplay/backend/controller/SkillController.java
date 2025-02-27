@@ -24,20 +24,20 @@ public class SkillController {
     }
 
     // область приколов
-    @PostMapping("{x10}")
-    public List<CreateSkillResponse> createSkillx10(@RequestBody CreateSkillRequest request) {
+    @PostMapping()
+    public List<CreateSkillResponse> createSkill(@RequestBody CreateSkillRequest request) {
         return skillService.createSkill(request);
     }
 
-    @PutMapping("/x10/{oldName}")
+    @PutMapping("{oldName}")
     public String updateSkillsByName(@RequestBody UpdateSkillRequest updateRequest, @PathVariable String oldName) {
-        skillService.updateSkillTimes10ByName(updateRequest, oldName);
+        skillService.updateSkill(updateRequest, oldName);
         return "Навыки успешно обновлены";
     }
 
-    @DeleteMapping("/x10/{skillName}")
-    public void deleteSkillsByName(@PathVariable String skillName) {
-        skillService.deleteSkillsByNames(List.of(skillName));
+    @DeleteMapping("/{skillFamily}")
+    public void deleteSkillsByName(@PathVariable String skillFamily) {
+        skillService.deleteSkillsBySkillFamily(List.of(skillFamily));
     }
 
     // Шутки кончились
@@ -54,15 +54,5 @@ public class SkillController {
     @GetMapping("{skillId}")
     public SkillDto getSkill(@PathVariable UUID skillId) {
         return skillService.getSkill(skillId);
-    }
-
-    @PutMapping("{skillId}")
-    public void updateSkill(@RequestBody UpdateSkillRequest request, @PathVariable UUID skillId) {
-        skillService.updateSkill(request, skillId);
-    }
-
-    @DeleteMapping("{skillId}")
-    public void deleteSkill(@PathVariable UUID skillId) {
-        skillService.deleteSkill(skillId);
     }
 }

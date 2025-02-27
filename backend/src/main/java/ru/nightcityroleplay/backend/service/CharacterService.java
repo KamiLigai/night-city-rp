@@ -157,7 +157,7 @@ public class CharacterService {
     @Transactional
     //todo Нужно будет сделать это админским методом.
     public void adminUpdateCharacterSkill(UpdateCharacterSkillRequest request, UUID characterId) {
-        log.info("Навыки персонажа {} обновляются", characterId);
+        log.info("Навыки персонажа {} обновляют ся", characterId);
         CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
             new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
         List<Skill> skills = new ArrayList<>();

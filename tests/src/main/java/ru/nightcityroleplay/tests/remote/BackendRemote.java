@@ -197,4 +197,15 @@ public class BackendRemote {
         Call call = client.newCall(httpRequest);
         return call.execute();
     }
+
+    @SneakyThrows
+    public Response deleteSkill(String skillFamily) {
+        Request httpRequest = new Request.Builder()
+            .url(baseUrl + "skills/" + skillFamily)
+            .delete()
+            .header(AUTHORIZATION, getBasicAuthorization(username, password))
+            .build();
+        Call call = client.newCall(httpRequest);
+        return call.execute();
+    }
 }

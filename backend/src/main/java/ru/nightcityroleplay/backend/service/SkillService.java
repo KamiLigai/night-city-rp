@@ -21,8 +21,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
-import static ru.nightcityroleplay.backend.util.BooleanUtils.not;
 
 @Service
 @Slf4j
@@ -53,6 +51,10 @@ public class SkillService {
 
     @Transactional
     public List<CreateSkillResponse> createSkill(CreateSkillRequest baseRequest) {
+        if (baseRequest.getName() == null || baseRequest.getName().trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Название навыка не может быть пустым.");
+        }
+
         List<CreateSkillResponse> responses = new ArrayList<>();
 
         for (int level = 1; level <= 10; level++) {
@@ -77,7 +79,6 @@ public class SkillService {
         if (level < 1 || level > 10) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Уровень навыка должен быть от 1 до 10");
         }
-
         if (request.getTypeIsBattle()) {
             setBattleCostAndReputationRequirement(skill, level);
             skill.setCivilCost(0);
@@ -85,7 +86,6 @@ public class SkillService {
             setCivilCostAndReputationRequirement(skill, level);
             skill.setBattleCost(0);
         }
-
         return skill;
     }
 
@@ -138,30 +138,32 @@ public class SkillService {
     }
 
     @Transactional
-    public void updateSkillTimes10ByName(UpdateSkillRequest updateRequest, String oldName) {
-        log.info("Навыки с названием {} обновляются на новое название {}", oldName, updateRequest.getName());
+    public void updateSkill(UpdateSkillRequest updateRequest, String oldSkillFamily) {
+        log.info("Навыки с названием {} обновляются на новое название {}", oldSkillFamily, updateRequest.getName());
 
-        List<Skill> skills = skillRepo.findByName(oldName);
+        List<Skill> skills = skillRepo.findBySkillFamily(oldSkillFamily);
 
         if (skills.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Навыки с названием " + oldName + " не найдены");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Навыки с skillFamily " + oldSkillFamily
+                + " не найдены");
         }
 
         for (Skill oldSkill : skills) {
+            oldSkill.setSkillFamily(updateRequest.getSkillFamily());
             oldSkill.setName(updateRequest.getName());
             oldSkill.setDescription(updateRequest.getDescription());
             oldSkill.setTypeIsBattle(updateRequest.getTypeIsBattle());
             skillRepo.save(oldSkill);
-            log.info("Навык с id {} обновлён", oldSkill.getId());
+            log.info("Навык с skillFamily {} обновлён", oldSkill.getSkillFamily());
         }
     }
 
     @Transactional
-    public void deleteSkillsByNames(List<String> skillNames) {
-        for (String skillName : skillNames) {
-            List<Skill> skills = skillRepo.findByName(skillName);
+    public void deleteSkillsBySkillFamily(List<String> skillFamilies) {
+        for (String skillFamily : skillFamilies) {
+            List<Skill> skills = skillRepo.findBySkillFamily(skillFamily);
             if (skills == null || skills.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Навык " + skillName + " не найден");
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Навык " + skillFamily + " не найден");
             }
             for (Skill skill : skills) {
                 if (!skill.getCharacters().isEmpty()) {
@@ -169,7 +171,7 @@ public class SkillService {
                         "Этот навык есть как минимум у одного персонажа!");
                 }
                 skillRepo.delete(skill);
-                log.info("Навык {} удалён", skillName);
+                log.info("Навык {} удалён", skillFamily);
             }
         }
     }
@@ -223,38 +225,5 @@ public class SkillService {
             throw new ResponseStatusException(NOT_FOUND, "Навык " + skillId + " не найден");
         }
         return toDto(skillById.get());
-    }
-
-    @Transactional
-    public void updateSkill(UpdateSkillRequest skillDto, UUID skillId) {
-        log.info("Навык {} обновляется", skillDto.getName());
-        Optional<Skill> oldSkill = skillRepo.findById(skillId);
-        Skill newSkill = new Skill();
-        if (oldSkill.isEmpty()) {
-            throw new ResponseStatusException(NOT_FOUND, "Навык " + skillId + " не найден");
-        }
-        newSkill.setId(skillId);
-        newSkill.setName(skillDto.getName());
-        newSkill.setDescription(skillDto.getDescription());
-        newSkill.setTypeIsBattle(skillDto.getTypeIsBattle());
-        newSkill.setLevel(oldSkill.get().getLevel());
-        newSkill.setBattleCost(oldSkill.get().getBattleCost());
-        newSkill.setCivilCost(oldSkill.get().getCivilCost());
-        newSkill.setReputationRequirement(oldSkill.get().getReputationRequirement());
-        skillRepo.save(newSkill);
-        log.info("Навык {} обновлен", skillDto.getName());
-    }
-
-    @Transactional
-    public void deleteSkill(UUID skillId) {
-        Skill skill = skillRepo.findById(skillId).orElse(null);
-        if (skill == null) {
-            throw new ResponseStatusException(NOT_FOUND, "Навык " + skillId + " не найден");
-        }
-        if (not(skill.getCharacters().isEmpty())) {
-            throw new ResponseStatusException(UNPROCESSABLE_ENTITY, "Этот навык есть как минимум у одного персонажа!");
-        }
-        skillRepo.delete(skill);
-        log.info("Навык {} удалён", skillId);
     }
 }

@@ -9,6 +9,7 @@ import ru.nightcityroleplay.tests.dto.*;
 import ru.nightcityroleplay.tests.exception.AppContextException;
 import ru.nightcityroleplay.tests.remote.BackendRemote;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.fail;
@@ -155,12 +156,26 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
     }
 
     @SneakyThrows
-    public void createSkill(CreateSkillRequest request) {
+    public List<CreateSkillResponse> createSkill(CreateSkillRequest request) {
         @Cleanup Response response = remote.createSkill(request);
         if (!response.isSuccessful()) {
             fail("Не удалось создать навык " + request.name() + ", " + response);
         }
         var jsonBody = response.body().string();
-        objectMapper.readValue(jsonBody, CreateWeaponResponse.class);
+        List<CreateSkillResponse> skillResponses = objectMapper.readValue(jsonBody, new TypeReference<>() {
+        });
+        return skillResponses;
+    }
+
+    public HttpResponse makeCreateSkillRequest(CreateSkillRequest request) {
+        @Cleanup Response response = remote.createSkill(request);
+        return toHttpResponse(response);
+    }
+
+    public void deleteSkill(String skillFamily) {
+        @Cleanup Response response = remote.deleteSkill(skillFamily);
+        if (!response.isSuccessful()) {
+            fail("Не удалось удалить навык c Skill Family: " + skillFamily + ", " + response);
+        }
     }
 }
