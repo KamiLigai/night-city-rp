@@ -22,6 +22,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.stream.Collectors.toList;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 
 @Service
@@ -120,6 +121,15 @@ public class ImplantService {
     public ImplantDto getImplant(UUID implantId) {
         Optional<Implant> implantById = implantRepo.findById(implantId);
         return implantById.map(this::toDto).orElse(null);
+    }
+
+    @Transactional
+    public int getImplantStatus(UUID implantId) {
+        Optional<Implant> implantById = implantRepo.findById(implantId);
+        if (implantById.isEmpty()) {
+            throw new ResponseStatusException(NOT_FOUND, "Имплант " + implantId + " не найден");
+        }
+        return implantById.get().getChars().size();
     }
 
     @Transactional

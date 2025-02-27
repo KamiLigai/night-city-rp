@@ -46,6 +46,11 @@ public class ImplantController {
         implantService.updateImplant(request, implantId, name);
     }
 
+    @GetMapping("{implantId}")
+    public int getImplantStatus(@PathVariable UUID implantId) {
+        return implantService.getImplantStatus(implantId);
+    }
+
     @DeleteMapping("{implantId}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void deleteImplant(@PathVariable UUID implantId, @RequestParam boolean redButton) {
