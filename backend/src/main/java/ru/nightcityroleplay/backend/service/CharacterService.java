@@ -525,7 +525,7 @@ public class CharacterService {
     }
 
     @Transactional
-    public void deleteCharacterImplant(UUID characterId, UUID implantId, Authentication auth) {
+    public void deleteCharacterImplant(UUID implantId, UUID characterId, Authentication auth) {
         CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
             new ResponseStatusException(NOT_FOUND, "Персонаж не найден"));
 
