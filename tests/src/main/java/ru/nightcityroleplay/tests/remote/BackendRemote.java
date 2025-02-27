@@ -245,9 +245,9 @@ public class BackendRemote {
     }
 
     @SneakyThrows
-    public Response deleteImplant(UUID implantid) {
+    public Response deleteImplant(UUID implantid, boolean redButton) {
         Request httpRequest = new Request.Builder()
-            .url(baseUrl + "implants/" + implantid)
+            .url(baseUrl + "implants/" + implantid + "?redButton=" + redButton)
             .delete()
             .header(AUTHORIZATION, getBasicAuthorization(username, password))
             .build();

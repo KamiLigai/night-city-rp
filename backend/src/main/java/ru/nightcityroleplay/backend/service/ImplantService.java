@@ -168,7 +168,7 @@ public class ImplantService {
     //todo В реквесте должен быть true чтобы удалить всё у всех и сам имплант
 
     @Transactional
-    public void deleteImplant(UUID implantId) {
+    public void deleteImplant(UUID implantId, boolean redButton) {
         log.info("Запрос на удаление импланта с ID: {}", implantId);
 
         // Поиск импланта по ID
@@ -179,11 +179,19 @@ public class ImplantService {
             log.info("Имплант {} не найден", implantId);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Имплант не найден");
         }
-        // Если имплант встроен в персонажей, выбросить ошибку 422
-        if (!implant.getChars().isEmpty()) {
-            log.info("Не удалось удалить имплант с ID {}: так как он встроен в персонажей", implantId);
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
-                "Запрещено удаление импланта, так как он встроен в персонажей");
+        // Если true то проверить наличие на персонажах
+        if (redButton) {
+            // Если имплант встроен в персонажей, выбросить ошибку 422
+            if (!implant.getChars().isEmpty()) {
+                log.info("Не удалось удалить имплант с ID {}: так как он встроен в персонажей", implantId);
+                throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+                    "Запрещено удаление импланта, так как он встроен в персонажей");
+                // Отображение error notification на фронтенде
+            }
+            // Удаление импланта
+            implantRepo.delete(implant);
+            log.info("Имплант с ID {} был успешно удалён", implantId);
+            return;
         }
         // Удаление импланта
         implantRepo.delete(implant);

@@ -48,8 +48,8 @@ public class ImplantController {
 
     @DeleteMapping("{implantId}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void deleteImplant(@PathVariable UUID implantId) {
-        implantService.deleteImplant(implantId);
+    public void deleteImplant(@PathVariable UUID implantId, @RequestParam boolean redButton) {
+        implantService.deleteImplant(implantId, redButton);
     }
 
     // Получение списка всех ID имплантов

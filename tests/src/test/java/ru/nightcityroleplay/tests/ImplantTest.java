@@ -156,7 +156,7 @@ public class ImplantTest {
         Действие: Удалить имплант методом DELETE /implant/{id}.
         Ожидается: Имплант удалён из бд.
         """)
-    void deleteImplant_existingImplant_success() {
+    void deleteImplant_redButtonTrue_success() {
         // Создать имплант
         String implantName = randomUUID().toString();
         backendRemote.createImplant(
@@ -175,7 +175,39 @@ public class ImplantTest {
         assertThat(implantResult).hasSize(1);
 
         // Удалить имплант
-        backendRemote.deleteImplant(implantResult.get(0).getId());
+        backendRemote.deleteImplant(implantResult.get(0).getId(), true);
+
+        // Проверить, что имплант удалён
+        Result<ImplantsRecord> result = implantRepo.getImplantsByName(implantName);
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    @Description("""
+        Дано: Имплант с id.
+        Действие: Удалить имплант методом DELETE /implant/{id}.
+        Ожидается: Имплант удалён из бд.
+        """)
+    void deleteImplant_redButtonFalse_success() {
+        // Создать имплант
+        String implantName = randomUUID().toString();
+        backendRemote.createImplant(
+            CreateImplantRequest.builder()
+                .name(implantName)
+                .implantType("Optics_Kiroshi")
+                .description("Description text")
+                .reputationRequirement(100)
+                .implantPointsCost(3)
+                .specialImplantPointsCost(0)
+                .build()
+        );
+
+        // Проверить, что имплант создан
+        Result<ImplantsRecord> implantResult = implantRepo.getImplantsByName(implantName);
+        assertThat(implantResult).hasSize(1);
+
+        // Удалить имплант
+        backendRemote.deleteImplant(implantResult.get(0).getId(), false);
 
         // Проверить, что имплант удалён
         Result<ImplantsRecord> result = implantRepo.getImplantsByName(implantName);
@@ -210,7 +242,7 @@ public class ImplantTest {
         backendRemote.setCurrentUser(user.id(), user.username(), user.username());
 
         // Удалить имплант
-        HttpResponse response = backendRemote.makeDeleteImplantRequest(implantResult.get(0).getId());
+        HttpResponse response = backendRemote.makeDeleteImplantRequest(implantResult.get(0).getId(), true);
 
         // Проверить, что имплант не удалён и вышло 403
         assertThat(response.code()).isEqualTo(403);
@@ -227,7 +259,7 @@ public class ImplantTest {
     void deleteNonExistingImplant_whenImplantDoesNotExist_throw404() {
         // Удалить несуществующий имплант
         UUID implantId = randomUUID();
-        HttpResponse response = backendRemote.makeDeleteImplantRequest(implantId);
+        HttpResponse response = backendRemote.makeDeleteImplantRequest(implantId, true);
 
         // Проверить, что вернулся статус 404 и сообщение об ошибке
         assertThat(response.code()).isEqualTo(404);

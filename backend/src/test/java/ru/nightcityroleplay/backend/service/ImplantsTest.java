@@ -163,8 +163,10 @@ public class ImplantsTest {
             .matches(exception -> ((ResponseStatusException) exception).getStatusCode() == HttpStatus.NOT_FOUND);
     }
     @Test
-    public void deleteImplant_implantExists_success() {
+    public void deleteImplant_redButtonTrue_success() {
         // given
+        boolean redButton = true;
+
         UUID implantId = UUID.randomUUID();
         Implant implant = new Implant();
         implant.setId(implantId);
@@ -173,7 +175,26 @@ public class ImplantsTest {
         when(implantRepo.findById(implantId)).thenReturn(Optional.of(implant));
 
         // when
-        service.deleteImplant(implantId);
+        service.deleteImplant(implantId, redButton);
+
+        // then
+        verify(implantRepo).delete(implant);
+    }
+
+    @Test
+    public void deleteImplant_redButtonFalse_success() {
+        // given
+        boolean redButton = false;
+
+        UUID implantId = UUID.randomUUID();
+        Implant implant = new Implant();
+        implant.setId(implantId);
+        implant.setChars(List.of());
+
+        when(implantRepo.findById(implantId)).thenReturn(Optional.of(implant));
+
+        // when
+        service.deleteImplant(implantId, redButton);
 
         // then
         verify(implantRepo).delete(implant);
@@ -182,13 +203,14 @@ public class ImplantsTest {
     @Test
     public void deleteImplant_implantIsAbsent_throw404() {
         // given
+        boolean redButton = true;
         UUID implantId = UUID.randomUUID();
         when(implantRepo.findById(implantId)).thenReturn(Optional.empty());
 
         // when
         ResponseStatusException exception = assertThrows(
             ResponseStatusException.class,
-            () -> service.deleteImplant(implantId)
+            () -> service.deleteImplant(implantId, redButton)
         );
 
         // then
