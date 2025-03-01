@@ -737,7 +737,7 @@ class CharacterServiceTest {
         when(implantRepo.findById(implantId)).thenReturn(Optional.of(implant));
 
         // when
-        service.deleteCharacterImplant(implantId, characterId, auth);
+        service.deleteCharacterImplant(characterId, implantId, auth);
 
         // then
         assertFalse(character.getImplants().contains(implant));
@@ -786,7 +786,7 @@ class CharacterServiceTest {
         // when & then
         ResponseStatusException exception = assertThrows(
             ResponseStatusException.class,
-            () -> service.deleteCharacterImplant(implantId, characterId, auth)
+            () -> service.deleteCharacterImplant(characterId, implantId, auth)
         );
 
         assertEquals(HttpStatus.FORBIDDEN, exception.getStatusCode());
@@ -814,7 +814,7 @@ class CharacterServiceTest {
         // when & then
         ResponseStatusException exception = assertThrows(
             ResponseStatusException.class,
-            () -> service.deleteCharacterImplant(implantId, characterId, auth)
+            () -> service.deleteCharacterImplant(characterId, implantId, auth)
         );
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
@@ -849,7 +849,7 @@ class CharacterServiceTest {
         // when & then
         ResponseStatusException exception = assertThrows(
             ResponseStatusException.class,
-            () -> service.deleteCharacterImplant(implantId, characterId, auth)
+            () -> service.deleteCharacterImplant(characterId, implantId, auth)
         );
 
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
