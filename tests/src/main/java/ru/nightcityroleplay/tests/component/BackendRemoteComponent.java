@@ -167,6 +167,16 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
     }
 
     @SneakyThrows
+    public Integer getImplantStatus(UUID implantid) {
+        @Cleanup Response response = remote.getImplantStatus(implantid);
+        if (!response.isSuccessful()) {
+            throw new AppContextException("Имплант не найден " + response);
+        }
+        var jsonBody = response.body().string();
+        return objectMapper.readValue(jsonBody, Integer.class);
+    }
+
+    @SneakyThrows
     public void updateImplant(UUID implantid, UpdateImplantRequest request) {
         @Cleanup Response response = remote.updateImplant(implantid, request);
         if (!response.isSuccessful()) {

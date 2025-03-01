@@ -267,6 +267,17 @@ public class BackendRemote {
     }
 
     @SneakyThrows
+    public Response getImplantStatus(UUID implantd) {
+        Request httpRequest = new Request.Builder()
+            .url(baseUrl + "implants/" + implantd + "/assigned-count")
+            .get()
+            .header(AUTHORIZATION, getBasicAuthorization(username, password))
+            .build();
+        Call call = client.newCall(httpRequest);
+        return call.execute();
+    }
+
+    @SneakyThrows
     public Response updateImplant(UUID implantd, UpdateImplantRequest request) {
         byte[] body = objectMapper.writeValueAsBytes(request);
         Request httpRequest = new Request.Builder()

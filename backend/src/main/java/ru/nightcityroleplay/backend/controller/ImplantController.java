@@ -46,8 +46,8 @@ public class ImplantController {
         implantService.updateImplant(request, implantId, name);
     }
 
-    @GetMapping("{implantId}")
-    public int getImplantStatus(@PathVariable UUID implantId) {
+    @GetMapping("{implantId}/assigned-count")
+    public Integer getImplantStatus(@PathVariable UUID implantId) {
         return implantService.getImplantStatus(implantId);
     }
 

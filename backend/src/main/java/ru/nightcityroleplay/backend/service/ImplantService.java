@@ -124,7 +124,7 @@ public class ImplantService {
     }
 
     @Transactional
-    public int getImplantStatus(UUID implantId) {
+    public Integer getImplantStatus(UUID implantId) {
         Optional<Implant> implantById = implantRepo.findById(implantId);
         if (implantById.isEmpty()) {
             throw new ResponseStatusException(NOT_FOUND, "Имплант " + implantId + " не найден");
@@ -174,8 +174,6 @@ public class ImplantService {
         implantRepo.save(existingImplant);
         log.info("Имплант с ID: {} был успешно обновлен", implantId);
     }
-
-    //todo В реквесте должен быть true чтобы удалить всё у всех и сам имплант
 
     @Transactional
     public void deleteImplant(UUID implantId, boolean redButton) {
