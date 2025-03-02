@@ -156,7 +156,7 @@ public class ImplantTest {
         Действие: Удалить имплант методом DELETE /implant/{id}.
         Ожидается: Имплант удалён из бд.
         """)
-    void deleteImplant_redButtonTrue_success() {
+    void deleteImplant_ignoreAssignmentsTrue_success() {
         // Создать имплант
         String implantName = randomUUID().toString();
         backendRemote.createImplant(
@@ -188,7 +188,7 @@ public class ImplantTest {
         Действие: Удалить имплант методом DELETE /implant/{id}.
         Ожидается: Имплант удалён из бд.
         """)
-    void deleteImplant_redButtonFalse_success() {
+    void deleteImplant_ignoreAssignmentsFalse_success() {
         // Создать имплант
         String implantName = randomUUID().toString();
         backendRemote.createImplant(
@@ -314,7 +314,7 @@ public class ImplantTest {
         Действие: Получить число методом GET /implants/{id}/assigned-chars.
         Ожидается: Получено число 0.
         """)
-    void getImplantStatus_whenDataIsValid_success() {
+    void getImplantAssignmentsCount_whenDataIsValid_success() {
         // Создать имплант
         String implantName = randomUUID().toString();
         String implantType = "Optics";
@@ -337,10 +337,10 @@ public class ImplantTest {
         Result<ImplantsRecord> implantRecord = implantRepo.getImplantsByName(implantName);
 
         // Проверить статус импланта
-        Integer implantStatus = backendRemote.getImplantStatus(implantRecord.get(0).getId());
+        Integer assignmentsCount = backendRemote.getImplantAssignmentsCount(implantRecord.get(0).getId());
 
         assertThat(implantRecord).hasSize(1);
-        assertThat(implantStatus).isEqualTo(0);
+        assertThat(assignmentsCount).isEqualTo(0);
     }
 
     @Test

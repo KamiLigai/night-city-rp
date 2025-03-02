@@ -47,14 +47,14 @@ public class ImplantController {
     }
 
     @GetMapping("{implantId}/assigned-count")
-    public Integer getImplantStatus(@PathVariable UUID implantId) {
-        return implantService.getImplantStatus(implantId);
+    public Integer getImplantAssignmentsCount(@PathVariable UUID implantId) {
+        return implantService.getImplantAssignmentsCount(implantId);
     }
 
     @DeleteMapping("{implantId}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void deleteImplant(@PathVariable UUID implantId, @RequestParam boolean redButton) {
-        implantService.deleteImplant(implantId, redButton);
+    public void deleteImplant(@PathVariable UUID implantId, @RequestParam boolean ignoreAssignments) {
+        implantService.deleteImplant(implantId, ignoreAssignments);
     }
 
     // Получение списка всех ID имплантов

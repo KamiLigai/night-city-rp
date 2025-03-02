@@ -124,7 +124,7 @@ public class ImplantService {
     }
 
     @Transactional
-    public Integer getImplantStatus(UUID implantId) {
+    public Integer getImplantAssignmentsCount(UUID implantId) {
         Optional<Implant> implantById = implantRepo.findById(implantId);
         if (implantById.isEmpty()) {
             throw new ResponseStatusException(NOT_FOUND, "Имплант " + implantId + " не найден");
@@ -176,32 +176,26 @@ public class ImplantService {
     }
 
     @Transactional
-    public void deleteImplant(UUID implantId, boolean redButton) {
+    public void deleteImplant(UUID implantId, boolean ignoreAssignments) {
         log.info("Запрос на удаление импланта с ID: {}", implantId);
 
-        // Поиск импланта по ID
         Implant implant = implantRepo.findById(implantId).orElse(null);
 
-        // Если имплант не найден, выбросить ошибку 404
         if (implant == null) {
             log.info("Имплант {} не найден", implantId);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Имплант не найден");
         }
-        // Если true то проверить наличие на персонажах
-        if (redButton) {
-            // Если имплант встроен в персонажей, выбросить ошибку 422
+        if (ignoreAssignments) {
             if (!implant.getChars().isEmpty()) {
                 log.info("Не удалось удалить имплант с ID {}: так как он встроен в персонажей", implantId);
                 throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
                     "Запрещено удаление импланта, так как он встроен в персонажей");
-                // Отображение error notification на фронтенде
             }
-            // Удаление импланта
             implantRepo.delete(implant);
             log.info("Имплант с ID {} был успешно удалён", implantId);
             return;
         }
-        // Удаление импланта
+
         implantRepo.delete(implant);
         log.info("Имплант с ID {} был успешно удалён", implantId);
     }

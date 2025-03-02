@@ -182,9 +182,9 @@ public class ImplantsTest {
     }
 
     @Test
-    public void deleteImplant_redButtonFalse_success() {
+    public void deleteImplant_ignoreAssignmentsFalse_success() {
         // given
-        boolean redButton = false;
+        boolean ignoreAssignments = false;
 
         UUID implantId = UUID.randomUUID();
         Implant implant = new Implant();
@@ -194,7 +194,7 @@ public class ImplantsTest {
         when(implantRepo.findById(implantId)).thenReturn(Optional.of(implant));
 
         // when
-        service.deleteImplant(implantId, redButton);
+        service.deleteImplant(implantId, ignoreAssignments);
 
         // then
         verify(implantRepo).delete(implant);

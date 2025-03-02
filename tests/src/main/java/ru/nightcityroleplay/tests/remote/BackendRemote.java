@@ -245,9 +245,9 @@ public class BackendRemote {
     }
 
     @SneakyThrows
-    public Response deleteImplant(UUID implantid, boolean redButton) {
+    public Response deleteImplant(UUID implantid, boolean ignoreAssignments) {
         Request httpRequest = new Request.Builder()
-            .url(baseUrl + "implants/" + implantid + "?redButton=" + redButton)
+            .url(baseUrl + "implants/" + implantid + "?ignoreAssignments=" + ignoreAssignments)
             .delete()
             .header(AUTHORIZATION, getBasicAuthorization(username, password))
             .build();
@@ -267,7 +267,7 @@ public class BackendRemote {
     }
 
     @SneakyThrows
-    public Response getImplantStatus(UUID implantd) {
+    public Response getImplantAssignmentsCount(UUID implantd) {
         Request httpRequest = new Request.Builder()
             .url(baseUrl + "implants/" + implantd + "/assigned-count")
             .get()

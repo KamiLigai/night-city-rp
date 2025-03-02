@@ -149,8 +149,8 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
         objectMapper.readValue(jsonBody, CreateImplantRequest.class);
     }
 
-    public void deleteImplant(UUID implantid, boolean redButton) {
-        @Cleanup Response response = remote.deleteImplant(implantid, redButton);
+    public void deleteImplant(UUID implantid, boolean ignoreAssignments) {
+        @Cleanup Response response = remote.deleteImplant(implantid, ignoreAssignments);
         if (!response.isSuccessful()) {
             fail("Не удалось удалить Имплант " + implantid + ", " + response);
         }
@@ -167,8 +167,8 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
     }
 
     @SneakyThrows
-    public Integer getImplantStatus(UUID implantid) {
-        @Cleanup Response response = remote.getImplantStatus(implantid);
+    public Integer getImplantAssignmentsCount(UUID implantid) {
+        @Cleanup Response response = remote.getImplantAssignmentsCount(implantid);
         if (!response.isSuccessful()) {
             throw new AppContextException("Имплант не найден " + response);
         }
