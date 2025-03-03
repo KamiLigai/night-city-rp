@@ -22,6 +22,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.stream.Collectors.toList;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 
 @Service
@@ -123,6 +124,15 @@ public class ImplantService {
     }
 
     @Transactional
+    public Integer getImplantAssignmentsCount(UUID implantId) {
+        Optional<Implant> implantById = implantRepo.findById(implantId);
+        if (implantById.isEmpty()) {
+            throw new ResponseStatusException(NOT_FOUND, "Имплант " + implantId + " не найден");
+        }
+        return implantById.get().getChars().size();
+    }
+
+    @Transactional
     public void updateImplant(UpdateImplantRequest request, UUID implantId, String name) {
         log.info("Администратор пытается создать имплант с именем: {} с id {}", name, implantId);
         if (request.getReputationRequirement() < 0) {
@@ -166,24 +176,26 @@ public class ImplantService {
     }
 
     @Transactional
-    public void deleteImplant(UUID implantId) {
+    public void deleteImplant(UUID implantId, boolean ignoreAssignments) {
         log.info("Запрос на удаление импланта с ID: {}", implantId);
 
-        // Поиск импланта по ID
         Implant implant = implantRepo.findById(implantId).orElse(null);
 
-        // Если имплант не найден, выбросить ошибку 404
         if (implant == null) {
             log.info("Имплант {} не найден", implantId);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Имплант не найден");
         }
-        // Если имплант встроен в персонажей, выбросить ошибку 422
-        if (!implant.getChars().isEmpty()) {
-            log.info("Не удалось удалить имплант с ID {}: так как он встроен в персонажей", implantId);
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
-                "Запрещено удаление импланта, так как он встроен в персонажей");
+        if (!ignoreAssignments) {
+            if (!implant.getChars().isEmpty()) {
+                log.info("Не удалось удалить имплант с ID {}: так как он встроен в персонажей", implantId);
+                throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+                    "Запрещено удаление импланта, так как он встроен в персонажей");
+            }
+            implantRepo.delete(implant);
+            log.info("Имплант с ID {} был успешно удалён", implantId);
+            return;
         }
-        // Удаление импланта
+
         implantRepo.delete(implant);
         log.info("Имплант с ID {} был успешно удалён", implantId);
     }

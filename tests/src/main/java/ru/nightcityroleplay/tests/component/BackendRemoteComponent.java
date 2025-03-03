@@ -149,8 +149,8 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
         objectMapper.readValue(jsonBody, CreateImplantRequest.class);
     }
 
-    public void deleteImplant(UUID implantid) {
-        @Cleanup Response response = remote.deleteImplant(implantid);
+    public void deleteImplant(UUID implantid, boolean ignoreAssignments) {
+        @Cleanup Response response = remote.deleteImplant(implantid, ignoreAssignments);
         if (!response.isSuccessful()) {
             fail("Не удалось удалить Имплант " + implantid + ", " + response);
         }
@@ -164,6 +164,16 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
         }
         var jsonBody = response.body().string();
         return objectMapper.readValue(jsonBody, ImplantDto.class);
+    }
+
+    @SneakyThrows
+    public Integer getImplantAssignmentsCount(UUID implantid) {
+        @Cleanup Response response = remote.getImplantAssignmentsCount(implantid);
+        if (!response.isSuccessful()) {
+            throw new AppContextException("Имплант не найден " + response);
+        }
+        var jsonBody = response.body().string();
+        return objectMapper.readValue(jsonBody, Integer.class);
     }
 
     @SneakyThrows
@@ -239,8 +249,8 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
         return toHttpResponse(response);
     }
 
-    public HttpResponse makeDeleteImplantRequest(UUID implantid) {
-        @Cleanup Response response = remote.deleteImplant(implantid);
+    public HttpResponse makeDeleteImplantRequest(UUID implantid, boolean redButton) {
+        @Cleanup Response response = remote.deleteImplant(implantid, redButton);
         return toHttpResponse(response);
     }
 }

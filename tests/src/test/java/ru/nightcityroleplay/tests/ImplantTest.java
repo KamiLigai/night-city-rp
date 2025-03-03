@@ -118,10 +118,10 @@ public class ImplantTest {
     @MethodSource("implantDataProvider")
     @SneakyThrows
     @Description("""
-    Дано: Пустая БД.
-    Действие: Попытаться добавить имплант методом POST /implants с некорректными данными.
-    Ожидается: Запрос завершился с ошибкой и сообщение об ошибке о некорректных данных.
-    """)
+        Дано: Пустая БД.
+        Действие: Попытаться добавить имплант методом POST /implants с некорректными данными.
+        Ожидается: Запрос завершился с ошибкой и сообщение об ошибке о некорректных данных.
+        """)
     void createImplant_WithInvalidData_throw400(String implantName, String implantType, int implantPointsCost, int specialImplantPointsCost, int reputationRequirement, String expectedErrorMessage) {
         // Попытаться создать имплант с некорректными данными
         HttpResponse response = backendRemote.makeCreateImplantRequest(
@@ -156,7 +156,7 @@ public class ImplantTest {
         Действие: Удалить имплант методом DELETE /implant/{id}.
         Ожидается: Имплант удалён из бд.
         """)
-    void deleteImplant_existingImplant_success() {
+    void deleteImplant_ignoreAssignmentsTrue_success() {
         // Создать имплант
         String implantName = randomUUID().toString();
         backendRemote.createImplant(
@@ -175,7 +175,39 @@ public class ImplantTest {
         assertThat(implantResult).hasSize(1);
 
         // Удалить имплант
-        backendRemote.deleteImplant(implantResult.get(0).getId());
+        backendRemote.deleteImplant(implantResult.get(0).getId(), true);
+
+        // Проверить, что имплант удалён
+        Result<ImplantsRecord> result = implantRepo.getImplantsByName(implantName);
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    @Description("""
+        Дано: Имплант с id.
+        Действие: Удалить имплант методом DELETE /implant/{id}.
+        Ожидается: Имплант удалён из бд.
+        """)
+    void deleteImplant_ignoreAssignmentsFalse_success() {
+        // Создать имплант
+        String implantName = randomUUID().toString();
+        backendRemote.createImplant(
+            CreateImplantRequest.builder()
+                .name(implantName)
+                .implantType("Optics_Kiroshi")
+                .description("Description text")
+                .reputationRequirement(100)
+                .implantPointsCost(3)
+                .specialImplantPointsCost(0)
+                .build()
+        );
+
+        // Проверить, что имплант создан
+        Result<ImplantsRecord> implantResult = implantRepo.getImplantsByName(implantName);
+        assertThat(implantResult).hasSize(1);
+
+        // Удалить имплант
+        backendRemote.deleteImplant(implantResult.get(0).getId(), false);
 
         // Проверить, что имплант удалён
         Result<ImplantsRecord> result = implantRepo.getImplantsByName(implantName);
@@ -210,7 +242,7 @@ public class ImplantTest {
         backendRemote.setCurrentUser(user.id(), user.username(), user.username());
 
         // Удалить имплант
-        HttpResponse response = backendRemote.makeDeleteImplantRequest(implantResult.get(0).getId());
+        HttpResponse response = backendRemote.makeDeleteImplantRequest(implantResult.get(0).getId(), true);
 
         // Проверить, что имплант не удалён и вышло 403
         assertThat(response.code()).isEqualTo(403);
@@ -219,15 +251,15 @@ public class ImplantTest {
     @Test
     @SneakyThrows
     @Description("""
-    Дано: Имплант 1.
-    Действие: Удалить Имплант 2 методом DELETE /implants/{id}.
-    Ожидается: 404 Not Found.
+        Дано: Имплант 1.
+        Действие: Удалить Имплант 2 методом DELETE /implants/{id}.
+        Ожидается: 404 Not Found.
                Никакой имплант не удалён.
     """)
     void deleteNonExistingImplant_whenImplantDoesNotExist_throw404() {
         // Удалить несуществующий имплант
         UUID implantId = randomUUID();
-        HttpResponse response = backendRemote.makeDeleteImplantRequest(implantId);
+        HttpResponse response = backendRemote.makeDeleteImplantRequest(implantId, true);
 
         // Проверить, что вернулся статус 404 и сообщение об ошибке
         assertThat(response.code()).isEqualTo(404);
@@ -278,10 +310,45 @@ public class ImplantTest {
 
     @Test
     @Description("""
-    Дано: Имплант с id.
-    Действие: Изменить имплант по id методом PUT /implants/{id}.
-    Ожидается: Имплант в бд обновлён.
-    """)
+        Дано: Имплант.
+        Действие: Получить число методом GET /implants/{id}/assigned-chars.
+        Ожидается: Получено число 0.
+        """)
+    void getImplantAssignmentsCount_whenDataIsValid_success() {
+        // Создать имплант
+        String implantName = randomUUID().toString();
+        String implantType = "Optics";
+        String description = "TestStatus";
+        int reputationRequirement = 100;
+        int implantPointsCost = 3;
+        int specialImplantPointsCost = 0;
+
+        backendRemote.createImplant(
+            CreateImplantRequest.builder()
+                .name(implantName)
+                .implantType(implantType)
+                .description(description)
+                .reputationRequirement(reputationRequirement)
+                .implantPointsCost(implantPointsCost)
+                .specialImplantPointsCost(specialImplantPointsCost)
+                .build()
+        );
+        // Проверить новый имплант
+        Result<ImplantsRecord> implantRecord = implantRepo.getImplantsByName(implantName);
+
+        // Проверить статус импланта
+        Integer assignmentsCount = backendRemote.getImplantAssignmentsCount(implantRecord.get(0).getId());
+
+        assertThat(implantRecord).hasSize(1);
+        assertThat(assignmentsCount).isEqualTo(0);
+    }
+
+    @Test
+    @Description("""
+        Дано: Имплант с id.
+        Действие: Изменить имплант по id методом PUT /implants/{id}.
+        Ожидается: Имплант в бд обновлён.
+        """)
     void updateImplant_whenDataIsValid_success() {
         // Создать имплант
         String implantName = randomUUID().toString();
@@ -331,10 +398,10 @@ public class ImplantTest {
 
     @Test
     @Description("""
-    Дано: Имплант отсутствует
-    Действие: Изменить имплант по id методом PUT /implants/{id}
-    Ожидается: Ошибка 404, имплант не найден
-    """)
+        Дано: Имплант отсутствует
+        Действие: Изменить имплант по id методом PUT /implants/{id}
+        Ожидается: Ошибка 404, имплант не найден
+        """)
     void updateImplant_whenNonExistingImplant_throw404() {
         // Пытаться изменить несуществующий имплант
         HttpResponse response = backendRemote.makeUpdateImplantRequest(
@@ -355,11 +422,11 @@ public class ImplantTest {
 
     @Test
     @Description("""
-    Дано: Имплант с id.
-    Действие: Изменить Имплант по id методом PUT /implants/{id} с некорректными данными.
-    Ожидается: 400 Bad_Request.
+        Дано: Имплант с id.
+        Действие: Изменить Имплант по id методом PUT /implants/{id} с некорректными данными.
+        Ожидается: 400 Bad_Request.
                Никакой Имплант не был изменен.
-    """)
+        """)
     void updateImplant_withBadRequest_throw400() {
         // Создать имплант
         String implantName = randomUUID().toString();
