@@ -185,7 +185,7 @@ public class ImplantService {
             log.info("Имплант {} не найден", implantId);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Имплант не найден");
         }
-        if (ignoreAssignments) {
+        if (!ignoreAssignments) {
             if (!implant.getChars().isEmpty()) {
                 log.info("Не удалось удалить имплант с ID {}: так как он встроен в персонажей", implantId);
                 throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,

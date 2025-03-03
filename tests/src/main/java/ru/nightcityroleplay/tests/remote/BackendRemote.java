@@ -269,7 +269,7 @@ public class BackendRemote {
     @SneakyThrows
     public Response getImplantAssignmentsCount(UUID implantd) {
         Request httpRequest = new Request.Builder()
-            .url(baseUrl + "implants/" + implantd + "/assigned-count")
+            .url(baseUrl + "implants/" + implantd + "/assignments-count")
             .get()
             .header(AUTHORIZATION, getBasicAuthorization(username, password))
             .build();
