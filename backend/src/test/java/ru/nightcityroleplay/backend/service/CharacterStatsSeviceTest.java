@@ -14,14 +14,14 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class CharacterStatsSeviceTest {
-    private CharacterStatsService characterStatsService;
+    private CharacterStatsService statsService;
 
     @BeforeEach
     void setUp() {
 
         MockitoAnnotations.openMocks(this);
 
-        characterStatsService = new CharacterStatsService();
+        statsService = new CharacterStatsService();
     }
 
     @ParameterizedTest
@@ -33,10 +33,10 @@ public class CharacterStatsSeviceTest {
         character.setAge(26);
 
         // when
-        characterStatsService.updateCharacterStats(character);
+        statsService.updateCharacterStats(character);
 
         // then
-        assertThat(character.getImplantPoints()).isEqualTo(implantPoints);
+        assertThat(statsService.calculateSpecialImplantPoints(character.getReputation())).isEqualTo(implantPoints);
 
     }
 
@@ -61,7 +61,7 @@ public class CharacterStatsSeviceTest {
         int age = 20;
 
         // when
-        int result = characterStatsService.calculateBattlePoints(age);
+        int result = statsService.calculateBattlePoints(age);
 
         // then
         assertThat(result).isEqualTo(13);
@@ -73,7 +73,7 @@ public class CharacterStatsSeviceTest {
         int age = 30;
 
         // when
-        int result = characterStatsService.calculateBattlePoints(age);
+        int result = statsService.calculateBattlePoints(age);
 
         // then
         assertThat(result).isEqualTo(15);
@@ -85,7 +85,7 @@ public class CharacterStatsSeviceTest {
         int age = 50;
 
         // when
-        int result = characterStatsService.calculateBattlePoints(age);
+        int result = statsService.calculateBattlePoints(age);
 
         // then
         assertThat(result).isEqualTo(17);
@@ -95,7 +95,7 @@ public class CharacterStatsSeviceTest {
     @Test
     void calculateCivilPoints_isAlwaysThirteen_success() {
         // when
-        int result = characterStatsService.calculateCivilPoints();
+        int result = statsService.calculateCivilPoints();
 
         // then
         assertThat(result).isEqualTo(13);

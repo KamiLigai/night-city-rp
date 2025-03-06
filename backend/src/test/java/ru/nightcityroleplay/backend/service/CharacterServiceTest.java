@@ -179,11 +179,13 @@ class CharacterServiceTest {
         character1.setId(UUID.randomUUID());
         character1.setName("Character 1");
         character1.setWeapons(new ArrayList<>()); // инициализация пустого списка
+        character1.setReputation(5);
 
         CharacterEntity character2 = new CharacterEntity();
         character2.setId(UUID.randomUUID());
         character2.setName("Character 2");
-        character2.setWeapons(new ArrayList<>()); // инициализация пустого списка
+        character2.setWeapons(new ArrayList<>());
+        character2.setReputation(5);// инициализация пустого списка
 
         List<CharacterEntity> characterList = List.of(character1, character2);
         Page<CharacterEntity> characterPage = new PageImpl<>(characterList, pageable, characterList.size());
@@ -651,8 +653,8 @@ class CharacterServiceTest {
         implant.setImplantPointsCost(3);
         implant.setSpecialImplantPointsCost(0);
 
-        UpdateCharacterImplantRequest request = new UpdateCharacterImplantRequest();
-        request.setImplantId(List.of(implant.getId()));
+        UpdateCharacterImplantsRequest request = new UpdateCharacterImplantsRequest();
+        request.setImplantIds(List.of(implant.getId()));
 
 
         when(charRepo.findById(characterId)).thenReturn(Optional.of(character));
@@ -661,11 +663,11 @@ class CharacterServiceTest {
         // when & then
         ResponseStatusException exception = assertThrows(
             ResponseStatusException.class,
-            () -> service.putCharacterImplant(request, characterId, auth)
+            () -> service.updateCharacterImplants(request, characterId, auth)
         );
 
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
-        assertEquals("Данный имплант не доступен на вашей репутации", exception.getReason());
+        assertEquals("Недостаточная репутация для импланта с ID " + implant.getId(), exception.getReason());
     }
 
     @Test
@@ -680,16 +682,15 @@ class CharacterServiceTest {
         CharacterEntity character = new CharacterEntity();
         character.setId(characterId);
         character.setOwnerId(user.getId());
-        character.setReputation(5);
+        character.setReputation(1);
 
         Implant implant = new Implant();
         implant.setId(UUID.randomUUID());
         implant.setReputationRequirement(1);
-        implant.setImplantPointsCost(5);
-        implant.setSpecialImplantPointsCost(0); // 0 для специальных очков
+        implant.setImplantPointsCost(1000);
 
-        UpdateCharacterImplantRequest request = new UpdateCharacterImplantRequest();
-        request.setImplantId(List.of(implant.getId()));
+        UpdateCharacterImplantsRequest request = new UpdateCharacterImplantsRequest();
+        request.setImplantIds(List.of(implant.getId()));
 
         when(charRepo.findById(characterId)).thenReturn(Optional.of(character));
         when(implantRepo.findById(implant.getId())).thenReturn(Optional.of(implant));
@@ -697,7 +698,7 @@ class CharacterServiceTest {
         // when & then
         ResponseStatusException exception = assertThrows(
             ResponseStatusException.class,
-            () -> service.putCharacterImplant(request, characterId, auth)
+            () -> service.updateCharacterImplants(request, characterId, auth)
         );
 
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
