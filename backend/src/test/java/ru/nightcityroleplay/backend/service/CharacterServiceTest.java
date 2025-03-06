@@ -35,9 +35,7 @@ import static org.mockito.Mockito.*;
 class CharacterServiceTest {
 
     CharacterService service;
-
     CharacterStatsService characterStatsService;
-
     WeaponRepository weaponRepo;
     CharacterRepository charRepo;
     SkillRepository skillRepo;
@@ -52,7 +50,8 @@ class CharacterServiceTest {
         charRepo = mock();
         skillRepo = mock();
         implantRepo = mock();
-        service = new CharacterService(charRepo, characterStatsService, weaponRepo, skillRepo, implantRepo);
+
+        service = new CharacterService(charRepo, characterStatsService, weaponRepo, skillRepo, implantRepo, characterStatsService);
     }
 
     @Test
@@ -644,8 +643,6 @@ class CharacterServiceTest {
         CharacterEntity character = new CharacterEntity();
         character.setId(characterId);
         character.setOwnerId(user.getId());
-        character.setImplantPoints(10);
-        character.setSpecialImplantPoints(10);
         character.setReputation(0); // Низкая репутация <----
 
         Implant implant = new Implant();
@@ -683,8 +680,6 @@ class CharacterServiceTest {
         CharacterEntity character = new CharacterEntity();
         character.setId(characterId);
         character.setOwnerId(user.getId());
-        character.setImplantPoints(4); // Недостаточно очков
-        character.setSpecialImplantPoints(10);
         character.setReputation(5);
 
         Implant implant = new Implant();
@@ -730,8 +725,6 @@ class CharacterServiceTest {
         implant.setSpecialImplantPointsCost(5);
 
         character.getImplants().add(implant);
-        character.setImplantPoints(10);
-        character.setSpecialImplantPoints(10);
 
         when(charRepo.findById(characterId)).thenReturn(Optional.of(character));
         when(implantRepo.findById(implantId)).thenReturn(Optional.of(implant));
@@ -741,8 +734,6 @@ class CharacterServiceTest {
 
         // then
         assertFalse(character.getImplants().contains(implant));
-        assertEquals(15, character.getImplantPoints());
-        assertEquals(15, character.getSpecialImplantPoints());
         verify(charRepo, times(1)).save(character);
     }
 
@@ -840,8 +831,6 @@ class CharacterServiceTest {
         implant.setId(UUID.randomUUID());
 
         character.getImplants().add(implant);
-        character.setImplantPoints(10);
-        character.setSpecialImplantPoints(10);
 
         when(charRepo.findById(characterId)).thenReturn(Optional.of(character));
         when(implantRepo.findById(implantId)).thenReturn(Optional.of(new Implant())); // Это возвращает несуществующий имплант
