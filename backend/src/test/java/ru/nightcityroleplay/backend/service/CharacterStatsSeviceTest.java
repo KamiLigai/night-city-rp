@@ -26,7 +26,7 @@ public class CharacterStatsSeviceTest {
 
     @ParameterizedTest
     @MethodSource("calculateImplantPointsData")
-    void calculateImplantPoints(int reputation, int implantPoints) {
+    void calculateImplantPoints(int reputation, int reqImplantPoints) {
         // given
         var character = new CharacterEntity();
         character.setReputation(reputation);
@@ -34,14 +34,15 @@ public class CharacterStatsSeviceTest {
 
         // when
         statsService.updateCharacterStats(character);
+        int implantPoints = statsService.calculateImplantPoints(reputation);
 
         // then
-        assertThat(statsService.calculateSpecialImplantPoints(character.getReputation())).isEqualTo(implantPoints);
+        assertThat(implantPoints).isEqualTo(reqImplantPoints);
 
     }
 
     public static Stream<Arguments> calculateImplantPointsData() {
-        // reputation, implantPoints
+        // reputation, reqImplantPoints
         return Stream.of(
             Arguments.of(-1, 7),
             Arguments.of(0, 7),
