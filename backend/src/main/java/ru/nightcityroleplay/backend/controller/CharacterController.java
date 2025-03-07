@@ -73,7 +73,7 @@ public class CharacterController {
         return characterService.getCharacterImplants(characterId);
     }
 
-    @PutMapping("{characterId}/implants-list")
+    @PutMapping("{characterId}/implants")
     public void updateCharacterImplants(
             @RequestBody UpdateCharacterImplantsRequest request,
             @PathVariable UUID characterId,

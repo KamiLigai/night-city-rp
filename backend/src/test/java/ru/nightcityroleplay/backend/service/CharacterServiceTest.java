@@ -178,14 +178,14 @@ class CharacterServiceTest {
         CharacterEntity character1 = new CharacterEntity();
         character1.setId(UUID.randomUUID());
         character1.setName("Character 1");
-        character1.setWeapons(new ArrayList<>()); // инициализация пустого списка
+        character1.setWeapons(new ArrayList<>());
         character1.setReputation(5);
 
         CharacterEntity character2 = new CharacterEntity();
         character2.setId(UUID.randomUUID());
         character2.setName("Character 2");
         character2.setWeapons(new ArrayList<>());
-        character2.setReputation(5);// инициализация пустого списка
+        character2.setReputation(5);
 
         List<CharacterEntity> characterList = List.of(character1, character2);
         Page<CharacterEntity> characterPage = new PageImpl<>(characterList, pageable, characterList.size());
