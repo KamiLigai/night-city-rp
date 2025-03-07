@@ -14,34 +14,35 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class CharacterStatsSeviceTest {
-    private CharacterStatsService characterStatsService;
+    private CharacterStatsService statsService;
 
     @BeforeEach
     void setUp() {
 
         MockitoAnnotations.openMocks(this);
 
-        characterStatsService = new CharacterStatsService();
+        statsService = new CharacterStatsService();
     }
 
     @ParameterizedTest
     @MethodSource("calculateImplantPointsData")
-    void calculateImplantPoints(int reputation, int implantPoints) {
+    void calculateImplantPoints(int reputation, int reqImplantPoints) {
         // given
         var character = new CharacterEntity();
         character.setReputation(reputation);
         character.setAge(26);
 
         // when
-        characterStatsService.updateCharacterStats(character);
+        statsService.updateCharacterStats(character);
+        int implantPoints = statsService.calculateImplantPoints(reputation);
 
         // then
-        assertThat(character.getImplantPoints()).isEqualTo(implantPoints);
+        assertThat(implantPoints).isEqualTo(reqImplantPoints);
 
     }
 
     public static Stream<Arguments> calculateImplantPointsData() {
-        // reputation, implantPoints
+        // reputation, reqImplantPoints
         return Stream.of(
             Arguments.of(-1, 7),
             Arguments.of(0, 7),
@@ -61,7 +62,7 @@ public class CharacterStatsSeviceTest {
         int age = 20;
 
         // when
-        int result = characterStatsService.calculateBattlePoints(age);
+        int result = statsService.calculateBattlePoints(age);
 
         // then
         assertThat(result).isEqualTo(13);
@@ -73,7 +74,7 @@ public class CharacterStatsSeviceTest {
         int age = 30;
 
         // when
-        int result = characterStatsService.calculateBattlePoints(age);
+        int result = statsService.calculateBattlePoints(age);
 
         // then
         assertThat(result).isEqualTo(15);
@@ -85,7 +86,7 @@ public class CharacterStatsSeviceTest {
         int age = 50;
 
         // when
-        int result = characterStatsService.calculateBattlePoints(age);
+        int result = statsService.calculateBattlePoints(age);
 
         // then
         assertThat(result).isEqualTo(17);
@@ -95,7 +96,7 @@ public class CharacterStatsSeviceTest {
     @Test
     void calculateCivilPoints_isAlwaysThirteen_success() {
         // when
-        int result = characterStatsService.calculateCivilPoints();
+        int result = statsService.calculateCivilPoints();
 
         // then
         assertThat(result).isEqualTo(13);

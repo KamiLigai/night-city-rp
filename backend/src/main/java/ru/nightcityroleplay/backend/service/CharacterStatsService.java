@@ -10,8 +10,6 @@ public class CharacterStatsService {
 
     public void updateCharacterStats(CharacterEntity character) {
 
-        character.setImplantPoints(calculateImplantPoints(character.getReputation()));
-        character.setSpecialImplantPoints(calculateSpecialImplantPoint(character.getReputation()));
         character.setBattlePoints(calculateBattlePoints(character.getAge()));
         character.setCivilPoints(calculateCivilPoints());
     }
@@ -29,7 +27,7 @@ public class CharacterStatsService {
         }
     }
 
-    public int calculateSpecialImplantPoint(int reputation) {
+    public int calculateSpecialImplantPoints(int reputation) {
         if (reputation < 90) {
             return 0;
         } else if (reputation < 120) {

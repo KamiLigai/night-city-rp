@@ -1,0 +1,12 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2025-03-06-remove-ip-from-characters.yaml
+      author: Woomanz
+      changes:
+        - dropColumn:
+            tableName: characters
+            columns:
+              - column:
+                  name: implant_points
+              - column:
+                  name: special_implant_points
