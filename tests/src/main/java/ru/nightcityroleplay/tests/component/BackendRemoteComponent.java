@@ -178,4 +178,14 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
             fail("Не удалось удалить навык c Skill Family: " + skillFamily + ", " + response);
         }
     }
+
+    @SneakyThrows
+    public SkillDto getSkill(String skillFamily) {
+        @Cleanup Response response = remote.getSkill(skillFamily);
+        if (!response.isSuccessful()) {
+            throw new AppContextException("Навык не найден " + response);
+        }
+        var jsonBody = response.body().string();
+        return objectMapper.readValue(jsonBody, SkillDto.class);
+    }
 }

@@ -1,6 +1,5 @@
 package ru.nightcityroleplay.tests;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.qameta.allure.Description;
 import lombok.SneakyThrows;
 import org.jooq.Result;
@@ -11,9 +10,12 @@ import ru.nightcityroleplay.tests.component.AppContext;
 import ru.nightcityroleplay.tests.component.BackendRemoteComponent;
 import ru.nightcityroleplay.tests.dto.CreateSkillRequest;
 import ru.nightcityroleplay.tests.dto.HttpResponse;
+import ru.nightcityroleplay.tests.dto.SkillDto;
 import ru.nightcityroleplay.tests.dto.UserDto;
 import ru.nightcityroleplay.tests.entity.tables.records.SkillsRecord;
 import ru.nightcityroleplay.tests.repo.SkillRepo;
+
+import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -113,10 +115,10 @@ public class SkillTest {
 
     @Test
     @Description("""
-    Дано: Навыки с skillFamily.
-    Действие: Удалить Навыки методом DELETE /skills/{skillFamily}.
-    Ожидается: Навыки удалены из бд.
-    """)
+        Дано: Навыки с skillFamily.
+        Действие: Удалить Навыки методом DELETE /skills/{skillFamily}.
+        Ожидается: Навыки удалены из бд.
+        """)
     void deleteSkill() {
         // Создание данных для нового навыка
         String skillName = randomUUID().toString();
@@ -143,10 +145,10 @@ public class SkillTest {
             .satisfies(
                 skill -> assertThat(skill.getSkillFamily()).isEqualTo(skillFamily),
                 skill -> assertThat(skill.getName()).isEqualTo(skillName),
-            skill -> assertThat(skill.getDescription()).isEqualTo(skillDescription),
-            skill -> assertThat(skill.getSkillClass()).isEqualTo(skillClass),
-            skill -> assertThat(skill.getTypeIsBattle()).isEqualTo(typeIsBattle)
-        );
+                skill -> assertThat(skill.getDescription()).isEqualTo(skillDescription),
+                skill -> assertThat(skill.getSkillClass()).isEqualTo(skillClass),
+                skill -> assertThat(skill.getTypeIsBattle()).isEqualTo(typeIsBattle)
+            );
 
         // Удаление навыка
         backendRemote.deleteSkill(skillResult.get(0).getSkillFamily());
@@ -155,4 +157,96 @@ public class SkillTest {
         Result<SkillsRecord> deletedSkillResult = skillRepo.getSkillsBySkillFamily(skillFamily);
         assertThat(deletedSkillResult).isEmpty();
     }
+
+    @Test
+    @Description("""
+        Дано: Навык с определённым skillFamily.
+        Действие: Получить навык методом GET /skills/{skillFamily}.
+        Ожидается: Получены данные навыка.
+        """)
+    void getSkill() {
+        // Подготовка данных для нового навыка
+        String skillName = UUID.randomUUID().toString();
+        String skillFamily = UUID.randomUUID().toString();
+        String skillDescription = "Skill description example";
+        String skillClass = "solo";
+        Boolean typeIsBattle = true;
+
+        backendRemote.createSkill(
+            CreateSkillRequest.builder()
+                .skillFamily(skillFamily)
+                .name(skillName)
+                .description(skillDescription)
+                .skillClass(skillClass)
+                .typeIsBattle(typeIsBattle)
+                .build()
+        );
+
+        // Получаем навык с использованием метода getSkill
+        SkillDto skillDto = backendRemote.getSkill(skillFamily);
+
+        // Проверяем, что полученный навык не null и соответствует ожидаемым значениям
+        assertThat(skillDto).isNotNull();
+        assertThat(skillDto.getName()).isEqualTo(skillName);
+        assertThat(skillDto.getSkillFamily()).isEqualTo(skillFamily);
+        assertThat(skillDto.getDescription()).isEqualTo(skillDescription);
+        assertThat(skillDto.getSkillClass()).isEqualTo(skillClass);
+        assertThat(skillDto.getTypeIsBattle()).isEqualTo(typeIsBattle);
+    }
+//   @Test
+//    @Description("""
+//    Дано: Несколько навыков с различными уровнями, но одинаковыми группой и именем.
+//    Действие: Вызов метода GET /skills/unique с использованием пагинации.
+//    Ожидается: Получение списка уникальных навыков с наибольшим уровнем для каждой комбинации группы и имени.
+//    """)
+//    void testGetUniqueSkillsWithHighestLevel() {
+//
+//        String commonSkillFamily = UUID.randomUUID().toString();
+//        String commonSkillName = UUID.randomUUID().toString();
+//
+//        backendRemote.createSkill(
+//            CreateSkillRequest.builder()
+//                .id(UUID.randomUUID())
+//                .skillFamily(commonSkillFamily)
+//                .name(commonSkillName)
+//                .description("Описание 1")
+//                .skillClass("Класс 1")
+//                .typeIsBattle(true)
+//                .build()
+//        );
+//        backendRemote.createSkill(
+//            CreateSkillRequest.builder()
+//                .id(UUID.randomUUID())
+//                .skillFamily(commonSkillFamily)
+//                .name(commonSkillName)
+//                .description("Описание 2")
+//                .skillClass("Класс 2")
+//                .typeIsBattle(true)
+//                .build()
+//        );
+//        String differentSkillFamily = UUID.randomUUID().toString();
+//        String differentSkillName = UUID.randomUUID().toString();
+//        backendRemote.createSkill(
+//            CreateSkillRequest.builder()
+//                .id(UUID.randomUUID())
+//                .skillFamily(differentSkillFamily)
+//                .name(differentSkillName)
+//                .description("Описание 3")
+//                .skillClass("Класс 3")
+//                .typeIsBattle(false)
+//                .build()
+//        );
+//        Pageable pageable = PageRequest.of(0, 10);
+//        Page<SkillDto> uniqueSkillsPage = backendRemote.getUniqueSkills(pageable);
+//
+//        // Проверка результатов
+//        assertThat(uniqueSkillsPage).isNotNull();
+//        assertThat(uniqueSkillsPage.getTotalElements()).isEqualTo(2); // Ожидается два уникальных навыка
+//        List<SkillDto> retrievedSkills = uniqueSkillsPage.getContent();
+//        assertAll("Проверка уникальных навыков",
+//            () -> assertThat(retrievedSkills).extracting("skillFamily").containsExactlyInAnyOrder(commonSkillFamily, differentSkillFamily),
+//            () -> assertThat(retrievedSkills).extracting("level").containsExactlyInAnyOrder(2, 3)
+//        );
+//    }
+//
 }

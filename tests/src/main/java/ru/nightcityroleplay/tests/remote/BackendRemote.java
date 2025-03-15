@@ -208,4 +208,15 @@ public class BackendRemote {
         Call call = client.newCall(httpRequest);
         return call.execute();
     }
+
+    @SneakyThrows
+    public Response getSkill(String skillFamily) {
+        Request httpRequest = new Request.Builder()
+            .url(baseUrl + "skills/" + skillFamily)
+            .get()
+            .header(AUTHORIZATION, getBasicAuthorization(username, password))
+            .build();
+        Call call = client.newCall(httpRequest);
+        return call.execute();
+    }
 }

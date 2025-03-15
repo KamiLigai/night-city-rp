@@ -43,14 +43,14 @@ class SkillServiceTest {
     @Test
     void getSkill_skillIsAbsent_throw404() {
         // given
-        UUID id = randomUUID();
-        when(skillRepo.findById(id))
+        String skillFamily = randomUUID().toString();
+        when(skillRepo.findBySkillFamilyAndLevel(skillFamily, 1))
             .thenReturn(Optional.empty());
 
         // then
-        assertThatThrownBy(() -> service.getSkill(id))
+        assertThatThrownBy(() -> service.getSkill(skillFamily))
             .isInstanceOf(ResponseStatusException.class)
-            .hasMessageContaining("Навык " + id + " не найден")
+            .hasMessageContaining("Навык " + skillFamily + " не найден")
             .extracting(ResponseStatusException.class::cast)
             .extracting(ErrorResponseException::getStatusCode)
             .isEqualTo(HttpStatus.NOT_FOUND);

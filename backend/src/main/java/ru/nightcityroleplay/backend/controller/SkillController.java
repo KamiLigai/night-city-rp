@@ -11,7 +11,7 @@ import ru.nightcityroleplay.backend.dto.UpdateSkillRequest;
 import ru.nightcityroleplay.backend.service.SkillService;
 
 import java.util.List;
-import java.util.UUID;
+
 
 @RestController
 @RequestMapping("skills")
@@ -51,8 +51,8 @@ public class SkillController {
         return skillService.getUniqueSkillPage(pageable);
     }
 
-    @GetMapping("{skillId}")
-    public SkillDto getSkill(@PathVariable UUID skillId) {
-        return skillService.getSkill(skillId);
+    @GetMapping("{skillFamily}")
+    public SkillDto getSkill(@PathVariable String skillFamily) {
+        return skillService.getSkill(skillFamily);
     }
 }

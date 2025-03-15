@@ -219,11 +219,11 @@ public class SkillService {
     }
 
     @Transactional
-    public SkillDto getSkill(UUID skillId) {
-        Optional<Skill> skillById = skillRepo.findById(skillId);
-        if (skillById.isEmpty()) {
-            throw new ResponseStatusException(NOT_FOUND, "Навык " + skillId + " не найден");
+    public SkillDto getSkill(String skillFamily) {
+        Optional<Skill> skillBySkillFamily = skillRepo.findBySkillFamilyAndLevel(skillFamily, 1);
+        if (skillBySkillFamily.isEmpty()) {
+            throw new ResponseStatusException(NOT_FOUND, "Навык " + skillFamily + " не найден");
         }
-        return toDto(skillById.get());
+        return toDto(skillBySkillFamily.get());
     }
 }
