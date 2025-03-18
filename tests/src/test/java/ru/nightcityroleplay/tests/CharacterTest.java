@@ -132,7 +132,7 @@ public class CharacterTest {
         backendRemote.makeCreateCharacterRequest(
             CreateCharacterRequest.builder()
                 .name(charName)
-                .age(22)
+                .age(20)
                 .reputation(0)
                 .build()
         );
@@ -143,13 +143,103 @@ public class CharacterTest {
         HttpResponse response2 = backendRemote.makeCreateCharacterRequest(
             CreateCharacterRequest.builder()
                 .name(charName)
-                .age(22)
+                .age(21)
                 .reputation(0)
                 .build()
         );
         assertThat(response2.code()).isEqualTo(422);
         assertThat(response2.body()).contains("Персонаж с таким именем уже есть");
         assertThat(result).size().isEqualTo(1);
+    }
+
+    @Test
+    @SneakyThrows
+    void createCharacter_badAge_throw400() {
+        String charName = randomUUID().toString();
+        HttpResponse response = backendRemote.makeCreateCharacterRequest(
+            CreateCharacterRequest.builder()
+                .name(charName)
+                .age(101)
+                .reputation(0)
+                .build()
+        );
+
+        assertThat(response.code()).isEqualTo(400);
+        assertThat(response.body()).contains("Возраст не может быть больше 100");
+    }
+
+    @Test
+    @SneakyThrows
+    void updateCharacter_badAge_throw400() {
+        String charName = randomUUID().toString();
+        backendRemote.createCharacter(
+            CreateCharacterRequest.builder()
+                .name(charName)
+                .age(10)
+                .reputation(0)
+                .build()
+        );
+
+        Result<CharactersRecord> record = dbContext.select().from(CHARACTERS)
+            .where(CHARACTERS.NAME.eq(charName))
+            .fetchInto(CHARACTERS);
+
+        HttpResponse response = backendRemote.makeUpdateCharacterRequest(
+            record.get(0).getId(),
+            UpdateCharacterRequest.builder()
+                .name(charName)
+                .age(101)
+                .reputation(0)
+                .build()
+        );
+
+        assertThat(response.code()).isEqualTo(400);
+        assertThat(response.body()).contains("Возраст не может быть больше 100");
+    }
+
+    @Test
+    @SneakyThrows
+    void createCharacter_badReputation_throw400() {
+        String charName = randomUUID().toString();
+        HttpResponse response = backendRemote.makeCreateCharacterRequest(
+            CreateCharacterRequest.builder()
+                .name(charName)
+                .age(10)
+                .reputation(41)
+                .build()
+        );
+
+        assertThat(response.code()).isEqualTo(400);
+        assertThat(response.body()).contains("Репутация не может быть больше 40");
+    }
+
+    @Test
+    @SneakyThrows
+    void updateCharacter_badReputation_throw400() {
+        String charName = randomUUID().toString();
+        backendRemote.createCharacter(
+            CreateCharacterRequest.builder()
+                .name(charName)
+                .age(10)
+                .reputation(0)
+                .build()
+        );
+
+        Result<CharactersRecord> record = dbContext.select().from(CHARACTERS)
+            .where(CHARACTERS.NAME.eq(charName))
+            .fetchInto(CHARACTERS);
+
+        HttpResponse response = backendRemote.makeUpdateCharacterRequest(
+            record.get(0).getId(),
+            UpdateCharacterRequest.builder()
+                .name(charName)
+                .age(10)
+                .reputation(41)
+                .build()
+        );
+
+        assertThat(response.code()).isEqualTo(400);
+        assertThat(response.body()).contains("Репутация не может быть больше 40");
     }
 
     @Test
@@ -229,7 +319,7 @@ public class CharacterTest {
         backendRemote.createCharacter(
             CreateCharacterRequest.builder()
                 .name(charName)
-                .age(240)
+                .age(21)
                 .reputation(0)
                 .build()
         );
@@ -284,21 +374,21 @@ public class CharacterTest {
         backendRemote.createCharacter(
             CreateCharacterRequest.builder()
                 .name(randomUUID().toString())
-                .age(10000)
+                .age(10)
                 .reputation(0)
                 .build()
         );
         backendRemote.createCharacter(
             CreateCharacterRequest.builder()
                 .name(randomUUID().toString())
-                .age(10001)
+                .age(11)
                 .reputation(0)
                 .build()
         );
         backendRemote.createCharacter(
             CreateCharacterRequest.builder()
                 .name(randomUUID().toString())
-                .age(10002)
+                .age(12)
                 .reputation(0)
                 .build()
         );
@@ -322,7 +412,7 @@ public class CharacterTest {
         backendRemote.createCharacter(
             CreateCharacterRequest.builder()
                 .name(charName)
-                .age(1000)
+                .age(10)
                 .reputation(0)
                 .build()
         );
@@ -364,7 +454,7 @@ public class CharacterTest {
             randomUUID(),
             UpdateCharacterRequest.builder()
                 .name(randomUUID().toString())
-                .age(1000)
+                .age(10)
                 .reputation(0)
                 .build()
         );
@@ -386,7 +476,7 @@ public class CharacterTest {
         backendRemote.createCharacter(
             CreateCharacterRequest.builder()
                 .name(charName)
-                .age(1000)
+                .age(10)
                 .reputation(0)
                 .build()
         );
@@ -432,7 +522,7 @@ public class CharacterTest {
         backendRemote.createCharacter(
             CreateCharacterRequest.builder()
                 .name(charName)
-                .age(1001)
+                .age(10)
                 .reputation(0)
                 .build()
         );
@@ -477,7 +567,7 @@ public class CharacterTest {
         backendRemote.createCharacter(
             CreateCharacterRequest.builder()
                 .name(charName)
-                .age(1000)
+                .age(10)
                 .reputation(0)
                 .build()
         );
