@@ -43,7 +43,7 @@ public class WeaponServiceTest {
         // given
         var request = new CreateWeaponRequest();
         request.setName("test-name");
-        request.setIsMelee(true);
+        request.setIsMelee(false);
         request.setWeaponType("test-weapon-type");
         request.setPenetration(2);
         request.setReputationRequirement(40);
@@ -63,7 +63,7 @@ public class WeaponServiceTest {
         assertThat(savedWeapon.getName())
             .isEqualTo("test-name");
         assertThat(savedWeapon.getIsMelee())
-            .isEqualTo(true);
+            .isEqualTo(false);
         assertThat(savedWeapon.getWeaponType())
             .isEqualTo("test-weapon-type");
         assertThat(savedWeapon.getPenetration())
