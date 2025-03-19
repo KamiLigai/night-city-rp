@@ -63,7 +63,9 @@ public class WeaponService {
         if (weapon.getIsMelee() == null)
             throw new ResponseStatusException(BAD_REQUEST, "'Ближнее?' не может быть null");
         if (weapon.getWeaponType() == null)
-            throw new ResponseStatusException(BAD_REQUEST, "Тип Оружия не может быть null");
+            throw new ResponseStatusException(BAD_REQUEST, "Тип оружия не может быть null");
+        if (weapon.getIsMelee())
+            weapon.setWeaponType("null");
         if (weapon.getPenetration() < 0)
             throw new ResponseStatusException(BAD_REQUEST, "Пробив не может быть отрицательным.");
         if (weapon.getReputationRequirement() < 0)
@@ -114,7 +116,9 @@ public class WeaponService {
         if (existingWeapon.getIsMelee() == null)
             throw new ResponseStatusException(BAD_REQUEST, "'Ближнее?' не может быть null");
         if (existingWeapon.getWeaponType() == null)
-            throw new ResponseStatusException(BAD_REQUEST, "Тип Оружия не может быть null");
+            throw new ResponseStatusException(BAD_REQUEST, "Тип оружия не может быть null");
+        if (existingWeapon.getIsMelee())
+            existingWeapon.setWeaponType("null");
         if (existingWeapon.getPenetration() < 0)
             throw new ResponseStatusException(BAD_REQUEST, "Пробив не может быть отрицательным.");
         if (existingWeapon.getReputationRequirement() < 0)
