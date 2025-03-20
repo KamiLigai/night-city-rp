@@ -4,8 +4,9 @@ import lombok.Data;
 
 @Data
 public class UpdateSkillRequest {
-
+    private String skillFamily;
     private String name;
     private String description;
-    private String type;
+    private String skillClass;
+    private Boolean typeIsBattle;
 }
