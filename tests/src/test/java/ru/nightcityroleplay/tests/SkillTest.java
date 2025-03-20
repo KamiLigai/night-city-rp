@@ -2,7 +2,6 @@ package ru.nightcityroleplay.tests;
 
 import io.qameta.allure.Description;
 import lombok.SneakyThrows;
-import org.jooq.DSLContext;
 import org.jooq.Result;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;

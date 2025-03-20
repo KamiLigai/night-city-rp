@@ -456,19 +456,6 @@ public class CharacterService {
         return implants;
     }
 
-    // Подсчитывает общую стоимость имплантов
-    private int calculateTotalPointsForImplants(List<Implant> implants) {
-        return implants.stream()
-            .mapToInt(implant -> implant.getImplantPointsCost())
-            .sum();
-    }
-
-    private int calculateTotalPointsForSpecialImplants(List<Implant> implants) {
-        return implants.stream()
-            .mapToInt(implant -> implant.getSpecialImplantPointsCost())
-            .sum();
-    }
-
     @Transactional
     public void deleteCharacterImplant(UUID characterId, UUID implantId, Authentication auth) {
         CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
