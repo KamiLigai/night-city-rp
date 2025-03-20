@@ -2,7 +2,6 @@ package ru.nightcityroleplay.tests;
 
 import io.qameta.allure.Description;
 import lombok.SneakyThrows;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jooq.DSLContext;
 import org.jooq.Result;
 import org.junit.jupiter.api.AfterAll;
@@ -12,21 +11,17 @@ import ru.nightcityroleplay.tests.component.AppContext;
 import ru.nightcityroleplay.tests.component.BackendRemoteComponent;
 import ru.nightcityroleplay.tests.dto.CreateSkillRequest;
 import ru.nightcityroleplay.tests.dto.HttpResponse;
-import ru.nightcityroleplay.tests.dto.IdsRequest;
 import ru.nightcityroleplay.tests.dto.SkillDto;
 import ru.nightcityroleplay.tests.dto.UserDto;
 import ru.nightcityroleplay.tests.entity.tables.records.SkillsRecord;
 import ru.nightcityroleplay.tests.repo.SkillRepo;
 
-import java.util.List;
 import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
-import static ru.nightcityroleplay.tests.entity.Tables.SKILLS;
 
 public class SkillTest {
-    DSLContext dbContext = AppContext.get(DSLContext.class);
     BackendRemoteComponent backendRemote = AppContext.get(BackendRemoteComponent.class);
     SkillRepo skillRepo = AppContext.get(SkillRepo.class);
 
@@ -197,64 +192,9 @@ public class SkillTest {
         assertThat(skillDto.getSkillClass()).isEqualTo(skillClass);
         assertThat(skillDto.getTypeIsBattle()).isEqualTo(typeIsBattle);
     }
-//   @Test
-//    @Description("""
-//    Дано: Несколько навыков с различными уровнями, но одинаковыми группой и именем.
-//    Действие: Вызов метода GET /skills/unique с использованием пагинации.
-//    Ожидается: Получение списка уникальных навыков с наибольшим уровнем для каждой комбинации группы и имени.
-//    """)
-//    void testGetUniqueSkillsWithHighestLevel() {
-//
-//        String commonSkillFamily = UUID.randomUUID().toString();
-//        String commonSkillName = UUID.randomUUID().toString();
-//
-//        backendRemote.createSkill(
-//            CreateSkillRequest.builder()
-//                .id(UUID.randomUUID())
-//                .skillFamily(commonSkillFamily)
-//                .name(commonSkillName)
-//                .description("Описание 1")
-//                .skillClass("Класс 1")
-//                .typeIsBattle(true)
-//                .build()
-//        );
-//        backendRemote.createSkill(
-//            CreateSkillRequest.builder()
-//                .id(UUID.randomUUID())
-//                .skillFamily(commonSkillFamily)
-//                .name(commonSkillName)
-//                .description("Описание 2")
-//                .skillClass("Класс 2")
-//                .typeIsBattle(true)
-//                .build()
-//        );
-//        String differentSkillFamily = UUID.randomUUID().toString();
-//        String differentSkillName = UUID.randomUUID().toString();
-//        backendRemote.createSkill(
-//            CreateSkillRequest.builder()
-//                .id(UUID.randomUUID())
-//                .skillFamily(differentSkillFamily)
-//                .name(differentSkillName)
-//                .description("Описание 3")
-//                .skillClass("Класс 3")
-//                .typeIsBattle(false)
-//                .build()
-//        );
-//        Pageable pageable = PageRequest.of(0, 10);
-//        Page<SkillDto> uniqueSkillsPage = backendRemote.getUniqueSkills(pageable);
-//
-//        // Проверка результатов
-//        assertThat(uniqueSkillsPage).isNotNull();
-//        assertThat(uniqueSkillsPage.getTotalElements()).isEqualTo(2); // Ожидается два уникальных навыка
-//        List<SkillDto> retrievedSkills = uniqueSkillsPage.getContent();
-//        assertAll("Проверка уникальных навыков",
-//            () -> assertThat(retrievedSkills).extracting("skillFamily").containsExactlyInAnyOrder(commonSkillFamily, differentSkillFamily),
-//            () -> assertThat(retrievedSkills).extracting("level").containsExactlyInAnyOrder(2, 3)
-//        );
-//    }
 
     //todo Исправить Bulk
-////  void getSkillBulk_skillExists_success() {
+//  void getSkillBulk_skillExists_success() {
     //      // Создать навык
     //      String skillName = "testName" + randomUUID();
     //      String skillDescription = "testDescription" + randomUUID();
@@ -336,5 +276,6 @@ public class SkillTest {
     //      List<UUID> ids = backendRemote.getSkillIds();
 
     //      assertThat(skillsRecords.size()).isEqualTo(ids.size());
-    }
+
 }
+

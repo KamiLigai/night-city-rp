@@ -48,9 +48,9 @@ public class SkillController {
         return skillService.getUniqueSkillPage(pageable);
     }
 
-    @GetMapping("{skillId}")
-    public SkillDto getSkill(@PathVariable UUID skillId) {
-        return skillService.getSkill(skillId);
+    @GetMapping("{skillFamily}")
+    public SkillDto getSkill(@PathVariable String skillFamily) {
+        return skillService.getSkill(skillFamily);
     }
 
     @GetMapping("ids")

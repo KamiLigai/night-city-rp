@@ -190,43 +190,14 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
     }
 
     @SneakyThrows
-    public SkillDto createSkill(CreateSkillRequest request) {
-        @Cleanup Response response = remote.createSkill(request);
-        if (!response.isSuccessful()) {
-            fail("Не удалось создать навык " + request.name() + ", " + response);
-        }
-        var jsonBody = response.body().string();
-        return objectMapper.readValue(jsonBody, SkillDto.class);
-    }
-
-    @SneakyThrows
-    public SkillDto getSkill(UUID skillId) {
-        @Cleanup Response response = remote.getSkill(skillId);
-        if (!response.isSuccessful()) {
-            throw new AppContextException("Не удалось получить навык " + response);
-        }
-        var jsonBody = response.body().string();
-        return objectMapper.readValue(jsonBody, SkillDto.class);
-    }
-
-    @SneakyThrows
-    public List<UUID> getSkillIds() {
-        @Cleanup Response response = remote.getSkillIds();
-        if (!response.isSuccessful()) {
-            throw new AppContextException("Не удалось получить id навыков " + response);
-        }
-        var jsonBody = response.body().string();
-        return objectMapper.readValue(jsonBody, new TypeReference<>() {});
-    }
-
-    @SneakyThrows
     public List<SkillDto> getSkillsBulk(IdsRequest request) {
         @Cleanup Response response = remote.getSkillsBulk(request);
         if (!response.isSuccessful()) {
             throw new AppContextException("Не удалось получить навыки " + response);
         }
         var jsonBody = response.body().string();
-        return objectMapper.readValue(jsonBody, new TypeReference<>() {});
+        return objectMapper.readValue(jsonBody, new TypeReference<>() {
+        });
     }
 
     public HttpResponse makeCreateWeaponRequest(CreateWeaponRequest request) {

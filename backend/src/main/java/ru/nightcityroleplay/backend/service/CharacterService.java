@@ -63,8 +63,6 @@ public class CharacterService {
             .collect(Collectors.toList());
         characterDto.setWeaponIds(weaponIds);
         characterDto.setReputation(character.getReputation());
-        characterDto.setImplantPoints(statsService.calculateImplantPoints(character.getReputation()));
-        characterDto.setSpecialImplantPoints(statsService.calculateSpecialImplantPoints(character.getReputation()));
         characterDto.setBattlePoints(character.getBattlePoints());
         characterDto.setCivilPoints(character.getCivilPoints());
         return characterDto;

@@ -102,15 +102,6 @@ public class CharacterController {
         return characterService.getCharacterImplants(characterId);
     }
 
-    @PutMapping("{characterId}/implants")
-    public void putCharacterImplant(
-        @RequestBody UpdateCharacterImplantRequest request,
-        @PathVariable UUID characterId,
-        Authentication auth
-    ) {
-        characterService.putCharacterImplant(request, characterId, auth);
-    }
-
     @PutMapping("{characterId}/implants-list")
     public void updateCharacterImplants(
         @RequestBody UpdateCharacterImplantsRequest request,
