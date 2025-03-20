@@ -17,3 +17,5 @@ databaseChangeLog:
       file: db/changelog/includes/2024-10-01-fix-unique-characters.yaml
   - include:
       file: db/changelog/includes/2025-01-23-add-skills.yaml
+  - include:
+      file: db/changelog/includes/2025-03-06-remove-ip-from-characters.yaml

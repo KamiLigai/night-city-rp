@@ -12,6 +12,8 @@ import org.springframework.web.server.ResponseStatusException;
 import ru.nightcityroleplay.backend.dto.CreateSkillRequest;
 import ru.nightcityroleplay.backend.dto.CreateSkillResponse;
 import ru.nightcityroleplay.backend.dto.SkillDto;
+import ru.nightcityroleplay.backend.dto.IdsRequest;
+import ru.nightcityroleplay.backend.dto.SkillDto;
 import ru.nightcityroleplay.backend.dto.UpdateSkillRequest;
 import ru.nightcityroleplay.backend.entity.CharacterEntity;
 import ru.nightcityroleplay.backend.entity.Skill;
@@ -39,7 +41,6 @@ class SkillServiceTest {
         service = new SkillService(skillRepo);
     }
 
-
     @Test
     void getSkill_skillIsAbsent_throw404() {
         // given
@@ -55,7 +56,6 @@ class SkillServiceTest {
             .extracting(ErrorResponseException::getStatusCode)
             .isEqualTo(HttpStatus.NOT_FOUND);
     }
-
 
     @Test
     void testCreateSkillx10Battle_Success() {
@@ -331,4 +331,43 @@ class SkillServiceTest {
         // then
         assertThat(result.getTotalElements()).isEqualTo(0);
     }
+
+    // todo Изменить балк под новую логику навыков
+
+// @Test
+// public void getSkillBulk_skillExists_success() {
+//     // given
+//     UUID skill1Id = randomUUID();
+//     Skill skill1 = new Skill();
+//     skill1.setId(skill1Id);
+//     skill1.setName("Что-то");
+//     skill1.setDescription("Делает что-то 1");
+//     skill1.setLevel(1);
+//     skill1.setType("CIVIL");
+//     skill1.setCost(2);
+
+//     UUID skill2Id = randomUUID();
+//     Skill skill2 = new Skill();
+//     skill2.setId(skill2Id);
+//     skill2.setName("Что-то");
+//     skill2.setDescription("Делает что-то 2");
+//     skill2.setLevel(1);
+//     skill2.setType("CIVIL");
+//     skill2.setCost(2);
+
+//     IdsRequest idsRequest = new IdsRequest();
+//     idsRequest.setIds(List.of(skill1Id, skill2Id));
+
+//     // when
+//     when(skillRepo.findAllByIdIn(List.of(skill1Id, skill2Id)))
+//         .thenReturn(List.of(skill1, skill2));
+
+//     List<SkillDto> result = service.getSkillsBulk(idsRequest);
+
+//     // then
+//     assertThat(result).isNotNull();
+//     assertThat(result.get(0).getId()).isEqualTo(skill1Id);
+//     assertThat(result.get(1).getId()).isEqualTo(skill2Id);
+
+// }
 }

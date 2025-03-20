@@ -17,13 +17,13 @@ import static org.assertj.core.api.Assertions.fail;
 public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMapper) {
 
     @SneakyThrows
-    public CreateCharacterResponse createCharacter(CreateCharacterRequest request) {
+    public CharacterDto createCharacter(CreateCharacterRequest request) {
         @Cleanup Response response = remote.createCharacter(request);
         if (!response.isSuccessful()) {
             fail("Не удалось создать персонажа " + request.name() + ", " + response);
         }
         var jsonBody = response.body().string();
-        return objectMapper.readValue(jsonBody, CreateCharacterResponse.class);
+        return objectMapper.readValue(jsonBody, CharacterDto.class);
     }
 
     @SneakyThrows
@@ -133,11 +133,100 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
     }
 
     public void updateWeapon(UUID weaponId, UpdateWeaponRequest request) {
-        try (Response response = remote.updateWeapon(weaponId, request)) {
-            if (!response.isSuccessful()) {
-                fail("Не удалось обновить Оружие " + weaponId.toString() + ", " + response);
-            }
+        @Cleanup Response response = remote.updateWeapon(weaponId, request);
+        if (!response.isSuccessful()) {
+            fail("Не удалось обновить Оружие " + weaponId.toString() + ", " + response);
         }
+    }
+
+    @SneakyThrows
+    public void createImplant(CreateImplantRequest request) {
+        @Cleanup Response response = remote.createImplant(request);
+        if (!response.isSuccessful()) {
+            fail("Не удалось создать имплант " + request.name() + ", " + response);
+        }
+        var jsonBody = response.body().string();
+        objectMapper.readValue(jsonBody, CreateImplantRequest.class);
+    }
+
+    public void deleteImplant(UUID implantid, boolean ignoreAssignments) {
+        @Cleanup Response response = remote.deleteImplant(implantid, ignoreAssignments);
+        if (!response.isSuccessful()) {
+            fail("Не удалось удалить Имплант " + implantid + ", " + response);
+        }
+    }
+
+    @SneakyThrows
+    public ImplantDto getImplant(UUID implantid) {
+        @Cleanup Response response = remote.getImplant(implantid);
+        if (!response.isSuccessful()) {
+            throw new AppContextException("Имплант не найден " + response);
+        }
+        var jsonBody = response.body().string();
+        return objectMapper.readValue(jsonBody, ImplantDto.class);
+    }
+
+    @SneakyThrows
+    public Integer getImplantAssignmentsCount(UUID implantid) {
+        @Cleanup Response response = remote.getImplantAssignmentsCount(implantid);
+        if (!response.isSuccessful()) {
+            throw new AppContextException("Имплант не найден " + response);
+        }
+        var jsonBody = response.body().string();
+        return objectMapper.readValue(jsonBody, Integer.class);
+    }
+
+    @SneakyThrows
+    public void updateImplant(UUID implantid, UpdateImplantRequest request) {
+        @Cleanup Response response = remote.updateImplant(implantid, request);
+        if (!response.isSuccessful()) {
+            fail("Не удалось обновить Имплант " + implantid.toString() + ", " + response);
+        }
+    }
+
+    public HttpResponse makeCreateImplantRequest(CreateImplantRequest request) {
+        @Cleanup Response response = remote.createImplant(request);
+        return toHttpResponse(response);
+    }
+
+    @SneakyThrows
+    public SkillDto createSkill(CreateSkillRequest request) {
+        @Cleanup Response response = remote.createSkill(request);
+        if (!response.isSuccessful()) {
+            fail("Не удалось создать навык " + request.name() + ", " + response);
+        }
+        var jsonBody = response.body().string();
+        return objectMapper.readValue(jsonBody, SkillDto.class);
+    }
+
+    @SneakyThrows
+    public SkillDto getSkill(UUID skillId) {
+        @Cleanup Response response = remote.getSkill(skillId);
+        if (!response.isSuccessful()) {
+            throw new AppContextException("Не удалось получить навык " + response);
+        }
+        var jsonBody = response.body().string();
+        return objectMapper.readValue(jsonBody, SkillDto.class);
+    }
+
+    @SneakyThrows
+    public List<UUID> getSkillIds() {
+        @Cleanup Response response = remote.getSkillIds();
+        if (!response.isSuccessful()) {
+            throw new AppContextException("Не удалось получить id навыков " + response);
+        }
+        var jsonBody = response.body().string();
+        return objectMapper.readValue(jsonBody, new TypeReference<>() {});
+    }
+
+    @SneakyThrows
+    public List<SkillDto> getSkillsBulk(IdsRequest request) {
+        @Cleanup Response response = remote.getSkillsBulk(request);
+        if (!response.isSuccessful()) {
+            throw new AppContextException("Не удалось получить навыки " + response);
+        }
+        var jsonBody = response.body().string();
+        return objectMapper.readValue(jsonBody, new TypeReference<>() {});
     }
 
     public HttpResponse makeCreateWeaponRequest(CreateWeaponRequest request) {
@@ -150,8 +239,18 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
         return toHttpResponse(response);
     }
 
+    public HttpResponse makeUpdateImplantRequest(UUID implantid, UpdateImplantRequest request) {
+        @Cleanup Response response = remote.updateImplant(implantid, request);
+        return toHttpResponse(response);
+    }
+
     public HttpResponse makeDeleteWeaponRequest(UUID weaponId) {
         @Cleanup Response response = remote.deleteWeapon(weaponId);
+        return toHttpResponse(response);
+    }
+
+    public HttpResponse makeDeleteImplantRequest(UUID implantid, boolean redButton) {
+        @Cleanup Response response = remote.deleteImplant(implantid, redButton);
         return toHttpResponse(response);
     }
 
