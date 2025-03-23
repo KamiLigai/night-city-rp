@@ -8,5 +8,7 @@ export class CharacterDto {
   specialImplantPoints?: number;
   battlePoints?: number;
   civilPoints?: number;
+  implantIds?: string[];
+  skillIds?: string[];
   weaponIds?: string[];
 }
