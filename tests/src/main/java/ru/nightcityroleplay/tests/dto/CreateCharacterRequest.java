@@ -7,7 +7,11 @@ import lombok.Builder;
 @Builder
 public record CreateCharacterRequest(
     String name,
-    Integer reputation,
-    Integer age
+    String height,
+    String weigt,
+    Integer age,
+    String organisation,
+    String characterClass,
+    Integer reputation
 ) {
 }

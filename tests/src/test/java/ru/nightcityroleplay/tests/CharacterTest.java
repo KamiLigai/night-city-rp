@@ -43,6 +43,8 @@ public class CharacterTest {
             .setCurrentUser(user.id(), user.username(), user.username());
     }
 
+
+
     @Test
     @SneakyThrows
     @Description("""

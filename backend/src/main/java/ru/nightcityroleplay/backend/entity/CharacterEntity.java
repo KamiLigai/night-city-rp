@@ -22,8 +22,14 @@ public class CharacterEntity {
     private UUID id;
     private UUID ownerId;
     private String name;
+    private Integer height;
+    private Integer weight;
     private Integer age;
+    private String organisation;
+    private String characterClass;
     private Integer reputation;
+    private Integer implantPoints;
+    private Integer specialImplantPoints;
     private Integer battlePoints;
     private Integer civilPoints;
 

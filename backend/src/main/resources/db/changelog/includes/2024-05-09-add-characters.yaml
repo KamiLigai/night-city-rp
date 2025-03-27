@@ -23,7 +23,27 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
+                  name: height
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: weight
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
                   name: age
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: organisation
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: character_class
                   type: integer
                   constraints:
                     nullable: false

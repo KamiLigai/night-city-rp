@@ -9,7 +9,11 @@ public class CharacterDto {
     private UUID id;
     private UUID ownerId;
     private String name;
-    private int reputation;
-    private int age;
+    private Integer height;
+    private Integer weight;
+    private Integer age;
+    private String organisation;
+    private String characterClass;
+    private Integer reputation;
 }
 

@@ -57,10 +57,14 @@ public class CharacterService {
         characterDto.setId(character.getId());
         characterDto.setOwnerId(character.getOwnerId());
         characterDto.setName(character.getName());
+        characterDto.setHeight(character.getHeight());
+        characterDto.setWeight(character.getWeight());
         characterDto.setAge(character.getAge());
         List<UUID> weaponIds = character.getWeapons().stream()
             .map(Weapon::getId)
             .collect(Collectors.toList());
+        characterDto.setOrganisation(character.getOrganisation());
+        characterDto.setCharacterClass(character.getCharacterClass());
         characterDto.setWeaponIds(weaponIds);
         characterDto.setReputation(character.getReputation());
         characterDto.setImplantPoints(statsService.calculateImplantPoints(character.getReputation()));
@@ -90,6 +94,10 @@ public class CharacterService {
         User user = (User) principal;
         character.setOwnerId(user.getId());
         character.setName(request.getName());
+        character.setHeight(request.getHeight());
+        character.setWeight(request.getWeight());
+        character.setOrganisation(request.getOrganisation());
+        character.setCharacterClass(request.getCharacterClass());
         character.setAge(request.getAge());
         character.setReputation(request.getReputation());
         characterStatsService.updateCharacterStats(character);
@@ -134,7 +142,11 @@ public class CharacterService {
         newCharacter.setId(characterId);
         newCharacter.setOwnerId(user.getId());
         newCharacter.setName(request.getName());
+        newCharacter.setHeight(request.getHeight());
+        newCharacter.setWeight(request.getWeight());
         newCharacter.setAge(request.getAge());
+        newCharacter.setOrganisation(request.getOrganisation());
+        newCharacter.setCharacterClass(request.getCharacterClass());
         newCharacter.setReputation(request.getReputation());
         newCharacter.setBattlePoints(character.getBattlePoints());
         newCharacter.setCivilPoints(character.getCivilPoints());
