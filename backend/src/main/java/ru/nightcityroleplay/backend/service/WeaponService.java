@@ -10,11 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import ru.nightcityroleplay.backend.dto.CreateWeaponRequest;
-import ru.nightcityroleplay.backend.dto.CreateWeaponResponse;
-import ru.nightcityroleplay.backend.dto.IdsRequest;
-import ru.nightcityroleplay.backend.dto.UpdateWeaponRequest;
-import ru.nightcityroleplay.backend.dto.WeaponDto;
+import ru.nightcityroleplay.backend.dto.*;
 import ru.nightcityroleplay.backend.entity.Weapon;
 import ru.nightcityroleplay.backend.repo.WeaponRepository;
 
@@ -58,18 +54,7 @@ public class WeaponService {
         weapon.setReputationRequirement(request.getReputationRequirement());
 
         //проверка на отрицательные значения
-        if (weapon.getName() == null || weapon.getName().isEmpty())
-            throw new ResponseStatusException(BAD_REQUEST, "Имя оружия не может быть пустым.");
-        if (weapon.getIsMelee() == null)
-            throw new ResponseStatusException(BAD_REQUEST, "'Ближнее?' не может быть null");
-        if (weapon.getWeaponType() == null)
-            throw new ResponseStatusException(BAD_REQUEST, "Тип оружия не может быть null");
-        if (weapon.getIsMelee())
-            weapon.setWeaponType("null");
-        if (weapon.getPenetration() < 0)
-            throw new ResponseStatusException(BAD_REQUEST, "Пробив не может быть отрицательным.");
-        if (weapon.getReputationRequirement() < 0)
-            throw new ResponseStatusException(BAD_REQUEST, "Требование к репутации не может быть отрицательным.");
+        validate(request);
 
         //Сохранение
         weapon = weaponRepo.save(weapon);
@@ -111,18 +96,7 @@ public class WeaponService {
         existingWeapon.setReputationRequirement(request.getReputationRequirement());
 
         //проверка на отрицательные значения
-        if (existingWeapon.getName() == null || existingWeapon.getName().isEmpty())
-            throw new ResponseStatusException(BAD_REQUEST, "Имя оружия не может быть пустым.");
-        if (existingWeapon.getIsMelee() == null)
-            throw new ResponseStatusException(BAD_REQUEST, "'Ближнее?' не может быть null");
-        if (existingWeapon.getWeaponType() == null)
-            throw new ResponseStatusException(BAD_REQUEST, "Тип оружия не может быть null");
-        if (existingWeapon.getIsMelee())
-            existingWeapon.setWeaponType("null");
-        if (existingWeapon.getPenetration() < 0)
-            throw new ResponseStatusException(BAD_REQUEST, "Пробив не может быть отрицательным.");
-        if (existingWeapon.getReputationRequirement() < 0)
-            throw new ResponseStatusException(BAD_REQUEST, "Требование к репутации не может быть отрицательным.");
+        validate(request);
 
         // Сохранение обновленного оружия
         weaponRepo.save(existingWeapon);
@@ -160,5 +134,18 @@ public class WeaponService {
         return weaponRepo.findAllByIdIn(request.getIds())
             .stream().map(this::toDto)
             .toList();
+    }
+
+    public void validate(SaveWeaponRequest request) {
+        if (request.getName() == null || request.getName().isEmpty())
+            throw new ResponseStatusException(BAD_REQUEST, "Имя оружия не может быть пустым.");
+        if (request.getIsMelee() == null)
+            throw new ResponseStatusException(BAD_REQUEST, "'Ближнее?' не может быть null");
+        if (request.getWeaponType() == null)
+            throw new ResponseStatusException(BAD_REQUEST, "Тип Оружия не может быть null");
+        if (request.getPenetration() < 0)
+            throw new ResponseStatusException(BAD_REQUEST, "Пробив не может быть отрицательным.");
+        if (request.getReputationRequirement() < 0)
+            throw new ResponseStatusException(BAD_REQUEST, "Требование к репутации не может быть отрицательным.");
     }
 }
