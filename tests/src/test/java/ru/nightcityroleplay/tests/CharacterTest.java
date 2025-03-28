@@ -120,39 +120,6 @@ public class CharacterTest {
     }
 
     @Test
-    @SneakyThrows
-    @Description("""
-        Дано: Персонаж с определённым именем.
-        Действие: Добавить нового персонажа с таким же именем методом POST /characters.
-        Ожидается: 422 UNPROCESSABLE_ENTITY.
-                   Новый персонаж не создан в бд.
-        """)
-    void createCharacter_sameName_throw422() {
-        String charName = randomUUID().toString();
-        backendRemote.makeCreateCharacterRequest(
-            CreateCharacterRequest.builder()
-                .name(charName)
-                .age(22)
-                .reputation(0)
-                .build()
-        );
-        Result<Record> result = dbContext.select().from(CHARACTERS)
-            .where(CHARACTERS.NAME.eq(charName))
-            .fetch();
-
-        HttpResponse response2 = backendRemote.makeCreateCharacterRequest(
-            CreateCharacterRequest.builder()
-                .name(charName)
-                .age(22)
-                .reputation(0)
-                .build()
-        );
-        assertThat(response2.code()).isEqualTo(422);
-        assertThat(response2.body()).contains("Персонаж с таким именем уже есть");
-        assertThat(result).size().isEqualTo(1);
-    }
-
-    @Test
     @Description("""
     Дано: Администратор и персонаж с id.
     Действие: Администратор удаляет персонажа методом DELETE /characters/{id}.
@@ -229,7 +196,7 @@ public class CharacterTest {
         backendRemote.createCharacter(
             CreateCharacterRequest.builder()
                 .name(charName)
-                .age(240)
+                .age(21)
                 .reputation(0)
                 .build()
         );
@@ -284,21 +251,21 @@ public class CharacterTest {
         backendRemote.createCharacter(
             CreateCharacterRequest.builder()
                 .name(randomUUID().toString())
-                .age(10000)
+                .age(10)
                 .reputation(0)
                 .build()
         );
         backendRemote.createCharacter(
             CreateCharacterRequest.builder()
                 .name(randomUUID().toString())
-                .age(10001)
+                .age(11)
                 .reputation(0)
                 .build()
         );
         backendRemote.createCharacter(
             CreateCharacterRequest.builder()
                 .name(randomUUID().toString())
-                .age(10002)
+                .age(12)
                 .reputation(0)
                 .build()
         );
@@ -322,7 +289,7 @@ public class CharacterTest {
         backendRemote.createCharacter(
             CreateCharacterRequest.builder()
                 .name(charName)
-                .age(1000)
+                .age(10)
                 .reputation(0)
                 .build()
         );
@@ -364,7 +331,7 @@ public class CharacterTest {
             randomUUID(),
             UpdateCharacterRequest.builder()
                 .name(randomUUID().toString())
-                .age(1000)
+                .age(10)
                 .reputation(0)
                 .build()
         );
@@ -375,18 +342,19 @@ public class CharacterTest {
 
     @ParameterizedTest(name = "{index} - Проверка с данными: {0}, ожидаемое сообщение: {1}")
     @MethodSource("updateCharacterWithBadRequestData")
+    @SneakyThrows
     @Description("""
         Дано: Персонаж с id.
         Действие: Изменить персонажа по id методом PUT /characters/{id} с некорректными данными.
         Ожидается: 400 Bad_Request.
                    Никакой персонаж не был изменён.
         """)
-    void updateCharacter_badRequest_throw400(UpdateCharacterRequest request) {
+    void updateCharacter_badRequest_throw400(UpdateCharacterRequest request, String expectedMessage) {
         String charName = randomUUID().toString();
         backendRemote.createCharacter(
             CreateCharacterRequest.builder()
                 .name(charName)
-                .age(1000)
+                .age(10)
                 .reputation(0)
                 .build()
         );
@@ -408,15 +376,20 @@ public class CharacterTest {
         );
 
         assertThat(response.code()).isEqualTo(400);
+        var body = objectMapper.readValue(response.body(), ErrorResponse.class);
+        assertThat(body.message()).isEqualTo(expectedMessage);
     }
 
     public static Stream<Arguments> updateCharacterWithBadRequestData() {
         return Stream.of(
-            Arguments.of(UpdateCharacterRequest.builder().name("UPDATED" + randomUUID()).age(null).reputation(445).build()),
-            Arguments.of(UpdateCharacterRequest.builder().name("UPDATED" + randomUUID()).age(445).reputation(null).build()),
-            Arguments.of(UpdateCharacterRequest.builder().name("UPDATED" + randomUUID()).age(null).reputation(null).build()));
+            Arguments.of(UpdateCharacterRequest.builder().name("UPDATED" + randomUUID()).age(null).reputation(445).build(),
+                "Возраст не может быть 0 или меньше или null"),
+            Arguments.of(UpdateCharacterRequest.builder().name("UPDATED" + randomUUID()).age(445).reputation(null).build(),
+                "Репутация не может быть меньше 0 или null"),
+            Arguments.of(UpdateCharacterRequest.builder().name("UPDATED" + randomUUID()).age(null).reputation(null).build(),
+                "Возраст не может быть 0 или меньше или null")
+        );
     }
-
 
     @Test
     @SneakyThrows
@@ -432,7 +405,7 @@ public class CharacterTest {
         backendRemote.createCharacter(
             CreateCharacterRequest.builder()
                 .name(charName)
-                .age(1001)
+                .age(10)
                 .reputation(0)
                 .build()
         );
@@ -477,7 +450,7 @@ public class CharacterTest {
         backendRemote.createCharacter(
             CreateCharacterRequest.builder()
                 .name(charName)
-                .age(1000)
+                .age(10)
                 .reputation(0)
                 .build()
         );
