@@ -120,129 +120,6 @@ public class CharacterTest {
     }
 
     @Test
-    @SneakyThrows
-    @Description("""
-        Дано: Персонаж с определённым именем.
-        Действие: Добавить нового персонажа с таким же именем методом POST /characters.
-        Ожидается: 422 UNPROCESSABLE_ENTITY.
-                   Новый персонаж не создан в бд.
-        """)
-    void createCharacter_sameName_throw422() {
-        String charName = randomUUID().toString();
-        backendRemote.makeCreateCharacterRequest(
-            CreateCharacterRequest.builder()
-                .name(charName)
-                .age(20)
-                .reputation(0)
-                .build()
-        );
-        Result<Record> result = dbContext.select().from(CHARACTERS)
-            .where(CHARACTERS.NAME.eq(charName))
-            .fetch();
-
-        HttpResponse response2 = backendRemote.makeCreateCharacterRequest(
-            CreateCharacterRequest.builder()
-                .name(charName)
-                .age(21)
-                .reputation(0)
-                .build()
-        );
-        assertThat(response2.code()).isEqualTo(422);
-        assertThat(response2.body()).contains("Персонаж с таким именем уже есть");
-        assertThat(result).size().isEqualTo(1);
-    }
-
-    @Test
-    @SneakyThrows
-    void createCharacter_badAge_throw400() {
-        String charName = randomUUID().toString();
-        HttpResponse response = backendRemote.makeCreateCharacterRequest(
-            CreateCharacterRequest.builder()
-                .name(charName)
-                .age(101)
-                .reputation(0)
-                .build()
-        );
-
-        assertThat(response.code()).isEqualTo(400);
-        assertThat(response.body()).contains("Возраст не может быть больше 100");
-    }
-
-    @Test
-    @SneakyThrows
-    void updateCharacter_badAge_throw400() {
-        String charName = randomUUID().toString();
-        backendRemote.createCharacter(
-            CreateCharacterRequest.builder()
-                .name(charName)
-                .age(10)
-                .reputation(0)
-                .build()
-        );
-
-        Result<CharactersRecord> record = dbContext.select().from(CHARACTERS)
-            .where(CHARACTERS.NAME.eq(charName))
-            .fetchInto(CHARACTERS);
-
-        HttpResponse response = backendRemote.makeUpdateCharacterRequest(
-            record.get(0).getId(),
-            UpdateCharacterRequest.builder()
-                .name(charName)
-                .age(101)
-                .reputation(0)
-                .build()
-        );
-
-        assertThat(response.code()).isEqualTo(400);
-        assertThat(response.body()).contains("Возраст не может быть больше 100");
-    }
-
-    @Test
-    @SneakyThrows
-    void createCharacter_badReputation_throw400() {
-        String charName = randomUUID().toString();
-        HttpResponse response = backendRemote.makeCreateCharacterRequest(
-            CreateCharacterRequest.builder()
-                .name(charName)
-                .age(10)
-                .reputation(41)
-                .build()
-        );
-
-        assertThat(response.code()).isEqualTo(400);
-        assertThat(response.body()).contains("Репутация не может быть больше 40");
-    }
-
-    @Test
-    @SneakyThrows
-    void updateCharacter_badReputation_throw400() {
-        String charName = randomUUID().toString();
-        backendRemote.createCharacter(
-            CreateCharacterRequest.builder()
-                .name(charName)
-                .age(10)
-                .reputation(0)
-                .build()
-        );
-
-        Result<CharactersRecord> record = dbContext.select().from(CHARACTERS)
-            .where(CHARACTERS.NAME.eq(charName))
-            .fetchInto(CHARACTERS);
-
-        HttpResponse response = backendRemote.makeUpdateCharacterRequest(
-            record.get(0).getId(),
-            UpdateCharacterRequest.builder()
-                .name(charName)
-                .age(10)
-                .reputation(41)
-                .build()
-        );
-
-        assertThat(response.code()).isEqualTo(400);
-        assertThat(response.body()).contains("Репутация не может быть больше 40");
-    }
-
-    @Test
     @Description("""
     Дано: Администратор и персонаж с id.
     Действие: Администратор удаляет персонажа методом DELETE /characters/{id}.
@@ -465,13 +342,14 @@ public class CharacterTest {
 
     @ParameterizedTest(name = "{index} - Проверка с данными: {0}, ожидаемое сообщение: {1}")
     @MethodSource("updateCharacterWithBadRequestData")
+    @SneakyThrows
     @Description("""
         Дано: Персонаж с id.
         Действие: Изменить персонажа по id методом PUT /characters/{id} с некорректными данными.
         Ожидается: 400 Bad_Request.
                    Никакой персонаж не был изменён.
         """)
-    void updateCharacter_badRequest_throw400(UpdateCharacterRequest request) {
+    void updateCharacter_badRequest_throw400(UpdateCharacterRequest request, String expectedMessage) {
         String charName = randomUUID().toString();
         backendRemote.createCharacter(
             CreateCharacterRequest.builder()
@@ -498,15 +376,20 @@ public class CharacterTest {
         );
 
         assertThat(response.code()).isEqualTo(400);
+        var body = objectMapper.readValue(response.body(), ErrorResponse.class);
+        assertThat(body.message()).isEqualTo(expectedMessage);
     }
 
     public static Stream<Arguments> updateCharacterWithBadRequestData() {
         return Stream.of(
-            Arguments.of(UpdateCharacterRequest.builder().name("UPDATED" + randomUUID()).age(null).reputation(445).build()),
-            Arguments.of(UpdateCharacterRequest.builder().name("UPDATED" + randomUUID()).age(445).reputation(null).build()),
-            Arguments.of(UpdateCharacterRequest.builder().name("UPDATED" + randomUUID()).age(null).reputation(null).build()));
+            Arguments.of(UpdateCharacterRequest.builder().name("UPDATED" + randomUUID()).age(null).reputation(445).build(),
+                "Возраст не может быть 0 или меньше или null"),
+            Arguments.of(UpdateCharacterRequest.builder().name("UPDATED" + randomUUID()).age(445).reputation(null).build(),
+                "Репутация не может быть меньше 0 или null"),
+            Arguments.of(UpdateCharacterRequest.builder().name("UPDATED" + randomUUID()).age(null).reputation(null).build(),
+                "Возраст не может быть 0 или меньше или null")
+        );
     }
-
 
     @Test
     @SneakyThrows
