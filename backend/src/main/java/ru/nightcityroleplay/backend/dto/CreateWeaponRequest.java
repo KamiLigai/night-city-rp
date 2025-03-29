@@ -1,12 +1,19 @@
 package ru.nightcityroleplay.backend.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
 
 @Data
-public class CreateWeaponRequest {
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class CreateWeaponRequest implements SaveWeaponRequest {
     private Boolean isMelee;
     private String name;
     private String weaponType;
-    private int penetration;
-    private int reputationRequirement;
+    private Integer penetration;
+    private Integer reputationRequirement;
 }

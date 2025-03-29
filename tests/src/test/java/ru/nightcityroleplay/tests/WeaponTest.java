@@ -35,8 +35,8 @@ public class WeaponTest {
     void createWeapon() {
         // Создать оружие
         String weaponName = randomUUID().toString();
-        Boolean isMelee = true;
-        String weaponType = "Sword";
+        Boolean isMelee = false;
+        String weaponType = "Test";
         int penetration = 20;
         int reputationRequirement = 100;
         backendRemote.createWeapon(
@@ -60,6 +60,41 @@ public class WeaponTest {
                 weapon -> assertThat(weapon.getIsMelee()).isEqualTo(isMelee),
                 weapon -> assertThat(weapon.getName()).isEqualTo(weaponName),
                 weapon -> assertThat(weapon.getWeaponType()).isEqualTo(weaponType),
+                weapon -> assertThat(weapon.getPenetration()).isEqualTo(penetration),
+                weapon -> assertThat(weapon.getReputationRequirement()).isEqualTo(reputationRequirement)
+            );
+    }
+
+    @Test
+    @SneakyThrows
+    void createWeapon_isMeleeTrue_success() {
+        // Создать оружие
+        String weaponName = randomUUID().toString();
+        Boolean isMelee = true;
+        String weaponType = "Sword";
+        int penetration = 10;
+        int reputationRequirement = 150;
+        backendRemote.createWeapon(
+            CreateWeaponRequest.builder()
+                .isMelee(isMelee)
+                .name(weaponName)
+                .weaponType(weaponType)
+                .penetration(penetration)
+                .reputationRequirement(reputationRequirement)
+                .build()
+        );
+        UserDto defaultAdmin = AppContext.get("defaultAdmin");
+        backendRemote.setCurrentUser(defaultAdmin.id(), defaultAdmin.username(), defaultAdmin.username());
+
+        // Проверить новое оружие
+        Result<WeaponsRecord> weaponResult = weaponRepo.getWeaponsByName(weaponName);
+
+        assertThat(weaponResult).hasSize(1);
+        assertThat(weaponResult.get(0))
+            .satisfies(
+                weapon -> assertThat(weapon.getIsMelee()).isEqualTo(isMelee),
+                weapon -> assertThat(weapon.getName()).isEqualTo(weaponName),
+                weapon -> assertThat(weapon.getWeaponType()).isEqualTo("null"),
                 weapon -> assertThat(weapon.getPenetration()).isEqualTo(penetration),
                 weapon -> assertThat(weapon.getReputationRequirement()).isEqualTo(reputationRequirement)
             );
@@ -142,8 +177,8 @@ public class WeaponTest {
     void deleteWeapon() {
         // Создать оружие
         String weaponName = randomUUID().toString();
-        Boolean isMelee = true;
-        String weaponType = "Sword1";
+        Boolean isMelee = false;
+        String weaponType = "Test";
         int penetration = 201;
         int reputationRequirement = 1001;
         backendRemote.createWeapon(
