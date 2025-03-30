@@ -28,8 +28,6 @@ public class CharacterEntity {
     private String organisation;
     private String characterClass;
     private Integer reputation;
-    private Integer implantPoints;
-    private Integer specialImplantPoints;
     private Integer battlePoints;
     private Integer civilPoints;
 

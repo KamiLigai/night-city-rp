@@ -30,6 +30,7 @@ public class CharacterService {
 
     private final CharacterRepository characterRepo;
     private final CharacterStatsService characterStatsService;
+    private final CharacterClassService characterClassService;
     private final WeaponRepository weaponRepo;
     private final SkillRepository skillRepo;
     private final ImplantRepository implantRepo;
@@ -38,12 +39,14 @@ public class CharacterService {
     public CharacterService(
         CharacterRepository characterRepo,
         CharacterStatsService characterStatsService,
+        CharacterClassService characterClassService,
         WeaponRepository weaponRepo,
         SkillRepository skillRepo,
         ImplantRepository implantRepo,
         CharacterStatsService statsService
     ) {
         this.characterStatsService = characterStatsService;
+        this.characterClassService = characterClassService;
         this.characterRepo = characterRepo;
         this.weaponRepo = weaponRepo;
         this.skillRepo = skillRepo;
@@ -67,7 +70,8 @@ public class CharacterService {
         characterDto.setCharacterClass(character.getCharacterClass());
         characterDto.setWeaponIds(weaponIds);
         characterDto.setReputation(character.getReputation());
-        characterDto.setImplantPoints(statsService.calculateImplantPoints(character.getReputation()));
+        characterDto.setImplantPoints(statsService.calculateImplantPoints(character.getReputation())
+            + characterClassService.bonusFromSolo(character));
         characterDto.setSpecialImplantPoints(statsService.calculateSpecialImplantPoints(character.getReputation()));
         characterDto.setBattlePoints(character.getBattlePoints());
         characterDto.setCivilPoints(character.getCivilPoints());
@@ -127,6 +131,7 @@ public class CharacterService {
         return toDto(byId.get());
     }
 
+    //todo проверить работоспособность этого метода
     @Transactional
     public void updateCharacter(UpdateCharacterRequest request, UUID characterId, Authentication auth) {
         validate(request);
@@ -144,12 +149,10 @@ public class CharacterService {
         newCharacter.setName(request.getName());
         newCharacter.setHeight(request.getHeight());
         newCharacter.setWeight(request.getWeight());
-        newCharacter.setAge(request.getAge());
-        newCharacter.setOrganisation(request.getOrganisation());
-        newCharacter.setCharacterClass(request.getCharacterClass());
-        newCharacter.setReputation(request.getReputation());
-        newCharacter.setBattlePoints(character.getBattlePoints());
-        newCharacter.setCivilPoints(character.getCivilPoints());
+        newCharacter.setAge(character.getAge());
+        newCharacter.setOrganisation(character.getOrganisation());
+        newCharacter.setCharacterClass(character.getCharacterClass());
+        newCharacter.setReputation(character.getReputation());
         characterRepo.save(newCharacter);
         log.info("Персонаж {} изменён", newCharacter.getId());
     }
