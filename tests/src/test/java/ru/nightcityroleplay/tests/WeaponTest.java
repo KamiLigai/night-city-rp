@@ -71,14 +71,13 @@ public class WeaponTest {
         // Создать оружие
         String weaponName = randomUUID().toString();
         Boolean isMelee = true;
-        String weaponType = "Sword";
         int penetration = 10;
         int reputationRequirement = 150;
         backendRemote.createWeapon(
             CreateWeaponRequest.builder()
                 .isMelee(isMelee)
                 .name(weaponName)
-                .weaponType(weaponType)
+                .weaponType(null)
                 .penetration(penetration)
                 .reputationRequirement(reputationRequirement)
                 .build()
@@ -94,7 +93,7 @@ public class WeaponTest {
             .satisfies(
                 weapon -> assertThat(weapon.getIsMelee()).isEqualTo(isMelee),
                 weapon -> assertThat(weapon.getName()).isEqualTo(weaponName),
-                weapon -> assertThat(weapon.getWeaponType()).isEqualTo("null"),
+                weapon -> assertThat(weapon.getWeaponType()).isEqualTo(null),
                 weapon -> assertThat(weapon.getPenetration()).isEqualTo(penetration),
                 weapon -> assertThat(weapon.getReputationRequirement()).isEqualTo(reputationRequirement)
             );
@@ -138,13 +137,13 @@ public class WeaponTest {
         Действие: Попытаться добавить оружие методом POST /weapons с некорректными данными.
         Ожидается: Запрос завершился с ошибкой и сообщение об ошибке о некорректных данных.
         """)
-    void createWeaponWithInvalidData(String weaponName, String weaponType, int penetration, int reputationRequirement, String expectedErrorMessage) {
+    void createWeaponWithInvalidData(String weaponName, int penetration, int reputationRequirement, String expectedErrorMessage) {
         // Попытаться создать оружие с некорректными данными
         HttpResponse response = backendRemote.makeCreateWeaponRequest(
             CreateWeaponRequest.builder()
                 .isMelee(true)
                 .name(weaponName)
-                .weaponType(weaponType)
+                .weaponType(null)
                 .penetration(penetration)
                 .reputationRequirement(reputationRequirement)
                 .build()
@@ -163,8 +162,8 @@ public class WeaponTest {
 
     private static Stream<Arguments> weaponDataProvider() {
         return Stream.of(
-            Arguments.of("Тамогавк", "Axe", -2, 0, "Пробив не может быть отрицательным."),
-            Arguments.of("Танто", "Dagger", 0, -5, "Требование к репутации не может быть отрицательным.")
+            Arguments.of("Тамогавк", -2, 0, "Пробив не может быть отрицательным."),
+            Arguments.of("Танто", 0, -5, "Требование к репутации не может быть отрицательным.")
         );
     }
 
@@ -222,14 +221,13 @@ public class WeaponTest {
         // Создать оружие
         String weaponName = randomUUID().toString();
         Boolean isMelee = true;
-        String weaponType = "Sword1";
         int penetration = 201;
         int reputationRequirement = 1001;
         backendRemote.createWeapon(
             CreateWeaponRequest.builder()
                 .isMelee(isMelee)
                 .name(weaponName)
-                .weaponType(weaponType)
+                .weaponType(null)
                 .penetration(penetration)
                 .reputationRequirement(reputationRequirement)
                 .build()
@@ -282,14 +280,13 @@ public class WeaponTest {
         // Создать оружие
         String weaponName = randomUUID().toString();
         Boolean isMelee = true;
-        String weaponType = "Sword1";
         int penetration = 201;
         int reputationRequirement = 1001;
         backendRemote.createWeapon(
             CreateWeaponRequest.builder()
                 .isMelee(isMelee)
                 .name(weaponName)
-                .weaponType(weaponType)
+                .weaponType(null)
                 .penetration(penetration)
                 .reputationRequirement(reputationRequirement)
                 .build()
@@ -306,7 +303,7 @@ public class WeaponTest {
             .isMelee(true)
             .reputationRequirement(100)
             .penetration(5)
-            .weaponType("Длинное Режущее")
+            .weaponType(null)
             .build());
 
         WeaponDto updatedWeaponDto = backendRemote.getWeapon(weaponRecord.get(0).getId());
@@ -332,7 +329,7 @@ public class WeaponTest {
                 .isMelee(true)
                 .reputationRequirement(100)
                 .penetration(5)
-                .weaponType("Длинное Режущее")
+                .weaponType(null)
                 .build());
 
         assertThat(response.code()).isEqualTo(404);
@@ -349,7 +346,6 @@ public class WeaponTest {
         // Создать оружие
         String weaponName = randomUUID().toString();
         Boolean isMelee = true;
-        String weaponType = "Sword1";
         int penetration = 201;
         int reputationRequirement = 100;
         UserDto defaultAdmin = AppContext.get("defaultAdmin");
@@ -359,7 +355,7 @@ public class WeaponTest {
             CreateWeaponRequest.builder()
                 .isMelee(isMelee)
                 .name(weaponName)
-                .weaponType(weaponType)
+                .weaponType(null)
                 .penetration(penetration)
                 .reputationRequirement(reputationRequirement)
                 .build()
@@ -375,7 +371,7 @@ public class WeaponTest {
                 .isMelee(true)
                 .reputationRequirement(-1)
                 .penetration(-1)
-                .weaponType("0")
+                .weaponType(null)
                 .build());
 
         assertThat(response.code()).isEqualTo(400);
