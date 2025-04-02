@@ -19,3 +19,5 @@ databaseChangeLog:
       file: db/changelog/includes/2024-10-01-fix-unique-characters.yaml
   - include:
       file: db/changelog/includes/2025-03-06-remove-ip-from-characters.yaml
+  - include:
+      file: db/changelog/includes/2025-04-03-drop-notnull-from-weapontype.yaml

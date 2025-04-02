@@ -1,0 +1,8 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2025-04-03-drop-notnull-from-weapontype.yaml
+      author: Woomanz
+      changes:
+        - dropNotNullConstraint:
+            tableName: weapons
+            columnName: weapon_type
