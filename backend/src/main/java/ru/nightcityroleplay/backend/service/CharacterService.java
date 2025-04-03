@@ -131,7 +131,6 @@ public class CharacterService {
         return toDto(byId.get());
     }
 
-    //todo проверить работоспособность этого метода
     @Transactional
     public void updateCharacter(UpdateCharacterRequest request, UUID characterId, Authentication auth) {
         validate(request);
@@ -153,6 +152,7 @@ public class CharacterService {
         newCharacter.setOrganisation(character.getOrganisation());
         newCharacter.setCharacterClass(character.getCharacterClass());
         newCharacter.setReputation(character.getReputation());
+        characterStatsService.updateCharacterStats(newCharacter);
         characterRepo.save(newCharacter);
         log.info("Персонаж {} изменён", newCharacter.getId());
     }

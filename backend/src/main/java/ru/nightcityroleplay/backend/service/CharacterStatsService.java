@@ -10,8 +10,8 @@ public class CharacterStatsService {
 
     public void updateCharacterStats(CharacterEntity character) {
 
-        character.setBattlePoints(calculateBattlePoints(character.getAge()));
-        character.setCivilPoints(calculateCivilPoints());
+        character.setBattlePoints(calculateBattlePoints(character.getAge(), character.getReputation()));
+        character.setCivilPoints(calculateCivilPoints(character.getReputation()));
     }
 
 
@@ -22,6 +22,16 @@ public class CharacterStatsService {
             return 8;
         } else if (reputation < 40) {
             return 9;
+        } else if (reputation < 60) {
+            return 10;
+        } else if (reputation < 100) {
+            return 11;
+        } else if (reputation < 150) {
+            return 13;
+        } else if (reputation < 170) {
+            return 15;
+        } else if (reputation < 200) {
+            return 16;
         } else {
             return 10;
         }
@@ -41,18 +51,19 @@ public class CharacterStatsService {
         }
     }
 
-    public int calculateBattlePoints(int age) {
+    public int calculateBattlePoints(int age, int reputation) {
         if (age <= 25) {
-            return 13;
+            return (13 + reputation / 10) - 4;
         } else if (age <= 40) {
-            return 15;
+            return (15 + reputation / 10) - 4;
         } else {
-            return 17;
+            return (17 + reputation / 10) - 4;
         }
     }
 
-    public int calculateCivilPoints() {
-        return 13;
+
+    public int calculateCivilPoints(int reputation) {
+        return (13 + reputation / 10) - 4;
     }
 
 }

@@ -10,7 +10,6 @@ spring:
   jpa:
     open-in-view: false
     hibernate.ddl-auto: none
-
 management:
   endpoints:
     web:

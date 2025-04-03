@@ -58,7 +58,11 @@ public class CharacterTest {
         backendRemote.createCharacter(
             CreateCharacterRequest.builder()
                 .name(charName)
+                .height(180)
+                .weight(60)
                 .age(20)
+                .organisation("test")
+                .characterClass("test")
                 .reputation(0)
                 .build()
         );
@@ -75,7 +79,10 @@ public class CharacterTest {
                 character -> assertThat(character.getOwnerId())
                     .isEqualTo(backendRemote.remote().getUserId()),
                 character -> assertThat(character.getName()).isEqualTo(charName),
-                character -> assertThat(character.getAge()).isEqualTo(20)
+                character -> assertThat(character.getAge()).isEqualTo(20),
+                character -> assertThat(character.getReputation()).isEqualTo(0),
+                character -> assertThat(character.getHeight()).isEqualTo(180),
+                character -> assertThat(character.getWeight()).isEqualTo(60)
             );
     }
 
@@ -134,7 +141,11 @@ public class CharacterTest {
         backendRemote.makeCreateCharacterRequest(
             CreateCharacterRequest.builder()
                 .name(charName)
+                .height(180)
+                .weight(60)
                 .age(22)
+                .organisation("test")
+                .characterClass("test")
                 .reputation(0)
                 .build()
         );
@@ -145,7 +156,11 @@ public class CharacterTest {
         HttpResponse response2 = backendRemote.makeCreateCharacterRequest(
             CreateCharacterRequest.builder()
                 .name(charName)
+                .height(180)
+                .weight(60)
                 .age(22)
+                .organisation("test")
+                .characterClass("test")
                 .reputation(0)
                 .build()
         );
@@ -170,7 +185,11 @@ public class CharacterTest {
         backendRemote.createCharacter(
             CreateCharacterRequest.builder()
                 .name(charName)
+                .height(180)
+                .weight(60)
                 .age(20)
+                .organisation("test")
+                .characterClass("test")
                 .reputation(0)
                 .build()
         );
@@ -231,7 +250,11 @@ public class CharacterTest {
         backendRemote.createCharacter(
             CreateCharacterRequest.builder()
                 .name(charName)
+                .height(180)
+                .weight(60)
                 .age(240)
+                .organisation("test")
+                .characterClass("test")
                 .reputation(0)
                 .build()
         );
@@ -286,21 +309,33 @@ public class CharacterTest {
         backendRemote.createCharacter(
             CreateCharacterRequest.builder()
                 .name(randomUUID().toString())
-                .age(10000)
+                .height(180)
+                .weight(60)
+                .age(1001)
+                .organisation("test")
+                .characterClass("test")
                 .reputation(0)
                 .build()
         );
         backendRemote.createCharacter(
             CreateCharacterRequest.builder()
                 .name(randomUUID().toString())
-                .age(10001)
+                .height(180)
+                .weight(60)
+                .age(1002)
+                .organisation("test")
+                .characterClass("test")
                 .reputation(0)
                 .build()
         );
         backendRemote.createCharacter(
             CreateCharacterRequest.builder()
                 .name(randomUUID().toString())
-                .age(10002)
+                .height(180)
+                .weight(60)
+                .age(1003)
+                .organisation("test")
+                .characterClass("test")
                 .reputation(0)
                 .build()
         );
@@ -324,7 +359,11 @@ public class CharacterTest {
         backendRemote.createCharacter(
             CreateCharacterRequest.builder()
                 .name(charName)
-                .age(1000)
+                .height(180)
+                .weight(60)
+                .organisation("test")
+                .characterClass("test")
+                .age(1001)
                 .reputation(0)
                 .build()
         );
@@ -341,6 +380,10 @@ public class CharacterTest {
             charId,
             UpdateCharacterRequest.builder()
                 .name(request.name())
+                .height(request.height())
+                .weight(request.weight())
+                .organisation(request.organisation())
+                .characterClass(request.characterClass())
                 .age(request.age())
                 .reputation(request.reputation())
                 .build()
@@ -388,7 +431,11 @@ public class CharacterTest {
         backendRemote.createCharacter(
             CreateCharacterRequest.builder()
                 .name(charName)
+                .height(180)
+                .weight(60)
                 .age(1000)
+                .organisation("test")
+                .characterClass("test")
                 .reputation(0)
                 .build()
         );
@@ -404,7 +451,11 @@ public class CharacterTest {
             charId,
             UpdateCharacterRequest.builder()
                 .name(request.name())
+                .height(request.height())
+                .weight(request.weight())
                 .age(request.age())
+                .organisation(request.organisation())
+                .characterClass(request.characterClass())
                 .reputation(request.reputation())
                 .build()
         );
@@ -431,16 +482,19 @@ public class CharacterTest {
     void updateCharacter_characterNotOwned_throw403() {
         // Создать персонажа
         String charName = randomUUID().toString();
-        backendRemote.createCharacter(
+        CharacterDto createdCharacter = backendRemote.createCharacter(
             CreateCharacterRequest.builder()
                 .name(charName)
-                .age(1001)
+                .height(180)
+                .weight(60)
+                .age(1000)
+                .organisation("test")
+                .characterClass("test")
                 .reputation(0)
                 .build()
         );
 
         // Сменить юзера
-        UUID userId = randomUUID();
         String username = randomUUID().toString();
         String password = randomUUID().toString();
         UserDto userDto = backendRemote.createUser(username, password);
@@ -451,18 +505,25 @@ public class CharacterTest {
             .where(CHARACTERS.NAME.eq(charName))
             .fetchInto(CHARACTERS);
 
+        assertThat(charRecord).isNotEmpty();
+
         UpdateCharacterRequest request = createUpdateCharacterRequest();
-        HttpResponse response = backendRemote.makeUpdateCharacterRequest(charRecord.get(0).getId(),
+        HttpResponse response = backendRemote.makeUpdateCharacterRequest(
+            createdCharacter.getId(),
             UpdateCharacterRequest.builder()
                 .name(request.name())
                 .age(request.age())
+                .height(request.height())
+                .weight(request.weight())
+                .organisation(request.organisation())
+                .characterClass(request.characterClass())
                 .reputation(request.reputation())
                 .build()
         );
 
-        assertThat(charRecord).hasSize(1);
-        assertThat(charRecord.get(0).getOwnerId().equals(userId)).isFalse();
-        assertThat(response.code()).isEqualTo(403);
+        // Проверки
+        assertThat(charRecord.get(0).getOwnerId().equals(userDto.id())).isFalse(); // Владельцы не совпадают
+        assertThat(response.code()).isEqualTo(403); // Ошибка прав доступа
         assertThat(response.body()).contains("Изменить чужого персонажа вздумал? а ты хорош.");
     }
 
@@ -474,12 +535,16 @@ public class CharacterTest {
                    Никакой персонаж не был изменён.
         """)
     void updateCharacter_withoutAuthentication_throw401() {
-
+        // Создать персонажа
         String charName = randomUUID().toString();
-        backendRemote.createCharacter(
+        CharacterDto createdCharacter = backendRemote.createCharacter(
             CreateCharacterRequest.builder()
                 .name(charName)
+                .height(180)
+                .weight(60)
                 .age(1000)
+                .organisation("test")
+                .characterClass("test")
                 .reputation(0)
                 .build()
         );
@@ -488,23 +553,36 @@ public class CharacterTest {
         Result<CharactersRecord> charRecord = dbContext.select().from(CHARACTERS)
             .where(CHARACTERS.NAME.eq(charName))
             .fetchInto(CHARACTERS);
+
+        assertThat(charRecord).isNotEmpty(); // Проверка наличия записи
+
         UUID charId = charRecord.get(0).getId();
 
-        //Изменить персонажа
+        // Изменить персонажа без аутентификации
         UpdateCharacterRequest request = createUpdateCharacterRequest();
         HttpResponse response = backendRemote.makeUpdateCharacterWithoutAuthentication(
             charId,
             UpdateCharacterRequest.builder()
                 .name(request.name())
                 .age(request.age())
+                .height(request.height())
+                .weight(request.weight())
+                .organisation(request.organisation())
+                .characterClass(request.characterClass())
                 .reputation(request.reputation())
                 .build()
         );
-
         assertThat(response.code()).isEqualTo(401);
     }
 
     private UpdateCharacterRequest createUpdateCharacterRequest() {
-        return (UpdateCharacterRequest.builder().name("UPDATED" + randomUUID()).age(100).reputation(0).build());
+        return (UpdateCharacterRequest.builder().name("UPDATED" + randomUUID())
+            .height(181)
+            .weight(61)
+            .age(1001)
+            .organisation("test1")
+            .characterClass("test1")
+            .reputation(0)
+            .build());
     }
 }

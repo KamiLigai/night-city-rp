@@ -7,8 +7,8 @@ import lombok.Builder;
 @Builder
 public record CreateCharacterRequest(
     String name,
-    String height,
-    String weigt,
+    Integer height,
+    Integer weight,
     Integer age,
     String organisation,
     String characterClass,
