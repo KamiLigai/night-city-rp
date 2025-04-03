@@ -91,7 +91,6 @@ class CharacterServiceTest {
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
             service.createCharacter(request, auth);
         });
-
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exception.getStatusCode());
         assertEquals("Персонаж с таким именем уже есть", exception.getReason());
     }
@@ -347,7 +346,7 @@ class CharacterServiceTest {
         request.setAge(42);
         request.setHeight(180);
         request.setWeight(60);
-        request.setReputation(42);
+        request.setReputation(40);
         request.setOrganisation("raven");
         request.setCharacterClass("Соло");
 

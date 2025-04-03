@@ -250,7 +250,7 @@ public class CharacterTest {
                 .name(charName)
                 .height(180)
                 .weight(60)
-                .age(240)
+                .age(50)
                 .organisation("test")
                 .characterClass("test")
                 .reputation(0)
@@ -309,7 +309,7 @@ public class CharacterTest {
                 .name(randomUUID().toString())
                 .height(180)
                 .weight(60)
-                .age(1001)
+                .age(70)
                 .organisation("test")
                 .characterClass("test")
                 .reputation(0)
@@ -320,7 +320,7 @@ public class CharacterTest {
                 .name(randomUUID().toString())
                 .height(180)
                 .weight(60)
-                .age(1002)
+                .age(60)
                 .organisation("test")
                 .characterClass("test")
                 .reputation(0)
@@ -331,7 +331,7 @@ public class CharacterTest {
                 .name(randomUUID().toString())
                 .height(180)
                 .weight(60)
-                .age(1003)
+                .age(50)
                 .organisation("test")
                 .characterClass("test")
                 .reputation(0)
@@ -361,7 +361,7 @@ public class CharacterTest {
                 .weight(60)
                 .organisation("test")
                 .characterClass("test")
-                .age(1001)
+                .age(50)
                 .reputation(0)
                 .build()
         );
@@ -407,7 +407,7 @@ public class CharacterTest {
             randomUUID(),
             UpdateCharacterRequest.builder()
                 .name(randomUUID().toString())
-                .age(1000)
+                .age(50)
                 .reputation(0)
                 .build()
         );
@@ -432,7 +432,7 @@ public class CharacterTest {
                 .name(charName)
                 .height(180)
                 .weight(60)
-                .age(1000)
+                .age(50)
                 .organisation("test")
                 .characterClass("test")
                 .reputation(0)
@@ -468,7 +468,7 @@ public class CharacterTest {
         return Stream.of(
             Arguments.of(UpdateCharacterRequest.builder().name("UPDATED" + randomUUID()).age(null).reputation(445).build(),
                 "Возраст не может быть 0 или меньше или null"),
-            Arguments.of(UpdateCharacterRequest.builder().name("UPDATED" + randomUUID()).age(445).reputation(null).build(),
+            Arguments.of(UpdateCharacterRequest.builder().name("UPDATED" + randomUUID()).age(50).reputation(null).build(),
                 "Репутация не может быть меньше 0 или null"),
             Arguments.of(UpdateCharacterRequest.builder().name("UPDATED" + randomUUID()).age(null).reputation(null).build(),
                 "Возраст не может быть 0 или меньше или null")
@@ -491,7 +491,7 @@ public class CharacterTest {
                 .name(charName)
                 .height(180)
                 .weight(60)
-                .age(1000)
+                .age(50)
                 .organisation("test")
                 .characterClass("test")
                 .reputation(0)
@@ -546,7 +546,7 @@ public class CharacterTest {
                 .name(charName)
                 .height(180)
                 .weight(60)
-                .age(1000)
+                .age(50)
                 .organisation("test")
                 .characterClass("test")
                 .reputation(0)
@@ -583,7 +583,7 @@ public class CharacterTest {
         return (UpdateCharacterRequest.builder().name("UPDATED" + randomUUID())
             .height(181)
             .weight(61)
-            .age(1001)
+            .age(50)
             .organisation("test1")
             .characterClass("test1")
             .reputation(0)
