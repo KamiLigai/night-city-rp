@@ -95,7 +95,6 @@ class CharacterServiceTest {
         assertEquals("Персонаж с таким именем уже есть", exception.getReason());
     }
 
-
     @Test
     void createCharacter_ageIsNull_throw400() {
         // given
