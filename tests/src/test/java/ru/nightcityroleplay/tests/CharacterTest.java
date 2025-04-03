@@ -43,8 +43,6 @@ public class CharacterTest {
             .setCurrentUser(user.id(), user.username(), user.username());
     }
 
-
-
     @Test
     @SneakyThrows
     @Description("""
@@ -420,13 +418,14 @@ public class CharacterTest {
 
     @ParameterizedTest(name = "{index} - Проверка с данными: {0}, ожидаемое сообщение: {1}")
     @MethodSource("updateCharacterWithBadRequestData")
+    @SneakyThrows
     @Description("""
         Дано: Персонаж с id.
         Действие: Изменить персонажа по id методом PUT /characters/{id} с некорректными данными.
         Ожидается: 400 Bad_Request.
                    Никакой персонаж не был изменён.
         """)
-    void updateCharacter_badRequest_throw400(UpdateCharacterRequest request) {
+    void updateCharacter_badRequest_throw400(UpdateCharacterRequest request, String expectedMessage) {
         String charName = randomUUID().toString();
         backendRemote.createCharacter(
             CreateCharacterRequest.builder()
@@ -461,15 +460,20 @@ public class CharacterTest {
         );
 
         assertThat(response.code()).isEqualTo(400);
+        var body = objectMapper.readValue(response.body(), ErrorResponse.class);
+        assertThat(body.message()).isEqualTo(expectedMessage);
     }
 
     public static Stream<Arguments> updateCharacterWithBadRequestData() {
         return Stream.of(
-            Arguments.of(UpdateCharacterRequest.builder().name("UPDATED" + randomUUID()).age(null).reputation(445).build()),
-            Arguments.of(UpdateCharacterRequest.builder().name("UPDATED" + randomUUID()).age(445).reputation(null).build()),
-            Arguments.of(UpdateCharacterRequest.builder().name("UPDATED" + randomUUID()).age(null).reputation(null).build()));
+            Arguments.of(UpdateCharacterRequest.builder().name("UPDATED" + randomUUID()).age(null).reputation(445).build(),
+                "Возраст не может быть 0 или меньше или null"),
+            Arguments.of(UpdateCharacterRequest.builder().name("UPDATED" + randomUUID()).age(445).reputation(null).build(),
+                "Репутация не может быть меньше 0 или null"),
+            Arguments.of(UpdateCharacterRequest.builder().name("UPDATED" + randomUUID()).age(null).reputation(null).build(),
+                "Возраст не может быть 0 или меньше или null")
+        );
     }
-
 
     @Test
     @SneakyThrows

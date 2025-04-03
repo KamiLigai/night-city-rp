@@ -384,8 +384,14 @@ public class CharacterService {
         if (request.getAge() == null || request.getAge() <= 0) {
             throw new ResponseStatusException(BAD_REQUEST, "Возраст не может быть 0 или меньше или null");
         }
+        if (request.getAge() > 100) {
+            throw new ResponseStatusException(BAD_REQUEST, "Возраст не может быть больше 100");
+        }
         if (request.getReputation() == null || request.getReputation() < 0) {
             throw new ResponseStatusException(BAD_REQUEST, "Репутация не может быть меньше 0 или null");
+        }
+        if (request.getReputation() > 40) {
+            throw new ResponseStatusException(BAD_REQUEST, "Репутация не может быть больше 40");
         }
         if (characterRepo.existsByName(request.getName())) {
             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Персонаж с таким именем уже есть");

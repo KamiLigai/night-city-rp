@@ -9,6 +9,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.hibernate.annotations.UuidGenerator;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,6 +24,7 @@ public class Weapon {
     private UUID id;
     private Boolean isMelee;
     private String name;
+    @Nullable
     private String weaponType;
     private int penetration;
     private int reputationRequirement;
