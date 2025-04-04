@@ -96,6 +96,14 @@ class Client {
         return this.axiosClient.get('/characters/' + id)
     }
 
+    updateCharacterImplants(characterId: string, implantIds: string[]): Promise<AxiosResponse> {
+        return this.axiosClient.put('characters/' + characterId + '/implants', {implantIds: implantIds})
+    }
+
+    updateCharacterSkills(characterId: string, skillIds: string[]): Promise<AxiosResponse> {
+        return this.axiosClient.put('characters/' + characterId + '/skills', {skillIds: skillIds})
+    }
+
     updateCharacterWeapons(characterId: string, weaponIds: string[]): Promise<AxiosResponse> {
         return this.axiosClient.put('characters/' + characterId + '/weapons', {weaponIds})
     }
@@ -119,6 +127,14 @@ class Client {
         return this.axiosClient.get('/implants/' + id)
     }
 
+    getImplantIds(): Promise<AxiosResponse<string[]>> {
+        return this.axiosClient.get('/implants/ids')
+    }
+
+    getImplantsBulk(implantIds: string[]): Promise<AxiosResponse<WeaponDto[]>> {
+        return this.axiosClient.post('/implants/get-bulk', {ids: implantIds})
+    }
+
     getSkills(page: number, size: number): Promise<AxiosResponse<Page<SkillDto>>> {
         return this.axiosClient.get('/skills', {
             params: {page, size}
@@ -135,6 +151,14 @@ class Client {
 
     getSkill(id: string): Promise<AxiosResponse<SkillDto>> {
         return this.axiosClient.get('/skills/' + id)
+    }
+
+    getSkillIds(): Promise<AxiosResponse<string[]>> {
+        return this.axiosClient.get('/skills/ids')
+    }
+
+    getSkillsBulk(skillIds: string[]): Promise<AxiosResponse<WeaponDto[]>> {
+        return this.axiosClient.post('/skills/get-bulk', {ids: skillIds})
     }
 
     getWeapons(page: number, size: number): Promise<AxiosResponse<Page<WeaponDto>>> {
