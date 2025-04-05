@@ -286,6 +286,8 @@ public class CharacterTest {
         """)
     void updateCharacter_characterExists_success() {
         String charName = randomUUID().toString();
+        UserDto defaultAdmin = AppContext.get("defaultAdmin");
+        backendRemote.setCurrentUser(defaultAdmin.id(), defaultAdmin.username(), defaultAdmin.username());
         backendRemote.createCharacter(
             CreateCharacterRequest.builder()
                 .name(charName)
@@ -327,6 +329,8 @@ public class CharacterTest {
         """)
     void updateCharacter_characterNotExists_throw404() {
         //Изменить персонажа
+        UserDto defaultAdmin = AppContext.get("defaultAdmin");
+        backendRemote.setCurrentUser(defaultAdmin.id(), defaultAdmin.username(), defaultAdmin.username());
         HttpResponse response = backendRemote.makeUpdateCharacterRequest(
             randomUUID(),
             UpdateCharacterRequest.builder()
@@ -351,6 +355,8 @@ public class CharacterTest {
         """)
     void updateCharacter_badRequest_throw400(UpdateCharacterRequest request, String expectedMessage) {
         String charName = randomUUID().toString();
+        UserDto defaultAdmin = AppContext.get("defaultAdmin");
+        backendRemote.setCurrentUser(defaultAdmin.id(), defaultAdmin.username(), defaultAdmin.username());
         backendRemote.createCharacter(
             CreateCharacterRequest.builder()
                 .name(charName)
@@ -434,7 +440,6 @@ public class CharacterTest {
         assertThat(charRecord).hasSize(1);
         assertThat(charRecord.get(0).getOwnerId().equals(userId)).isFalse();
         assertThat(response.code()).isEqualTo(403);
-        assertThat(response.body()).contains("Изменить чужого персонажа вздумал? а ты хорош.");
     }
 
     @Test

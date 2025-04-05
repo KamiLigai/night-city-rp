@@ -20,19 +20,37 @@ public class SkillController {
         this.skillService = skillService;
     }
 
-    @PostMapping
-    public CreateSkillResponse createSkill(@RequestBody CreateSkillRequest request) {
+    // область приколов
+    @PostMapping()
+    public List<CreateSkillResponse> createSkill(@RequestBody CreateSkillRequest request) {
         return skillService.createSkill(request);
     }
 
+    @PutMapping("{oldName}")
+    public String updateSkillsByName(@RequestBody UpdateSkillRequest updateRequest, @PathVariable String oldName) {
+        skillService.updateSkill(updateRequest, oldName);
+        return "Навыки успешно обновлены";
+    }
+
+    @DeleteMapping("/{skillFamily}")
+    public void deleteSkillsByName(@PathVariable String skillFamily) {
+        skillService.deleteSkillsBySkillFamily(List.of(skillFamily));
+    }
+
+    // Шутки кончились
     @GetMapping
     public Page<SkillDto> getSkillPage(Pageable pageable) {
         return skillService.getSkillPage(pageable);
     }
 
-    @GetMapping("{skillId}")
-    public SkillDto getSkill(@PathVariable UUID skillId) {
-        return skillService.getSkill(skillId);
+    @GetMapping("/unique")
+    public Page<SkillDto> getUniqueSkills(Pageable pageable) {
+        return skillService.getUniqueSkillPage(pageable);
+    }
+
+    @GetMapping("{skillFamily}")
+    public SkillDto getSkill(@PathVariable String skillFamily) {
+        return skillService.getSkill(skillFamily);
     }
 
     @GetMapping("ids")
@@ -43,15 +61,5 @@ public class SkillController {
     @PostMapping("get-bulk")
     public List<SkillDto> getSkillsBulk(@RequestBody IdsRequest request) {
         return skillService.getSkillsBulk(request);
-    }
-
-    @PutMapping("{skillId}")
-    public void updateSkill(@RequestBody UpdateSkillRequest request, @PathVariable UUID skillId) {
-        skillService.updateSkill(request, skillId);
-    }
-
-    @DeleteMapping("{skillId}")
-    public void deleteSkill(@PathVariable UUID skillId) {
-        skillService.deleteSkill(skillId);
     }
 }

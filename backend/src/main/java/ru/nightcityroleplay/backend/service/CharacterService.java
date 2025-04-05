@@ -63,8 +63,6 @@ public class CharacterService {
             .collect(Collectors.toList());
         characterDto.setWeaponIds(weaponIds);
         characterDto.setReputation(character.getReputation());
-        characterDto.setImplantPoints(statsService.calculateImplantPoints(character.getReputation()));
-        characterDto.setSpecialImplantPoints(statsService.calculateSpecialImplantPoints(character.getReputation()));
         characterDto.setBattlePoints(character.getBattlePoints());
         characterDto.setCivilPoints(character.getCivilPoints());
         return characterDto;
@@ -114,7 +112,7 @@ public class CharacterService {
     public CharacterDto getCharacter(UUID characterId) {
         Optional<CharacterEntity> byId = characterRepo.findById(characterId);
         if (byId.isEmpty()) {
-            throw new ResponseStatusException(NOT_FOUND, "Персонаж " + characterId + " не найден");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден");
         }
         return toDto(byId.get());
     }
@@ -124,7 +122,7 @@ public class CharacterService {
         validate(request);
         CharacterEntity newCharacter = new CharacterEntity();
         CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
-            new ResponseStatusException(NOT_FOUND, "Персонаж " + characterId + " не найден"));
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
         Object principal = auth.getPrincipal();
         User user = (User) principal;
         UUID userid = user.getId();
@@ -146,7 +144,7 @@ public class CharacterService {
     @PreAuthorize("hasRole('Role_ADMIN')")
     public void giveReputation(GiveReputationRequest request, UUID characterId, Authentication auth) {
         CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
-            new ResponseStatusException(NOT_FOUND, "Персонаж не найден"));
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж не найден"));
 
         Object principal = auth.getPrincipal();
         User user = (User) principal;
@@ -157,20 +155,186 @@ public class CharacterService {
     }
 
     @Transactional
-    public void updateCharacterSkill(UpdateCharacterSkillRequest request, UUID characterId, Authentication auth) {
-        log.info("Навыки персонажа {} обновляются", characterId);
+    //todo Нужно будет сделать это админским методом.
+    public void adminUpdateCharacterSkill(UpdateCharacterSkillRequest request, UUID characterId) {
+        log.info("Навыки персонажа {} обновляют ся", characterId);
         CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
-            new ResponseStatusException(NOT_FOUND, "Персонаж " + characterId + " не найден"));
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
+        List<Skill> skills = new ArrayList<>();
+        int totalBattlePoints = 0;
+        int totalCivilPoints = 0;
+        // Проверка наличия навыка и суммирование стоимости
+        for (UUID skillId : request.getSkillIds()) {
+            Skill skill = skillRepo.findById(skillId).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Навык с ID" + skillId + "не найден"));
+            if (character.getReputation() < skill.getReputationRequirement()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Данный уровень навыка не доступен на репутации изменяемого персонажа");
+            }
+            skills.add(skill);
+            totalBattlePoints += skill.getBattleCost();
+            totalCivilPoints += skill.getCivilCost();
+        }
+        if (character.getBattlePoints() < totalBattlePoints) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Недостаточно БО для выбранного уровня навыка");
+        }
+        if (character.getCivilPoints() < totalCivilPoints) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Недостаточно МО для выбранного уровня навыка");
+        }
+        // Создаем или обновляем список имплантов персонажа
+        if (character.getSkills() == null) {
+            character.setSkills(new ArrayList<>());
+        }
+        character.getSkills().addAll(skills);
+        characterRepo.save(character);
+    }
+
+    @Transactional
+    public void firstSelectCharacterSkill(UpdateCharacterSkillRequest request, UUID characterId, Authentication auth) {
+        log.info("Персонаж {} выбирает стартовые навыки", characterId);
+
+        // Получение персонажа
+        CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
+
+        // Проверка владельца персонажа
         Object principal = auth.getPrincipal();
         User user = (User) principal;
-        UUID userid = user.getId();
-        if (not(character.getOwnerId().equals(userid))) {
+        UUID userId = user.getId();
+        if (!character.getOwnerId().equals(userId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Нельзя добавлять навык не своему персонажу!");
         }
-        List<Skill> skills = skillRepo.findAllByIdIn(request.getSkillId());
-        character.setSkills(skills);
+
+        List<Skill> skills = new ArrayList<>();
+        int totalBattlePoints = 0;
+        int totalCivilPoints = 0;
+
+        // Проверяем, что все навыки, которые выбираются, находятся на первом уровне
+        for (UUID skillId : request.getSkillIds()) {
+            Skill skill = skillRepo.findById(skillId).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Навык с ID " + skillId + " не найден"));
+
+            if (skill.getLevel() != 1) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Можно выбирать только навыки первого уровня!");
+            }
+            skills.add(skill);
+            totalBattlePoints += skill.getBattleCost();
+            totalCivilPoints += skill.getCivilCost();
+        }
+        if (character.getBattlePoints() < totalBattlePoints) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Недостаточно БО для выбранных навыков. Сбавь колличество навыков и повтори попытку");
+        }
+        if (character.getCivilPoints() < totalCivilPoints) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Недостаточно МО для выбранных навыков. Сбавь колличество навыков и повтори попытку");
+        }
+        if (character.getSkills() == null) {
+            character.setSkills(new ArrayList<>());
+        }
+        character.getSkills().addAll(skills);
         characterRepo.save(character);
-        log.info("Персонажу {} обновлены навыки", character.getId());
+    }
+
+    @Transactional
+    public void upgradeCharacterSkill(UpdateCharacterSkillRequest request, UUID characterId, Authentication auth) {
+        log.info("Навыки персонажа {} обновляются", characterId);
+        CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
+
+        User user = (User) auth.getPrincipal();
+        UUID userId = user.getId();
+
+        if (!character.getOwnerId().equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Нельзя добавлять навык не своему персонажу!");
+        }
+
+        List<Skill> skillsToAdd = new ArrayList<>();
+        int totalBattlePoints = 0;
+        int totalCivilPoints = 0;
+
+        for (UUID skillId : request.getSkillIds()) {
+            Skill currentSkill = skillRepo.findById(skillId).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Навык с ID " + skillId + " не найден"));
+
+            if (character.getReputation() < currentSkill.getReputationRequirement()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Нынешний уровень навыка не доступен на вашей репутации");
+            }
+
+            // Определяем следующий уровень навыка на основе его текущего уровня
+            int nextLevel = currentSkill.getLevel() + 1;
+            if (nextLevel > 10) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Достигнут максимальный уровень навыка");
+            }
+
+            Skill nextSkill = skillRepo.findBySkillFamilyAndLevel(currentSkill.getSkillFamily(), nextLevel)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Навык уровня " + nextLevel + " не найден"));
+
+            // Проверка репутации для следующего уровня навыка
+            if (character.getReputation() < nextSkill.getReputationRequirement()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Следующий уровень навыка не доступен на вашей репутации");
+            }
+
+            Skill existingSkill = character.getSkills().stream()
+                .filter(s -> s.getId().equals(currentSkill.getId()))
+                .findFirst()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Текущий навык не найден у персонажа"));
+
+            character.getSkills().remove(existingSkill);
+            skillsToAdd.add(nextSkill);
+            totalBattlePoints += nextSkill.getBattleCost() - existingSkill.getBattleCost();
+            totalCivilPoints += nextSkill.getCivilCost() - existingSkill.getCivilCost();
+        }
+
+        if (character.getBattlePoints() < totalBattlePoints) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Недостаточно БО для выбранного уровня навыка");
+        }
+
+        if (character.getCivilPoints() < totalCivilPoints) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Недостаточно МО для выбранного уровня навыка");
+        }
+
+        character.getSkills().addAll(skillsToAdd);
+        characterRepo.save(character);
+    }
+
+    @Transactional
+    public void removeSkillFromCharacter(UUID characterId, UUID skillId, Authentication auth) {
+        log.info("Навык с ID {} удаляется у персонажа {}", skillId, characterId);
+
+        // Находим персонажа по его ID
+        CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
+
+        // Получаем информацию о текущем пользователе
+        User user = (User) auth.getPrincipal();
+        UUID userId = user.getId();
+
+        // Проверяем, что персонаж принадлежит текущему пользователю
+        if (!character.getOwnerId().equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                "Нельзя удалять навык у персонажа, который вам не принадлежит!");
+        }
+
+        // Находим навык, который нужно удалить
+        Skill skillToRemove = character.getSkills().stream()
+            .filter(skill -> skill.getId().equals(skillId))
+            .findFirst()
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "Навык с ID " + skillId + " не найден у персонажа"));
+
+        // Удаляем навык из списка навыков персонажа
+        character.getSkills().remove(skillToRemove);
+
+        // Сохраняем обновлённого персонажа в базе данных
+        characterRepo.save(character);
+
+        log.info("Навык с ID {} успешно удалён у персонажа {}", skillId, characterId);
     }
 
     @Transactional
@@ -290,19 +454,6 @@ public class CharacterService {
         }
 
         return implants;
-    }
-
-    // Подсчитывает общую стоимость имплантов
-    private int calculateTotalPointsForImplants(List<Implant> implants) {
-        return implants.stream()
-            .mapToInt(implant -> implant.getImplantPointsCost())
-            .sum();
-    }
-
-    private int calculateTotalPointsForSpecialImplants(List<Implant> implants) {
-        return implants.stream()
-            .mapToInt(implant -> implant.getSpecialImplantPointsCost())
-            .sum();
     }
 
     @Transactional
