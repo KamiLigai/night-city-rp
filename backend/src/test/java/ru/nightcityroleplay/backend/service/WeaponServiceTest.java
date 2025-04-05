@@ -1,8 +1,12 @@
 package ru.nightcityroleplay.backend.service;
 
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
@@ -19,6 +23,7 @@ import ru.nightcityroleplay.backend.entity.Weapon;
 import ru.nightcityroleplay.backend.repo.WeaponRepository;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,7 +48,7 @@ public class WeaponServiceTest {
         // given
         var request = new CreateWeaponRequest();
         request.setName("test-name");
-        request.setIsMelee(true);
+        request.setIsMelee(false);
         request.setWeaponType("test-weapon-type");
         request.setPenetration(2);
         request.setReputationRequirement(40);
@@ -63,13 +68,46 @@ public class WeaponServiceTest {
         assertThat(savedWeapon.getName())
             .isEqualTo("test-name");
         assertThat(savedWeapon.getIsMelee())
-            .isEqualTo(true);
+            .isEqualTo(false);
         assertThat(savedWeapon.getWeaponType())
             .isEqualTo("test-weapon-type");
         assertThat(savedWeapon.getPenetration())
             .isEqualTo(2);
         assertThat(savedWeapon.getReputationRequirement())
             .isEqualTo(40);
+    }
+
+    @ParameterizedTest(name = "{index} - Проверка с данными: {0}, ожидаемое сообщение: {1}")
+    @MethodSource("createWeaponWithBadRequestData")
+    @SneakyThrows
+    void createWeapon_badRequest_throw400(CreateWeaponRequest request, String expectedMessage) {
+        // given
+        Authentication auth = mock();
+
+        // when
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+            service.createWeapon(request, auth);
+        });
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+        assertEquals(expectedMessage, exception.getReason());
+    }
+
+    public static Stream<Arguments> createWeaponWithBadRequestData() {
+        return Stream.of(
+            Arguments.of(CreateWeaponRequest.builder().isMelee(null).name("test-name").weaponType("test").penetration(10).reputationRequirement(10).build(),
+                "'Ближнее?' не может быть null"),
+            Arguments.of(CreateWeaponRequest.builder().isMelee(false).name("").weaponType("test").penetration(10).reputationRequirement(10).build(),
+                "Имя оружия не может быть пустым."),
+            Arguments.of(CreateWeaponRequest.builder().isMelee(false).name("test-name").weaponType(null).penetration(10).reputationRequirement(10).build(),
+                "Тип этого оружия не может быть null"),
+            Arguments.of(CreateWeaponRequest.builder().isMelee(true).name("test-name").weaponType("test").penetration(10).reputationRequirement(10).build(),
+                "Тип оружия должен быть null"),
+            Arguments.of(CreateWeaponRequest.builder().isMelee(false).name("test-name").weaponType("test").penetration(-10).reputationRequirement(10).build(),
+                "Пробив не может быть отрицательным."),
+            Arguments.of(CreateWeaponRequest.builder().isMelee(false).name("test-name").weaponType("test").penetration(10).reputationRequirement(-10).build(),
+                "Требование к репутации не может быть отрицательным.")
+        );
     }
 
 
