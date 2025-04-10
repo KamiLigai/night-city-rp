@@ -254,6 +254,7 @@ public class CharacterService {
         characterRepo.save(character);
     }
 
+    @Transactional
     public void updateCharacterImplants(UpdateCharacterImplantsRequest request, UUID characterId, Authentication auth) {
         CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
             new ResponseStatusException(NOT_FOUND, "Персонаж не найден"));
@@ -305,19 +306,6 @@ public class CharacterService {
         }
 
         return implants;
-    }
-
-    // Подсчитывает общую стоимость имплантов
-    private int calculateTotalPointsForImplants(List<Implant> implants) {
-        return implants.stream()
-            .mapToInt(implant -> implant.getImplantPointsCost())
-            .sum();
-    }
-
-    private int calculateTotalPointsForSpecialImplants(List<Implant> implants) {
-        return implants.stream()
-            .mapToInt(implant -> implant.getSpecialImplantPointsCost())
-            .sum();
     }
 
     @Transactional

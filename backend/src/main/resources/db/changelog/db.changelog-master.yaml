@@ -21,3 +21,5 @@ databaseChangeLog:
       file: db/changelog/includes/2025-03-06-remove-ip-from-characters.yaml
   - include:
       file: db/changelog/includes/2025-04-03-drop-notnull-from-weapontype.yaml
+  - include:
+      file: db/changelog/includes/2025-04-10-change-characters.yaml
