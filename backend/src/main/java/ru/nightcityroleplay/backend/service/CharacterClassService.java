@@ -5,7 +5,6 @@ import ru.nightcityroleplay.backend.entity.CharacterEntity;
 
 @Service
 public class CharacterClassService {
-    // Соло
     public int bonusFromSolo(CharacterEntity character) {
         if (!character.getCharacterClass().equals("Соло")) {
             return 0;

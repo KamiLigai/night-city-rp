@@ -14,7 +14,7 @@ public class CharacterDto {
     private Integer height;
     private Integer weight;
     private Integer age;
-    private String organisation;
+    private String organization;
     private String characterClass;
     private Integer reputation;
     private Integer implantPoints;

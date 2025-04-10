@@ -9,7 +9,7 @@ public class CreateCharacterRequest implements SaveCharacterRequest {
     private Integer height;
     private Integer weight;
     private Integer age;
-    private String organisation;
+    private String organization;
     private String characterClass;
     private Integer reputation;
 }

@@ -346,7 +346,7 @@ class CharacterServiceTest {
         request.setHeight(180);
         request.setWeight(60);
         request.setReputation(40);
-        request.setOrganisation("raven");
+        request.setOrganization("raven");
         request.setCharacterClass("Соло");
 
         Authentication auth = mock(Authentication.class);
@@ -375,7 +375,7 @@ class CharacterServiceTest {
         assertThat(savedCharacter.getHeight()).isEqualTo(request.getHeight());
         assertThat(savedCharacter.getWeight()).isEqualTo(request.getWeight());
         assertThat(savedCharacter.getAge()).isEqualTo(character.getAge());
-        assertThat(savedCharacter.getOrganisation()).isEqualTo(character.getOrganisation());
+        assertThat(savedCharacter.getOrganization()).isEqualTo(character.getOrganization());
         assertThat(savedCharacter.getCharacterClass()).isEqualTo(character.getCharacterClass());
         assertThat(savedCharacter.getReputation()).isEqualTo(character.getReputation());
 

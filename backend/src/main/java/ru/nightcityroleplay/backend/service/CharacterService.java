@@ -66,7 +66,7 @@ public class CharacterService {
         List<UUID> weaponIds = character.getWeapons().stream()
             .map(Weapon::getId)
             .collect(Collectors.toList());
-        characterDto.setOrganisation(character.getOrganisation());
+        characterDto.setOrganization(character.getOrganization());
         characterDto.setCharacterClass(character.getCharacterClass());
         characterDto.setWeaponIds(weaponIds);
         characterDto.setReputation(character.getReputation());
@@ -100,7 +100,7 @@ public class CharacterService {
         character.setName(request.getName());
         character.setHeight(request.getHeight());
         character.setWeight(request.getWeight());
-        character.setOrganisation(request.getOrganisation());
+        character.setOrganization(request.getOrganization());
         character.setCharacterClass(request.getCharacterClass());
         character.setAge(request.getAge());
         character.setReputation(request.getReputation());
@@ -149,7 +149,7 @@ public class CharacterService {
         newCharacter.setHeight(request.getHeight());
         newCharacter.setWeight(request.getWeight());
         newCharacter.setAge(character.getAge());
-        newCharacter.setOrganisation(character.getOrganisation());
+        newCharacter.setOrganization(character.getOrganization());
         newCharacter.setCharacterClass(character.getCharacterClass());
         newCharacter.setReputation(character.getReputation());
         characterStatsService.updateCharacterStats(newCharacter);

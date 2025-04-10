@@ -8,7 +8,7 @@ public record UpdateCharacterRequest(
     Integer height,
     Integer weight,
     Integer age,
-    String organisation,
+    String organization,
     String characterClass,
     Integer reputation
 ) {

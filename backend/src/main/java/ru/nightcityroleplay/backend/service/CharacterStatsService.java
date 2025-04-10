@@ -32,6 +32,8 @@ public class CharacterStatsService {
             return 15;
         } else if (reputation < 200) {
             return 16;
+        } else if (reputation > 200) {
+            return 16;
         } else {
             return 10;
         }
@@ -52,12 +54,13 @@ public class CharacterStatsService {
     }
 
     public int calculateBattlePoints(int age, int reputation) {
+        int compensation = 4;
         if (age <= 25) {
-            return (13 + reputation / 10) - 4;
+            return (13 + reputation / 10) - compensation;
         } else if (age <= 40) {
-            return (15 + reputation / 10) - 4;
+            return (15 + reputation / 10) - compensation;
         } else {
-            return (17 + reputation / 10) - 4;
+            return (17 + reputation / 10) - compensation;
         }
     }
 

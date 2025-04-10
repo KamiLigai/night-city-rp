@@ -1,0 +1,49 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2025-04-10-add-characters.yaml
+      author: kokoligai
+      changes:
+        - createTable:
+            tableName: characters
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: owner_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar
+                  constraints:
+                    nullable: false
+              - column:
+                  name: height
+                  type: integer
+                  constraints:
+                    #nullable: false
+              - column:
+                  name: weight
+                  type: integer
+                  constraints:
+                    #nullable: false
+              - column:
+                  name: age
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: organization
+                  type: varchar
+                  constraints:
+                    nullable: false
+              - column:
+                  name: character_class
+                  type: varchar
+                  constraints:
+                    nullable: false
