@@ -31,8 +31,6 @@ public class CharacterStatsService {
             return 13;
         } else if (reputation < 170) {
             return 15;
-        } else if (reputation < 200) {
-            return 16;
         } else if (reputation > 200) {
             return 16;
         } else {
