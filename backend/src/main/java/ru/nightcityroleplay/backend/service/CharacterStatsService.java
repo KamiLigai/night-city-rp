@@ -31,10 +31,8 @@ public class CharacterStatsService {
             return 13;
         } else if (reputation < 170) {
             return 15;
-        } else if (reputation > 200) {
-            return 16;
         } else {
-            return 10;
+            return 16;
         }
     }
 
@@ -65,7 +63,7 @@ public class CharacterStatsService {
 
 
     public int calculateCivilPoints(int reputation) {
-        return (13 + reputation / 10) - 4;
+        return 13 + reputation / 10 - BP_COMPENSATION;
     }
 
 }
