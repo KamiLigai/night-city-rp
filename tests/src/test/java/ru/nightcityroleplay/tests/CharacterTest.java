@@ -541,7 +541,7 @@ public class CharacterTest {
     void updateCharacter_withoutAuthentication_throw401() {
         // Создать персонажа
         String charName = randomUUID().toString();
-        CharacterDto createdCharacter = backendRemote.createCharacter(
+        backendRemote.createCharacter(
             CreateCharacterRequest.builder()
                 .name(charName)
                 .height(180)
