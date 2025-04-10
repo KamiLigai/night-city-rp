@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: 2025-04-10-add-characters.yaml
+      id: 2024-05-09-add-characters.yaml
       author: kokoligai
       changes:
         - createTable:
@@ -23,27 +23,7 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: height
-                  type: integer
-                  constraints:
-                    #nullable: false
-              - column:
-                  name: weight
-                  type: integer
-                  constraints:
-                    #nullable: false
-              - column:
                   name: age
                   type: integer
-                  constraints:
-                    nullable: false
-              - column:
-                  name: organization
-                  type: varchar
-                  constraints:
-                    nullable: false
-              - column:
-                  name: character_class
-                  type: varchar
                   constraints:
                     nullable: false
