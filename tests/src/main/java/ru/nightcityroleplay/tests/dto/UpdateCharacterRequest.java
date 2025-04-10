@@ -5,7 +5,11 @@ import lombok.Builder;
 @Builder
 public record UpdateCharacterRequest(
     String name,
-    Integer reputation,
-    Integer age
+    Integer height,
+    Integer weight,
+    Integer age,
+    String organization,
+    String characterClass,
+    Integer reputation
 ) {
 }

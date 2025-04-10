@@ -52,17 +52,19 @@ public class CharacterStatsSeviceTest {
             Arguments.of(30, 9),
             Arguments.of(39, 9),
             Arguments.of(40, 10),
-            Arguments.of(100, 10)
+            Arguments.of(100, 13)
         );
     }
+
 
     @Test
     void calculateBattlePoints_youngAge_success() {
         // given
         int age = 20;
+        int reputation = 41;
 
         // when
-        int result = statsService.calculateBattlePoints(age);
+        int result = statsService.calculateBattlePoints(age, reputation);
 
         // then
         assertThat(result).isEqualTo(13);
@@ -72,9 +74,9 @@ public class CharacterStatsSeviceTest {
     void calculateBattlePoints_middleAge_success() {
         // given
         int age = 30;
-
+        int reputation = 41;
         // when
-        int result = statsService.calculateBattlePoints(age);
+        int result = statsService.calculateBattlePoints(age, reputation);
 
         // then
         assertThat(result).isEqualTo(15);
@@ -84,9 +86,10 @@ public class CharacterStatsSeviceTest {
     void calculateBattlePoints_oldAge_success() {
         // given
         int age = 50;
+        int reputation = 41;
 
         // when
-        int result = statsService.calculateBattlePoints(age);
+        int result = statsService.calculateBattlePoints(age, reputation);
 
         // then
         assertThat(result).isEqualTo(17);
@@ -95,8 +98,11 @@ public class CharacterStatsSeviceTest {
 
     @Test
     void calculateCivilPoints_isAlwaysThirteen_success() {
+        //given
+        int reputation = 49;
+
         // when
-        int result = statsService.calculateCivilPoints();
+        int result = statsService.calculateCivilPoints(reputation);
 
         // then
         assertThat(result).isEqualTo(13);

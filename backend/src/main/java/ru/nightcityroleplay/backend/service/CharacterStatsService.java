@@ -7,11 +7,12 @@ import ru.nightcityroleplay.backend.entity.CharacterEntity;
 @Service
 public class CharacterStatsService {
 
+    private static final int BP_COMPENSATION = 4;
 
     public void updateCharacterStats(CharacterEntity character) {
 
-        character.setBattlePoints(calculateBattlePoints(character.getAge()));
-        character.setCivilPoints(calculateCivilPoints());
+        character.setBattlePoints(calculateBattlePoints(character.getAge(), character.getReputation()));
+        character.setCivilPoints(calculateCivilPoints(character.getReputation()));
     }
 
 
@@ -22,8 +23,16 @@ public class CharacterStatsService {
             return 8;
         } else if (reputation < 40) {
             return 9;
-        } else {
+        } else if (reputation < 60) {
             return 10;
+        } else if (reputation < 100) {
+            return 11;
+        } else if (reputation < 150) {
+            return 13;
+        } else if (reputation < 170) {
+            return 15;
+        } else {
+            return 16;
         }
     }
 
@@ -41,18 +50,20 @@ public class CharacterStatsService {
         }
     }
 
-    public int calculateBattlePoints(int age) {
+    public int calculateBattlePoints(int age, int reputation) {
+
         if (age <= 25) {
-            return 13;
+            return 13 + reputation / 10 - BP_COMPENSATION;
         } else if (age <= 40) {
-            return 15;
+            return 15 + reputation / 10 - BP_COMPENSATION;
         } else {
-            return 17;
+            return 17 + reputation / 10 - BP_COMPENSATION;
         }
     }
 
-    public int calculateCivilPoints() {
-        return 13;
+
+    public int calculateCivilPoints(int reputation) {
+        return 13 + reputation / 10 - BP_COMPENSATION;
     }
 
 }
