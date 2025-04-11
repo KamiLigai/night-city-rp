@@ -30,6 +30,7 @@ public class CharacterService {
 
     private final CharacterRepository characterRepo;
     private final CharacterStatsService characterStatsService;
+    private final CharacterClassService characterClassService;
     private final WeaponRepository weaponRepo;
     private final SkillRepository skillRepo;
     private final ImplantRepository implantRepo;
@@ -44,6 +45,7 @@ public class CharacterService {
         CharacterStatsService statsService
     ) {
         this.characterStatsService = characterStatsService;
+        this.characterClassService = characterClassService;
         this.characterRepo = characterRepo;
         this.weaponRepo = weaponRepo;
         this.skillRepo = skillRepo;
@@ -57,12 +59,19 @@ public class CharacterService {
         characterDto.setId(character.getId());
         characterDto.setOwnerId(character.getOwnerId());
         characterDto.setName(character.getName());
+        characterDto.setHeight(character.getHeight());
+        characterDto.setWeight(character.getWeight());
         characterDto.setAge(character.getAge());
         List<UUID> weaponIds = character.getWeapons().stream()
             .map(Weapon::getId)
             .collect(Collectors.toList());
+        characterDto.setOrganization(character.getOrganization());
+        characterDto.setCharacterClass(character.getCharacterClass());
         characterDto.setWeaponIds(weaponIds);
         characterDto.setReputation(character.getReputation());
+        characterDto.setImplantPoints(statsService.calculateImplantPoints(character.getReputation())
+            + characterClassService.bonusFromSolo(character));
+        characterDto.setSpecialImplantPoints(statsService.calculateSpecialImplantPoints(character.getReputation()));
         characterDto.setBattlePoints(character.getBattlePoints());
         characterDto.setCivilPoints(character.getCivilPoints());
         return characterDto;
@@ -88,6 +97,10 @@ public class CharacterService {
         User user = (User) principal;
         character.setOwnerId(user.getId());
         character.setName(request.getName());
+        character.setHeight(request.getHeight());
+        character.setWeight(request.getWeight());
+        character.setOrganization(request.getOrganization());
+        character.setCharacterClass(request.getCharacterClass());
         character.setAge(request.getAge());
         character.setReputation(request.getReputation());
         characterStatsService.updateCharacterStats(character);
@@ -132,10 +145,13 @@ public class CharacterService {
         newCharacter.setId(characterId);
         newCharacter.setOwnerId(user.getId());
         newCharacter.setName(request.getName());
-        newCharacter.setAge(request.getAge());
-        newCharacter.setReputation(request.getReputation());
-        newCharacter.setBattlePoints(character.getBattlePoints());
-        newCharacter.setCivilPoints(character.getCivilPoints());
+        newCharacter.setHeight(request.getHeight());
+        newCharacter.setWeight(request.getWeight());
+        newCharacter.setAge(character.getAge());
+        newCharacter.setOrganization(character.getOrganization());
+        newCharacter.setCharacterClass(character.getCharacterClass());
+        newCharacter.setReputation(character.getReputation());
+        characterStatsService.updateCharacterStats(newCharacter);
         characterRepo.save(newCharacter);
         log.info("Персонаж {} изменён", newCharacter.getId());
     }
@@ -403,6 +419,7 @@ public class CharacterService {
         characterRepo.save(character);
     }
 
+    @Transactional
     public void updateCharacterImplants(UpdateCharacterImplantsRequest request, UUID characterId, Authentication auth) {
         CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
             new ResponseStatusException(NOT_FOUND, "Персонаж не найден"));

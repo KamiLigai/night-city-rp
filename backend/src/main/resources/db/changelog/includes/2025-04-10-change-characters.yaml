@@ -1,0 +1,36 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2025-04-10-add-characters.yaml
+      author: kokoligai
+      changes:
+        - delete:
+            tableName: characters_weapons
+        - delete:
+            tableName: characters_implants
+        - delete:
+            tableName: characters_skills
+        - delete:
+            tableName: characters
+        - addColumn:
+            tableName: characters
+            columns:
+              - column:
+                  name: height
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: weight
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: organization
+                  type: varchar
+                  constraints:
+                    nullable: false
+              - column:
+                  name: character_class
+                  type: varchar
+                  constraints:
+                    nullable: false
