@@ -289,7 +289,7 @@ class CharacterServiceTest {
     @Test
     void firstSelectCharacterSkill_unauthorized_throw403() {
         // given
-        var request = new UpdateCharacterSkillRequest();
+        var request = new UpgradeCharacterSkillRequest();
         UUID characterId = UUID.randomUUID();
 
         var oldCharacter = new CharacterEntity();
@@ -316,7 +316,7 @@ class CharacterServiceTest {
     @Test
     void upgradeCharacterSkill_skillNotFound_throw404() {
         // given
-        var request = new UpdateCharacterSkillRequest();
+        var request = new UpgradeCharacterSkillRequest();
         request.setSkillIds(List.of(UUID.randomUUID()));
         UUID characterId = UUID.randomUUID();
 
@@ -346,7 +346,7 @@ class CharacterServiceTest {
     @Test
     void upgradeCharacterSkill_insufficientBattlePoints_throw400() {
         // given
-        var request = new UpdateCharacterSkillRequest();
+        var request = new UpgradeCharacterSkillRequest();
         UUID skillId = UUID.randomUUID();
         request.setSkillIds(List.of(skillId));
 
@@ -421,7 +421,7 @@ class CharacterServiceTest {
     @Test
     void upgradeCharacterSkill_success() {
         // given
-        UpdateCharacterSkillRequest request = new UpdateCharacterSkillRequest();
+        UpgradeCharacterSkillRequest request = new UpgradeCharacterSkillRequest();
         UUID skillId = UUID.randomUUID();
 
         UUID characterId = UUID.randomUUID();

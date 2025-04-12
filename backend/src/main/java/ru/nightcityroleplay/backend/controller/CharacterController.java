@@ -1,5 +1,6 @@
 package ru.nightcityroleplay.backend.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -52,6 +53,8 @@ public class CharacterController {
     }
 
     @PostMapping("{characterId}/reputation/give")
+    @Operation(summary = "Get a product by id", description = "Returns a product as per the id")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void giveReputation(
         @RequestBody GiveReputationRequest request,
         @PathVariable UUID characterId,
@@ -60,16 +63,16 @@ public class CharacterController {
         characterService.giveReputation(request, characterId, auth);
     }
 
-    @PutMapping("{characterId}/skills")
+    @PutMapping("{characterId}/skills/force")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void updateCharacterSkill(
+    public void adminUpdateCharacterSkill(
         @RequestBody UpdateCharacterSkillRequest request,
         @PathVariable UUID characterId
     ) {
         characterService.adminUpdateCharacterSkill(request, characterId);
     }
 
-    @PutMapping("{characterId}/skills/select")
+    @PutMapping("{characterId}/skills/initial")
     public void selectCharacterSkills(
         @RequestBody UpdateCharacterSkillRequest request,
         @PathVariable UUID characterId,
@@ -79,22 +82,12 @@ public class CharacterController {
     }
 
     @PutMapping("{characterId}/skills/upgrade")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void upgradeCharacterSkill(
-        @RequestBody UpdateCharacterSkillRequest request,
+        @RequestBody UpgradeCharacterSkillRequest request,
         @PathVariable UUID characterId,
         Authentication auth
     ) {
         characterService.upgradeCharacterSkill(request, characterId, auth);
-    }
-
-    //todo сделать deleteSkillRequest и перенести skillId в RequestBody
-    @DeleteMapping("/{characterId}/skills/{skillId}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void removeSkillFromCharacter(@PathVariable UUID characterId,
-                                         @PathVariable UUID skillId,
-                                         Authentication auth) {
-        characterService.removeSkillFromCharacter(characterId, skillId, auth);
     }
 
     @GetMapping("{characterId}/implants")

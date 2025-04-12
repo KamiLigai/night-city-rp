@@ -34,11 +34,11 @@ public class CharacterService {
     private final WeaponRepository weaponRepo;
     private final SkillRepository skillRepo;
     private final ImplantRepository implantRepo;
-    private final CharacterStatsService statsService;
 
     public CharacterService(
         CharacterRepository characterRepo,
         CharacterStatsService characterStatsService,
+        CharacterClassService characterClassService,
         WeaponRepository weaponRepo,
         SkillRepository skillRepo,
         ImplantRepository implantRepo,
@@ -50,7 +50,6 @@ public class CharacterService {
         this.weaponRepo = weaponRepo;
         this.skillRepo = skillRepo;
         this.implantRepo = implantRepo;
-        this.statsService = statsService;
     }
 
 
@@ -69,9 +68,10 @@ public class CharacterService {
         characterDto.setCharacterClass(character.getCharacterClass());
         characterDto.setWeaponIds(weaponIds);
         characterDto.setReputation(character.getReputation());
-        characterDto.setImplantPoints(statsService.calculateImplantPoints(character.getReputation())
+        characterDto.setImplantPoints(characterStatsService.calculateImplantPoints(character.getReputation())
             + characterClassService.bonusFromSolo(character));
-        characterDto.setSpecialImplantPoints(statsService.calculateSpecialImplantPoints(character.getReputation()));
+        characterDto.setSpecialImplantPoints(characterStatsService.calculateSpecialImplantPoints
+            (character.getReputation()));
         characterDto.setBattlePoints(character.getBattlePoints());
         characterDto.setCivilPoints(character.getCivilPoints());
         return characterDto;
@@ -171,7 +171,6 @@ public class CharacterService {
     }
 
     @Transactional
-    //todo Нужно будет сделать это админским методом.
     public void adminUpdateCharacterSkill(UpdateCharacterSkillRequest request, UUID characterId) {
         log.info("Навыки персонажа {} обновляют ся", characterId);
         CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
@@ -225,36 +224,38 @@ public class CharacterService {
         int totalBattlePoints = 0;
         int totalCivilPoints = 0;
 
-        // Проверяем, что все навыки, которые выбираются, находятся на первом уровне
-        for (UUID skillId : request.getSkillIds()) {
-            Skill skill = skillRepo.findById(skillId).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, "Навык с ID " + skillId + " не найден"));
+        if (character.getSkills().isEmpty()) {
+            // Проверяем, что все навыки, которые выбираются, находятся на первом уровне
+            for (UUID skillId : request.getSkillIds()) {
+                Skill skill = skillRepo.findById(skillId).orElseThrow(() ->
+                    new ResponseStatusException(HttpStatus.NOT_FOUND, "Навык с ID " + skillId + " не найден"));
 
-            if (skill.getLevel() != 1) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Можно выбирать только навыки первого уровня!");
+                if (skill.getLevel() != 1) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Можно выбирать только навыки первого уровня!");
+                }
+                skills.add(skill);
+                totalBattlePoints += skill.getBattleCost();
+                totalCivilPoints += skill.getCivilCost();
             }
-            skills.add(skill);
-            totalBattlePoints += skill.getBattleCost();
-            totalCivilPoints += skill.getCivilCost();
-        }
-        if (character.getBattlePoints() < totalBattlePoints) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "Недостаточно БО для выбранных навыков. Сбавь колличество навыков и повтори попытку");
-        }
-        if (character.getCivilPoints() < totalCivilPoints) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "Недостаточно МО для выбранных навыков. Сбавь колличество навыков и повтори попытку");
-        }
-        if (character.getSkills() == null) {
-            character.setSkills(new ArrayList<>());
-        }
-        character.getSkills().addAll(skills);
-        characterRepo.save(character);
+            if (character.getBattlePoints() < totalBattlePoints) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Недостаточно БО для выбранных навыков. Сбавь колличество навыков и повтори попытку");
+            }
+            if (character.getCivilPoints() < totalCivilPoints) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Недостаточно МО для выбранных навыков. Сбавь колличество навыков и повтори попытку");
+            }
+            if (character.getSkills() == null) {
+                character.setSkills(new ArrayList<>());
+            }
+            character.getSkills().addAll(skills);
+            characterRepo.save(character);
+        } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Вы уже выбрали первые навыки");
     }
 
     @Transactional
-    public void upgradeCharacterSkill(UpdateCharacterSkillRequest request, UUID characterId, Authentication auth) {
+    public void upgradeCharacterSkill(UpgradeCharacterSkillRequest request, UUID characterId, Authentication auth) {
         log.info("Навыки персонажа {} обновляются", characterId);
         CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
             new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
@@ -317,40 +318,6 @@ public class CharacterService {
 
         character.getSkills().addAll(skillsToAdd);
         characterRepo.save(character);
-    }
-
-    @Transactional
-    public void removeSkillFromCharacter(UUID characterId, UUID skillId, Authentication auth) {
-        log.info("Навык с ID {} удаляется у персонажа {}", skillId, characterId);
-
-        // Находим персонажа по его ID
-        CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
-            new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
-
-        // Получаем информацию о текущем пользователе
-        User user = (User) auth.getPrincipal();
-        UUID userId = user.getId();
-
-        // Проверяем, что персонаж принадлежит текущему пользователю
-        if (!character.getOwnerId().equals(userId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                "Нельзя удалять навык у персонажа, который вам не принадлежит!");
-        }
-
-        // Находим навык, который нужно удалить
-        Skill skillToRemove = character.getSkills().stream()
-            .filter(skill -> skill.getId().equals(skillId))
-            .findFirst()
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "Навык с ID " + skillId + " не найден у персонажа"));
-
-        // Удаляем навык из списка навыков персонажа
-        character.getSkills().remove(skillToRemove);
-
-        // Сохраняем обновлённого персонажа в базе данных
-        characterRepo.save(character);
-
-        log.info("Навык с ID {} успешно удалён у персонажа {}", skillId, characterId);
     }
 
     @Transactional
@@ -463,10 +430,11 @@ public class CharacterService {
         }
 
         // Проверяем, достаточно ли ресурсов у персонажа
-        if (statsService.calculateImplantPoints(character.getReputation()) < totalImplantPointsCost) {
+        if (characterStatsService.calculateImplantPoints(character.getReputation()) < totalImplantPointsCost) {
             throw new ResponseStatusException(BAD_REQUEST, "Недостаточно ОИ для обычных имплантов");
         }
-        if (statsService.calculateSpecialImplantPoints(character.getReputation()) < totalSpecialImplantPointsCost) {
+        if (characterStatsService.calculateSpecialImplantPoints(character.getReputation())
+            < totalSpecialImplantPointsCost) {
             throw new ResponseStatusException(BAD_REQUEST, "Недостаточно ОИ* для специальных имплантов");
         }
 
