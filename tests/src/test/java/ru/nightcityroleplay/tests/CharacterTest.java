@@ -31,9 +31,10 @@ public class CharacterTest {
     ObjectMapper objectMapper = AppContext.get(ObjectMapper.class);
 
     @BeforeEach
-    void setUp() {
-        UserDto user = AppContext.get("defaultUser");
-        backendRemote.setCurrentUser(user.id(), user.username(), user.username());
+    @Test
+    void setUserAdmin(){
+        UserDto defaultAdmin = AppContext.get("defaultAdmin");
+        backendRemote.setCurrentUser(defaultAdmin.id(), defaultAdmin.username(), defaultAdmin.username());
     }
 
     @AfterAll
@@ -410,7 +411,7 @@ public class CharacterTest {
             UpdateCharacterRequest.builder()
                 .name(randomUUID().toString())
                 .age(50)
-                .reputation(0)
+                .reputation(1)
                 .build()
         );
 
@@ -496,7 +497,7 @@ public class CharacterTest {
                 .age(50)
                 .organization("test")
                 .characterClass("test")
-                .reputation(0)
+                .reputation(2)
                 .build()
         );
 
