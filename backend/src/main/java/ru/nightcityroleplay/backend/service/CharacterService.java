@@ -168,7 +168,7 @@ public class CharacterService {
     }
 
     @Transactional
-    public void adminUpdateCharacterSkill(UpdateCharacterSkillRequest request, UUID characterId) {
+    public void updateCharacterSkill(UpdateCharacterSkillRequest request, UUID characterId) {
         log.info("Навыки персонажа {} обновляют ся", characterId);
         CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
             new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
@@ -202,7 +202,8 @@ public class CharacterService {
     }
 
     @Transactional
-    public void firstSelectCharacterSkill(UpdateCharacterSkillRequest request, UUID characterId, Authentication auth) {
+    public void selectInitialCharacterSkills(UpdateCharacterSkillRequest request,
+                                             UUID characterId, Authentication auth) {
         log.info("Персонаж {} выбирает стартовые навыки", characterId);
 
         // Получение персонажа
@@ -271,48 +272,39 @@ public class CharacterService {
         for (UUID skillId : request.getSkillIds()) {
             Skill currentSkill = skillRepo.findById(skillId).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "Навык с ID " + skillId + " не найден"));
-
             if (character.getReputation() < currentSkill.getReputationRequirement()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Нынешний уровень навыка не доступен на вашей репутации");
             }
-
             // Определяем следующий уровень навыка на основе его текущего уровня
             int nextLevel = currentSkill.getLevel() + 1;
             if (nextLevel > 10) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Достигнут максимальный уровень навыка");
             }
-
             Skill nextSkill = skillRepo.findBySkillFamilyAndLevel(currentSkill.getSkillFamily(), nextLevel)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                     "Навык уровня " + nextLevel + " не найден"));
-
             // Проверка репутации для следующего уровня навыка
             if (character.getReputation() < nextSkill.getReputationRequirement()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Следующий уровень навыка не доступен на вашей репутации");
             }
-
             Skill existingSkill = character.getSkills().stream()
                 .filter(s -> s.getId().equals(currentSkill.getId()))
                 .findFirst()
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Текущий навык не найден у персонажа"));
-
             character.getSkills().remove(existingSkill);
             skillsToAdd.add(nextSkill);
             totalBattlePoints += nextSkill.getBattleCost() - existingSkill.getBattleCost();
             totalCivilPoints += nextSkill.getCivilCost() - existingSkill.getCivilCost();
         }
-
         if (character.getBattlePoints() < totalBattlePoints) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Недостаточно БО для выбранного уровня навыка");
         }
-
         if (character.getCivilPoints() < totalCivilPoints) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Недостаточно МО для выбранного уровня навыка");
         }
-
         character.getSkills().addAll(skillsToAdd);
         characterRepo.save(character);
     }

@@ -47,7 +47,7 @@ public class SkillService {
     /// Область приколов
 
     @Transactional
-    public List<CreateSkillResponse> createSkill(CreateSkillRequest baseRequest) {
+    public List<CreateSkillResponse> createSkillFamily(CreateSkillRequest baseRequest) {
         if (baseRequest.getName() == null || baseRequest.getName().trim().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Название навыка не может быть пустым.");
         }

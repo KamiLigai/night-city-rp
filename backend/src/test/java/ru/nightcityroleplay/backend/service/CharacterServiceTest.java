@@ -241,7 +241,7 @@ class CharacterServiceTest {
         when(charRepo.findById(characterId)).thenReturn(Optional.empty());
 
         // then
-        assertThatThrownBy(() -> service.adminUpdateCharacterSkill(request, characterId))
+        assertThatThrownBy(() -> service.updateCharacterSkill(request, characterId))
             .isInstanceOf(ResponseStatusException.class)
             .hasMessageContaining("Персонаж " + characterId + " не найден")
             .extracting(ResponseStatusException.class::cast)

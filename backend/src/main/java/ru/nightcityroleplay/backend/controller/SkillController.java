@@ -23,7 +23,7 @@ public class SkillController {
     // область приколов
     @PostMapping()
     public List<CreateSkillResponse> createSkill(@RequestBody CreateSkillRequest request) {
-        return skillService.createSkill(request);
+        return skillService.createSkillFamily(request);
     }
 
     @PutMapping("{oldName}")

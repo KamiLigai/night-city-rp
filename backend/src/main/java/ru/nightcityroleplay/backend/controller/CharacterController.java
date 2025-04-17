@@ -64,20 +64,20 @@ public class CharacterController {
 
     @PutMapping("{characterId}/skills/force")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void adminUpdateCharacterSkill(
+    public void updateCharacterSkill(
         @RequestBody UpdateCharacterSkillRequest request,
         @PathVariable UUID characterId
     ) {
-        characterService.adminUpdateCharacterSkill(request, characterId);
+        characterService.updateCharacterSkill(request, characterId);
     }
 
     @PutMapping("{characterId}/skills/initial")
-    public void selectCharacterSkills(
+    public void selectInitialCharacterSkills(
         @RequestBody UpdateCharacterSkillRequest request,
         @PathVariable UUID characterId,
         Authentication auth
     ) {
-        characterService.firstSelectCharacterSkill(request, characterId, auth);
+        characterService.selectInitialCharacterSkills(request, characterId, auth);
     }
 
     @PutMapping("{characterId}/skills/upgrade")
