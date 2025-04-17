@@ -288,4 +288,16 @@ public class BackendRemote {
         Call call = client.newCall(httpRequest);
         return call.execute();
     }
+
+    @SneakyThrows
+    public Response putCharacterWeapon(UpdateCharacterWeaponRequest request, UUID characterId) {
+        byte[] body = objectMapper.writeValueAsBytes(request);
+        Request httpRequest = new Request.Builder()
+            .url(baseUrl + "characters/" + characterId + "/weapons")
+            .put(RequestBody.create(body, APP_JSON))
+            .header(AUTHORIZATION, getBasicAuthorization(username, password))
+            .build();
+        Call call = client.newCall(httpRequest);
+        return call.execute();
+    }
 }
