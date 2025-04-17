@@ -10,5 +10,4 @@ public class UpdateCharacterRequest implements SaveCharacterRequest {
     private Integer age;
     private String organization;
     private String characterClass;
-    private Integer reputation;
 }

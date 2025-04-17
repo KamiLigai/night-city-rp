@@ -1,7 +1,7 @@
 databaseChangeLog:
   - changeSet:
-      id: 2024-08-20-add-skills
-      author: woomanz
+      id: 2025-01-23-add-skills
+      author: kokoligai
       changes:
         - createTable:
             tableName: skills
@@ -14,14 +14,30 @@ databaseChangeLog:
                     unique: true
                     nullable: false
               - column:
+                  name: skill_family
+                  type: varchar
+                  constraints:
+                    unique: false
+                    nullable: false
+              - column:
                   name: name
                   type: varchar
                   constraints:
-                    unique: true
+                    unique: false
                     nullable: false
               - column:
                   name: description
                   type: varchar
+                  constraints:
+                    nullable: false
+              - column:
+                  name: skill_class
+                  type: varchar
+                  constraints:
+                    nullable: false
+              - column:
+                  name: type_is_battle
+                  type: bool
                   constraints:
                     nullable: false
               - column:
@@ -30,12 +46,17 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: type
-                  type: varchar
+                  name: battle_cost
+                  type: integer
                   constraints:
                     nullable: false
               - column:
-                  name: cost
+                  name: civil_cost
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: reputation_requirement
                   type: integer
                   constraints:
                     nullable: false

@@ -2,12 +2,15 @@ package ru.nightcityroleplay.tests.dto;
 
 import lombok.Builder;
 
+import java.util.UUID;
+
 @Builder
 public record CreateSkillRequest(
+    UUID id,
+    String skillFamily,
     String name,
     String description,
-    Integer level,
-    String type,
-    Integer cost
+    String skillClass,
+    Boolean typeIsBattle
 ) {
 }

@@ -12,6 +12,7 @@ import ru.nightcityroleplay.tests.dto.UserDto;
 import ru.nightcityroleplay.tests.entity.tables.records.UsersRecord;
 import ru.nightcityroleplay.tests.exception.AppContextException;
 import ru.nightcityroleplay.tests.remote.BackendRemote;
+import ru.nightcityroleplay.tests.repo.SkillRepo;
 import ru.nightcityroleplay.tests.repo.ImplantRepo;
 import ru.nightcityroleplay.tests.repo.WeaponRepo;
 
@@ -49,6 +50,7 @@ public class AppContext {
             createAdminUser();
             createWeaponRepo();
             createImplantRepo();
+            createSkillRepo();
         } catch (Exception e) {
             throw new AppContextException("Ошибка инициализации контекста", e);
         }
@@ -179,5 +181,10 @@ public class AppContext {
     private static void createImplantRepo() {
         ImplantRepo implantRepo = new ImplantRepo(get(DSLContext.class));
         put(implantRepo);
+    }
+
+    private static void createSkillRepo() {
+        SkillRepo skillRepo = new SkillRepo(get(DSLContext.class));
+        put(skillRepo);
     }
 }
