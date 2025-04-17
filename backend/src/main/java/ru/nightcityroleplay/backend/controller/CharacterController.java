@@ -40,10 +40,9 @@ public class CharacterController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void updateCharacter(
         @RequestBody UpdateCharacterRequest request,
-        @PathVariable UUID characterId,
-        Authentication auth
+        @PathVariable UUID characterId
     ) {
-        characterService.updateCharacter(request, characterId, auth);
+        characterService.updateCharacter(request, characterId);
     }
 
     @DeleteMapping("{characterId}")

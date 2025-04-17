@@ -6,7 +6,7 @@ public interface SaveCharacterRequest {
 
     String getName();
 
-    Integer getReputation();
+
 
 
 }

@@ -42,7 +42,6 @@ class CharacterServiceTest {
 
     @BeforeEach
     void setUp() {
-        characterStatsService = mock();
         characterClassService = mock();
         weaponRepo = mock();
         pageable = mock();
@@ -50,7 +49,7 @@ class CharacterServiceTest {
         skillRepo = mock();
         implantRepo = mock();
 
-        service = new CharacterService(charRepo, characterStatsService, characterClassService, weaponRepo, skillRepo, implantRepo, characterStatsService);
+        service = new CharacterService(charRepo, characterStatsService, characterClassService, weaponRepo, skillRepo, implantRepo);
     }
 
     @Test
@@ -220,52 +219,17 @@ class CharacterServiceTest {
         var request = new UpdateCharacterRequest();
         UUID characterId = UUID.randomUUID();
         request.setAge(1);
-        request.setReputation(0);
         request.setName(randomUUID().toString());
-
-        Authentication auth = mock(Authentication.class);
 
         when(charRepo.findById(characterId)).thenReturn(Optional.empty());
 
         // then
-        assertThatThrownBy(() -> service.updateCharacter(request, characterId, auth))
+        assertThatThrownBy(() -> service.updateCharacter(request, characterId))
             .isInstanceOf(ResponseStatusException.class)
             .hasMessageContaining("Персонаж " + characterId + " не найден")
             .extracting(ResponseStatusException.class::cast)
             .extracting(ErrorResponseException::getStatusCode)
             .isEqualTo(HttpStatus.NOT_FOUND);
-    }
-
-    @Test
-    void updateCharacterForbidden() {
-        // given
-        var request = new UpdateCharacterRequest();
-        UUID characterId = UUID.randomUUID();
-
-        request.setAge(1);
-        request.setReputation(0);
-        request.setName(randomUUID().toString());
-
-        var oldCharacter = new CharacterEntity();
-        oldCharacter.setId(characterId);
-        oldCharacter.setOwnerId(UUID.randomUUID()); // Должен отличаться от ID пользователя
-
-        var user = new User();
-        user.setId(UUID.randomUUID()); // Должен отличаться от ID владельца персонажа
-
-        Authentication auth = mock(Authentication.class);
-        when(auth.getPrincipal()).thenReturn(user);
-
-        when(charRepo.findById(characterId)).thenReturn(Optional.of(oldCharacter));
-
-        // then
-        assertThatThrownBy(() -> service.updateCharacter(request, characterId, auth))
-            .isInstanceOf(ResponseStatusException.class)
-            .hasMessageContaining(("Изменить чужого персонажа вздумал? а ты хорош."))
-            .extracting(ResponseStatusException.class::cast)
-            .extracting(ErrorResponseException::getStatusCode)
-            .isEqualTo(HttpStatus.FORBIDDEN);
-
     }
 
     @Test
@@ -495,7 +459,6 @@ class CharacterServiceTest {
         request.setAge(42);
         request.setHeight(180);
         request.setWeight(60);
-        request.setReputation(40);
         request.setOrganization("raven");
         request.setCharacterClass("Соло");
 
@@ -507,12 +470,12 @@ class CharacterServiceTest {
         CharacterEntity character = new CharacterEntity();
         character.setId(charId);
         character.setOwnerId(user.getId());
-        character.setName("old-name"); // старые данные
-        character.setAge(30); // старые данные
+        character.setName("old-name");
+        character.setAge(30);
         when(charRepo.findById(charId)).thenReturn(Optional.of(character));
 
         // when
-        service.updateCharacter(request, charId, auth);
+        service.updateCharacter(request, charId);
 
         // then
         ArgumentCaptor<CharacterEntity> charCaptor = ArgumentCaptor.forClass(CharacterEntity.class);
@@ -524,9 +487,9 @@ class CharacterServiceTest {
         assertThat(savedCharacter.getName()).isEqualTo(request.getName());
         assertThat(savedCharacter.getHeight()).isEqualTo(request.getHeight());
         assertThat(savedCharacter.getWeight()).isEqualTo(request.getWeight());
-        assertThat(savedCharacter.getAge()).isEqualTo(character.getAge());
-        assertThat(savedCharacter.getOrganization()).isEqualTo(character.getOrganization());
-        assertThat(savedCharacter.getCharacterClass()).isEqualTo(character.getCharacterClass());
+        assertThat(savedCharacter.getAge()).isEqualTo(request.getAge());
+        assertThat(savedCharacter.getOrganization()).isEqualTo(request.getOrganization());
+        assertThat(savedCharacter.getCharacterClass()).isEqualTo(request.getCharacterClass());
         assertThat(savedCharacter.getReputation()).isEqualTo(character.getReputation());
 
         verify(charRepo).findById(charId);

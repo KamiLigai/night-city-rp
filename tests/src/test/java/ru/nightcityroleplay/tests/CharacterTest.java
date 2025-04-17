@@ -220,9 +220,6 @@ public class CharacterTest {
                    Никакой персонаж не удалён.
         """)
     void deleteCharacter_characterNotExists_throw404() {
-        // Установить админа как текущего пользователя
-        UserDto defaultAdmin = AppContext.get("defaultAdmin");
-        backendRemote.setCurrentUser(defaultAdmin.id(), defaultAdmin.username(), defaultAdmin.username());
         // Удалить персонажа
         UUID charId = randomUUID();
         HttpResponse response = backendRemote.makeDeleteCharacterRequest(charId);
@@ -430,7 +427,7 @@ public class CharacterTest {
         """)
     void updateCharacter_badRequest_throw400(UpdateCharacterRequest request, String expectedMessage) {
         String charName = randomUUID().toString();
-        backendRemote.createCharacter(
+        CharacterDto character = backendRemote.createCharacter(
             CreateCharacterRequest.builder()
                 .name(charName)
                 .height(180)
@@ -458,7 +455,7 @@ public class CharacterTest {
                 .age(request.age())
                 .organization(request.organization())
                 .characterClass(request.characterClass())
-                .reputation(request.reputation())
+                .reputation(character.getReputation())
                 .build()
         );
 
@@ -471,68 +468,9 @@ public class CharacterTest {
         return Stream.of(
             Arguments.of(UpdateCharacterRequest.builder().name("UPDATED" + randomUUID()).age(null).reputation(445).build(),
                 "Возраст не может быть 0 или меньше или null"),
-            Arguments.of(UpdateCharacterRequest.builder().name("UPDATED" + randomUUID()).age(50).reputation(null).build(),
-                "Репутация не может быть меньше 0 или null"),
             Arguments.of(UpdateCharacterRequest.builder().name("UPDATED" + randomUUID()).age(null).reputation(null).build(),
                 "Возраст не может быть 0 или меньше или null")
         );
-    }
-
-    @Test
-    @SneakyThrows
-    @Description("""
-        Дано: Персонаж юзера 1.
-        Действие: Юзер 2 изменяет персонажа по id методом PUT /characters/{id}.
-        Ожидается: Ошибка 403, нельзя менять чужого персонажа.
-                   Никакой персонаж не был изменён.
-        """)
-    void updateCharacter_characterNotOwned_throw403() {
-        // Создать персонажа
-        String charName = randomUUID().toString();
-        CharacterDto createdCharacter = backendRemote.createCharacter(
-            CreateCharacterRequest.builder()
-                .name(charName)
-                .height(180)
-                .weight(60)
-                .age(50)
-                .organization("test")
-                .characterClass("test")
-                .reputation(0)
-                .build()
-        );
-
-        // Сменить юзера
-        String username = randomUUID().toString();
-        String password = randomUUID().toString();
-        UserDto userDto = backendRemote.createUser(username, password);
-        backendRemote.setCurrentUser(userDto.id(), username, password);
-
-        // Изменить персонажа
-        Result<CharactersRecord> charRecord = dbContext.select().from(CHARACTERS)
-            .where(CHARACTERS.NAME.eq(charName))
-            .fetchInto(CHARACTERS);
-
-        assertThat(charRecord).isNotEmpty();
-
-        UpdateCharacterRequest request = createUpdateCharacterRequest();
-        HttpResponse response = backendRemote.makeUpdateCharacterRequest(
-            createdCharacter.getId(),
-            UpdateCharacterRequest.builder()
-                .name(request.name())
-                .age(request.age())
-                .height(request.height())
-                .weight(request.weight())
-                .organization(request.organization())
-                .characterClass(request.characterClass())
-                .reputation(request.reputation())
-                .build()
-        );
-
-        // Проверки
-        assertThat(charRecord.get(0).getOwnerId().equals(userDto.id())).isFalse(); // Владельцы не совпадают
-        assertThat(response.code()).isEqualTo(403); // Ошибка прав доступа
-        // assertThat(response.body()).contains("Изменить чужого персонажа вздумал? а ты хорош.");
-        // todo: Найти причину, почему тест не видит сообщения ошибки от сервиса.
     }
 
     @Test

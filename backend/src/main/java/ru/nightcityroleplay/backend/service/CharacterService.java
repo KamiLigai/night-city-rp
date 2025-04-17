@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static ru.nightcityroleplay.backend.util.BooleanUtils.not;
 
 @Service
 @Slf4j
@@ -41,8 +40,7 @@ public class CharacterService {
         CharacterClassService characterClassService,
         WeaponRepository weaponRepo,
         SkillRepository skillRepo,
-        ImplantRepository implantRepo,
-        CharacterStatsService statsService
+        ImplantRepository implantRepo
     ) {
         this.characterStatsService = characterStatsService;
         this.characterClassService = characterClassService;
@@ -92,6 +90,12 @@ public class CharacterService {
     @Transactional
     public CreateCharacterResponse createCharacter(CreateCharacterRequest request, Authentication auth) {
         validate(request);
+        if (request.getReputation() == null || request.getReputation() < 0) {
+            throw new ResponseStatusException(BAD_REQUEST, "Репутация не может быть меньше 0 или null");
+        }
+        if (request.getReputation() > 40) {
+            throw new ResponseStatusException(BAD_REQUEST, "Репутация не может быть больше 40");
+        }
         CharacterEntity character = new CharacterEntity();
         Object principal = auth.getPrincipal();
         User user = (User) principal;
@@ -104,7 +108,6 @@ public class CharacterService {
         character.setAge(request.getAge());
         character.setReputation(request.getReputation());
         characterStatsService.updateCharacterStats(character);
-
         character = characterRepo.save(character);
         log.info("Персонаж {} создан", character.getId());
         return new CreateCharacterResponse(character.getId());
@@ -131,25 +134,19 @@ public class CharacterService {
     }
 
     @Transactional
-    public void updateCharacter(UpdateCharacterRequest request, UUID characterId, Authentication auth) {
+    public void updateCharacter(UpdateCharacterRequest request, UUID characterId) {
         validate(request);
         CharacterEntity newCharacter = new CharacterEntity();
         CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
             new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
-        Object principal = auth.getPrincipal();
-        User user = (User) principal;
-        UUID userid = user.getId();
-        if (not(character.getOwnerId().equals(userid))) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Изменить чужого персонажа вздумал? а ты хорош.");
-        }
         newCharacter.setId(characterId);
-        newCharacter.setOwnerId(user.getId());
+        newCharacter.setOwnerId(character.getOwnerId());
         newCharacter.setName(request.getName());
         newCharacter.setHeight(request.getHeight());
         newCharacter.setWeight(request.getWeight());
-        newCharacter.setAge(character.getAge());
-        newCharacter.setOrganization(character.getOrganization());
-        newCharacter.setCharacterClass(character.getCharacterClass());
+        newCharacter.setAge(request.getAge());
+        newCharacter.setOrganization(request.getOrganization());
+        newCharacter.setCharacterClass(request.getCharacterClass());
         newCharacter.setReputation(character.getReputation());
         characterStatsService.updateCharacterStats(newCharacter);
         characterRepo.save(newCharacter);
@@ -507,12 +504,6 @@ public class CharacterService {
         }
         if (request.getAge() > 100) {
             throw new ResponseStatusException(BAD_REQUEST, "Возраст не может быть больше 100");
-        }
-        if (request.getReputation() == null || request.getReputation() < 0) {
-            throw new ResponseStatusException(BAD_REQUEST, "Репутация не может быть меньше 0 или null");
-        }
-        if (request.getReputation() > 40) {
-            throw new ResponseStatusException(BAD_REQUEST, "Репутация не может быть больше 40");
         }
         if (characterRepo.existsByName(request.getName())) {
             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Персонаж с таким именем уже есть");
