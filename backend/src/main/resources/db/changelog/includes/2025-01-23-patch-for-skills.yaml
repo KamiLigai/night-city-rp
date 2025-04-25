@@ -47,5 +47,5 @@ databaseChangeLog:
             columnName: cost
             tableName: skills
         - dropUniqueConstraint:
-            constraintName: skills_pkey
+            constraintName: skills_name_key
             tableName: skills
