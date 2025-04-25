@@ -14,7 +14,7 @@ import ru.nightcityroleplay.tests.entity.tables.records.CharactersRecord;
 import ru.nightcityroleplay.tests.entity.tables.records.CharactersWeaponsRecord;
 
 import java.util.Collections;
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
@@ -88,7 +88,7 @@ public class CharacterWeaponTest {
         // Добавить оружия персонажу
         backendRemote.putCharacterWeapon(
             UpdateCharacterWeaponRequest.builder()
-                .weaponIds(List.of(weaponId1, weaponId2))
+                .weaponIds(Set.of(weaponId1, weaponId2))
                 .build(), characterId
         );
 
@@ -140,7 +140,7 @@ public class CharacterWeaponTest {
         );
 
         backendRemote.putCharacterWeapon(
-            UpdateCharacterWeaponRequest.builder().weaponIds(List.of(weapon.getId())).build(),
+            UpdateCharacterWeaponRequest.builder().weaponIds(Set.of(weapon.getId())).build(),
             characterId
         );
 
@@ -156,7 +156,7 @@ public class CharacterWeaponTest {
 
         // Очищаем (ставим пустой список)
         backendRemote.putCharacterWeapon(
-            UpdateCharacterWeaponRequest.builder().weaponIds(Collections.emptyList()).build(),
+            UpdateCharacterWeaponRequest.builder().weaponIds(Collections.emptySet()).build(),
             characterId
         );
 
@@ -221,13 +221,13 @@ public class CharacterWeaponTest {
         );
 
         backendRemote.putCharacterWeapon(
-            UpdateCharacterWeaponRequest.builder().weaponIds(List.of(weapon1.getId(), weapon2.getId())).build(),
+            UpdateCharacterWeaponRequest.builder().weaponIds(Set.of(weapon1.getId(), weapon2.getId())).build(),
             characterId
         );
 
         // Теперь обновляем: оставляем только второе оружие
         backendRemote.putCharacterWeapon(
-            UpdateCharacterWeaponRequest.builder().weaponIds(List.of(weapon2.getId())).build(),
+            UpdateCharacterWeaponRequest.builder().weaponIds(Set.of(weapon2.getId())).build(),
             characterId
         );
 

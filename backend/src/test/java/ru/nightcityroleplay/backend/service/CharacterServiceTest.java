@@ -392,7 +392,7 @@ class CharacterServiceTest {
         Authentication auth = mock(Authentication.class);
         when(charRepo.findById(characterId)).thenReturn(Optional.empty());
         UpdateCharacterWeaponRequest request = new UpdateCharacterWeaponRequest();
-        request.setWeaponIds(List.of(weaponId));
+        request.setWeaponIds(Set.of(weaponId));
 
         //when
         Call call = () -> service.putCharacterWeapon(request, characterId, auth);
@@ -451,7 +451,7 @@ class CharacterServiceTest {
         UUID weaponId2 = randomUUID();
 
         UpdateCharacterWeaponRequest request = new UpdateCharacterWeaponRequest();
-        request.setWeaponIds(List.of(weaponId1, weaponId2));
+        request.setWeaponIds(Set.of(weaponId1, weaponId2));
         when(auth.getPrincipal()).thenReturn(user);
         when(charRepo.findById(characterId)).thenReturn(Optional.of(character));
         // repo вернёт только одну сущность, вторая "пропала"
@@ -487,7 +487,7 @@ class CharacterServiceTest {
             .setWeapons(new ArrayList<>(List.of(oldWeapon)));
 
         UpdateCharacterWeaponRequest request = new UpdateCharacterWeaponRequest();
-        request.setWeaponIds(List.of(newWeapon1.getId(), newWeapon2.getId()));
+        request.setWeaponIds(Set.of(newWeapon1.getId(), newWeapon2.getId()));
 
         when(auth.getPrincipal()).thenReturn(user);
         when(charRepo.findById(characterId)).thenReturn(Optional.of(character));
