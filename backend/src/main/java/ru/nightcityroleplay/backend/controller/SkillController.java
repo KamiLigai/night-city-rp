@@ -4,7 +4,7 @@ package ru.nightcityroleplay.backend.controller;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
-import ru.nightcityroleplay.backend.dto.*;
+import ru.nightcityroleplay.backend.dto.IdsRequest;
 import ru.nightcityroleplay.backend.dto.skills.CreateSkillRequest;
 import ru.nightcityroleplay.backend.dto.skills.CreateSkillResponse;
 import ru.nightcityroleplay.backend.dto.skills.SkillDto;
@@ -24,14 +24,14 @@ public class SkillController {
         this.skillService = skillService;
     }
 
-    // область приколов
     @PostMapping()
     public List<CreateSkillResponse> createSkill(@RequestBody CreateSkillRequest request) {
         return skillService.createSkillFamily(request);
     }
 
+    // todo: Skill Family Id
     @PutMapping("{oldName}")
-    public String updateSkillsByName(@RequestBody UpdateSkillRequest updateRequest, @PathVariable String oldName) {
+    public String updateSkillsBySkillFamily(@RequestBody UpdateSkillRequest updateRequest, @PathVariable String oldName) {
         skillService.updateSkill(updateRequest, oldName);
         return "Навыки успешно обновлены";
     }
@@ -41,7 +41,6 @@ public class SkillController {
         skillService.deleteSkillsBySkillFamily(List.of(skillFamily));
     }
 
-    // Шутки кончились
     @GetMapping
     public Page<SkillDto> getSkillPage(Pageable pageable) {
         return skillService.getSkillPage(pageable);

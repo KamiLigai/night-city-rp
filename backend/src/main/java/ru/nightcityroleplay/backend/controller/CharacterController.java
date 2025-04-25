@@ -6,7 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import ru.nightcityroleplay.backend.dto.*;
+import ru.nightcityroleplay.backend.dto.GiveReputationRequest;
 import ru.nightcityroleplay.backend.dto.character.*;
 import ru.nightcityroleplay.backend.dto.implants.ImplantDto;
 import ru.nightcityroleplay.backend.service.CharacterService;
@@ -73,6 +73,7 @@ public class CharacterController {
         characterService.updateCharacterSkill(request, characterId);
     }
 
+    //todo Заменить UpdateCharacterSkillRequest.
     @PutMapping("{characterId}/skills/initial")
     public void selectInitialCharacterSkills(
         @RequestBody UpdateCharacterSkillRequest request,
@@ -96,7 +97,7 @@ public class CharacterController {
         return characterService.getCharacterImplants(characterId);
     }
 
-    @PutMapping("{characterId}/implants-list")
+    @PutMapping("{characterId}/implants")
     public void updateCharacterImplants(
         @RequestBody UpdateCharacterImplantsRequest request,
         @PathVariable UUID characterId,

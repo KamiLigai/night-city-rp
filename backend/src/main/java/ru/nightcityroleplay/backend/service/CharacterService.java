@@ -93,10 +93,10 @@ public class CharacterService {
     public CreateCharacterResponse createCharacter(CreateCharacterRequest request, Authentication auth) {
         validate(request);
         if (request.getReputation() == null || request.getReputation() < 0) {
-            throw new ResponseStatusException(BAD_REQUEST, "Репутация не может быть меньше 0 или null");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Репутация не может быть меньше 0 или null");
         }
         if (request.getReputation() > 40) {
-            throw new ResponseStatusException(BAD_REQUEST, "Репутация не может быть больше 40");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Репутация не может быть больше 40");
         }
         CharacterEntity character = new CharacterEntity();
         Object principal = auth.getPrincipal();
