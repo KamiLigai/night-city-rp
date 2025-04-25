@@ -5,6 +5,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import ru.nightcityroleplay.backend.dto.*;
+import ru.nightcityroleplay.backend.dto.skills.CreateSkillRequest;
+import ru.nightcityroleplay.backend.dto.skills.CreateSkillResponse;
+import ru.nightcityroleplay.backend.dto.skills.SkillDto;
+import ru.nightcityroleplay.backend.dto.skills.UpdateSkillRequest;
 import ru.nightcityroleplay.backend.service.SkillService;
 
 import java.util.List;

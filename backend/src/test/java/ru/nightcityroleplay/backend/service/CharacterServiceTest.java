@@ -13,6 +13,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.ErrorResponseException;
 import org.springframework.web.server.ResponseStatusException;
 import ru.nightcityroleplay.backend.dto.*;
+import ru.nightcityroleplay.backend.dto.character.*;
+import ru.nightcityroleplay.backend.dto.implants.ImplantDto;
 import ru.nightcityroleplay.backend.entity.*;
 import ru.nightcityroleplay.backend.repo.CharacterRepository;
 import ru.nightcityroleplay.backend.repo.ImplantRepository;

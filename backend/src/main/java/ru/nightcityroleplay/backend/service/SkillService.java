@@ -9,6 +9,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import ru.nightcityroleplay.backend.dto.*;
+import ru.nightcityroleplay.backend.dto.skills.CreateSkillRequest;
+import ru.nightcityroleplay.backend.dto.skills.CreateSkillResponse;
+import ru.nightcityroleplay.backend.dto.skills.SkillDto;
+import ru.nightcityroleplay.backend.dto.skills.UpdateSkillRequest;
 import ru.nightcityroleplay.backend.entity.Skill;
 import ru.nightcityroleplay.backend.repo.SkillRepository;
 

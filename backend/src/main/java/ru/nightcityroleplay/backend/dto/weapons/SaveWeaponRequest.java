@@ -1,4 +1,4 @@
-package ru.nightcityroleplay.backend.dto;
+package ru.nightcityroleplay.backend.dto.weapons;
 
 public interface SaveWeaponRequest {
 

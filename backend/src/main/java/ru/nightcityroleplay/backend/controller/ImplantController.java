@@ -5,10 +5,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import ru.nightcityroleplay.backend.dto.CreateImplantRequest;
-import ru.nightcityroleplay.backend.dto.CreateImplantResponse;
-import ru.nightcityroleplay.backend.dto.ImplantDto;
-import ru.nightcityroleplay.backend.dto.UpdateImplantRequest;
+import ru.nightcityroleplay.backend.dto.implants.CreateImplantRequest;
+import ru.nightcityroleplay.backend.dto.implants.CreateImplantResponse;
+import ru.nightcityroleplay.backend.dto.implants.ImplantDto;
+import ru.nightcityroleplay.backend.dto.implants.UpdateImplantRequest;
 import ru.nightcityroleplay.backend.service.ImplantService;
 
 import java.util.List;

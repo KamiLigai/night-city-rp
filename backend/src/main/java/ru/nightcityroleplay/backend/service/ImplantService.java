@@ -9,10 +9,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import ru.nightcityroleplay.backend.dto.CreateImplantRequest;
-import ru.nightcityroleplay.backend.dto.CreateImplantResponse;
-import ru.nightcityroleplay.backend.dto.ImplantDto;
-import ru.nightcityroleplay.backend.dto.UpdateImplantRequest;
+import ru.nightcityroleplay.backend.dto.implants.CreateImplantRequest;
+import ru.nightcityroleplay.backend.dto.implants.CreateImplantResponse;
+import ru.nightcityroleplay.backend.dto.implants.ImplantDto;
+import ru.nightcityroleplay.backend.dto.implants.UpdateImplantRequest;
 import ru.nightcityroleplay.backend.entity.Implant;
 import ru.nightcityroleplay.backend.repo.ImplantRepository;
 
