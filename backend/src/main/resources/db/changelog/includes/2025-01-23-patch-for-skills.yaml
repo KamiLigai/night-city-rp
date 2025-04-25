@@ -4,9 +4,9 @@ databaseChangeLog:
       author: kokoligai
       changes:
         - delete:
-            tableName: skills
-        - delete:
             tableName: characters_skills
+        - delete:
+            tableName: skills
         - addColumn:
             tableName: skills
             columns:
@@ -47,5 +47,5 @@ databaseChangeLog:
             columnName: cost
             tableName: skills
         - dropUniqueConstraint:
-            constraintName: skills_name_key
+            constraintName: skills_pkey
             tableName: skills
