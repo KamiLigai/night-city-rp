@@ -491,7 +491,7 @@ class CharacterServiceTest {
 
         when(auth.getPrincipal()).thenReturn(user);
         when(charRepo.findById(characterId)).thenReturn(Optional.of(character));
-        when(weaponRepo.findAllByIdIn(List.of(newWeapon1.getId(), newWeapon2.getId())))
+        when(weaponRepo.findAllByIdIn(Set.of(newWeapon1.getId(), newWeapon2.getId())))
             .thenReturn(List.of(newWeapon1, newWeapon2));
 
         // when

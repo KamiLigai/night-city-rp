@@ -114,7 +114,8 @@ public class SkillService {
     @Transactional
     public List<SkillDto> getSkillsBulk(IdsRequest request) {
         return skillRepo.findAllByIdIn(request.getIds())
-            .stream().map(this::toDto)
+            .stream()
+            .map(this::toDto)
             .toList();
     }
 }
