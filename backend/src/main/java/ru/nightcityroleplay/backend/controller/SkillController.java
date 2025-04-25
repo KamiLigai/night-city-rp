@@ -31,7 +31,10 @@ public class SkillController {
 
     // todo: Skill Family Id
     @PutMapping("{oldName}")
-    public String updateSkillsBySkillFamily(@RequestBody UpdateSkillRequest updateRequest, @PathVariable String oldName) {
+    public String updateSkillsBySkillFamily(
+        @RequestBody UpdateSkillRequest updateRequest,
+        @PathVariable String oldName
+    ) {
         skillService.updateSkill(updateRequest, oldName);
         return "Навыки успешно обновлены";
     }
