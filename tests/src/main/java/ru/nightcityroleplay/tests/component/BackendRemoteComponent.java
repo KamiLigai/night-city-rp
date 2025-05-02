@@ -116,13 +116,14 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
     }
 
     @SneakyThrows
-    public void createWeapon(CreateWeaponRequest request) {
+    public WeaponDto createWeapon(CreateWeaponRequest request) {
         @Cleanup Response response = remote.createWeapon(request);
         if (!response.isSuccessful()) {
             fail("Не удалось создать оружие " + request.name() + ", " + response);
         }
         var jsonBody = response.body().string();
         objectMapper.readValue(jsonBody, CreateWeaponResponse.class);
+        return objectMapper.readValue(jsonBody, WeaponDto.class);
     }
 
     public void deleteWeapon(UUID weaponId) {
@@ -251,6 +252,11 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
 
     public HttpResponse makeDeleteImplantRequest(UUID implantid, boolean redButton) {
         @Cleanup Response response = remote.deleteImplant(implantid, redButton);
+        return toHttpResponse(response);
+    }
+
+    public HttpResponse putCharacterWeapon(UpdateCharacterWeaponRequest request, UUID characterId) {
+        @Cleanup Response response = remote.putCharacterWeapon(request, characterId);
         return toHttpResponse(response);
     }
 }

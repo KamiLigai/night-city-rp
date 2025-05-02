@@ -99,15 +99,6 @@ public class CharacterController {
     ) {
         characterService.putCharacterWeapon(request, characterId, auth);
     }
-
-    @DeleteMapping("{characterId}/weapons/{weaponId}")
-    public void deleteCharacterWeapon(
-            @PathVariable UUID characterId,
-            @PathVariable UUID weaponId,
-            Authentication auth
-    ) {
-        characterService.deleteCharacterWeapon(weaponId, characterId, auth);
-    }
 }
 
 
