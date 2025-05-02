@@ -82,15 +82,6 @@ public class CharacterController {
         characterService.updateCharacterImplants(request, characterId, auth);
     }
 
-    //    @DeleteMapping("{characterId}/implants/{implantId}")
-    //    public void deleteCharacterImplant(
-    //            @PathVariable UUID characterId,
-    //            @PathVariable UUID implantId,
-    //            Authentication auth
-    //    ) {
-    //        characterService.deleteCharacterImplant(characterId, implantId, auth);
-    //    }
-
     @PutMapping("{characterId}/weapons")
     public void putCharacterWeapon(
         @PathVariable UUID characterId,
