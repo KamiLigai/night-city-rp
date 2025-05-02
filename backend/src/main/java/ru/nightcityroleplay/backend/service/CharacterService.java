@@ -309,36 +309,37 @@ public class CharacterService {
         return implants;
     }
 
-    @Transactional
-    public void deleteCharacterImplant(UUID characterId, UUID implantId, Authentication auth) {
-        CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
-            new ResponseStatusException(NOT_FOUND, "Персонаж не найден"));
-
-        Object principal = auth.getPrincipal();
-        User user = (User) principal;
-        UUID userid = user.getId();
-
-        if (!character.getOwnerId().equals(userid)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Нельзя добавлять имплант не своему персонажу!");
-        }
-        // Найти Имплант по ID
-        Implant implant = implantRepo.findById(implantId).orElseThrow(() ->
-            new ResponseStatusException(NOT_FOUND, "Имплант не найден"));
-
-        List<Implant> implants = character.getImplants();
-        boolean hasImplant = false;
-        for (Implant value : implants) {
-            if (value.getId().equals(implant.getId())) {
-                hasImplant = true;
-                break;
-            }
-        }
-        if (!hasImplant) {
-            throw new ResponseStatusException(BAD_REQUEST, "Этого импланта нет в вашем списке.");
-        }
-        implants.remove(implant);
-        characterRepo.save(character);
-    }
+    //    @Transactional
+    //    public void deleteCharacterImplant(UUID characterId, UUID implantId, Authentication auth) {
+    //        CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
+    //            new ResponseStatusException(NOT_FOUND, "Персонаж не найден"));
+    //
+    //        Object principal = auth.getPrincipal();
+    //        User user = (User) principal;
+    //        UUID userid = user.getId();
+    //
+    //        if (!character.getOwnerId().equals(userid)) {
+    //            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+    //            "Нельзя добавлять имплант не своему персонажу!");
+    //        }
+    //        // Найти Имплант по ID
+    //        Implant implant = implantRepo.findById(implantId).orElseThrow(() ->
+    //            new ResponseStatusException(NOT_FOUND, "Имплант не найден"));
+    //
+    //        List<Implant> implants = character.getImplants();
+    //        boolean hasImplant = false;
+    //        for (Implant value : implants) {
+    //            if (value.getId().equals(implant.getId())) {
+    //                hasImplant = true;
+    //                break;
+    //            }
+    //        }
+    //        if (!hasImplant) {
+    //            throw new ResponseStatusException(BAD_REQUEST, "Этого импланта нет в вашем списке.");
+    //        }
+    //        implants.remove(implant);
+    //        characterRepo.save(character);
+    //    }
 
     private void validate(SaveCharacterRequest request) {
         if (request.getAge() == null || request.getAge() <= 0) {

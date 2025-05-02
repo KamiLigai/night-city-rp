@@ -37,9 +37,9 @@ public class CharacterController {
 
     @PutMapping("{characterId}")
     public void updateCharacter(
-            @RequestBody UpdateCharacterRequest request,
-            @PathVariable UUID characterId,
-            Authentication auth
+        @RequestBody UpdateCharacterRequest request,
+        @PathVariable UUID characterId,
+        Authentication auth
     ) {
         characterService.updateCharacter(request, characterId, auth);
     }
@@ -52,18 +52,18 @@ public class CharacterController {
 
     @PostMapping("{characterId}/reputation/give")
     public void giveReputation(
-            @RequestBody GiveReputationRequest request,
-            @PathVariable UUID characterId,
-            Authentication auth
+        @RequestBody GiveReputationRequest request,
+        @PathVariable UUID characterId,
+        Authentication auth
     ) {
         characterService.giveReputation(request, characterId, auth);
     }
 
     @PutMapping("{characterId}/skills")
     public void updateCharacterSkill(
-            @RequestBody UpdateCharacterSkillRequest request,
-            @PathVariable UUID characterId,
-            Authentication auth
+        @RequestBody UpdateCharacterSkillRequest request,
+        @PathVariable UUID characterId,
+        Authentication auth
     ) {
         characterService.updateCharacterSkill(request, characterId, auth);
     }
@@ -75,27 +75,27 @@ public class CharacterController {
 
     @PutMapping("{characterId}/implants")
     public void updateCharacterImplants(
-            @RequestBody UpdateCharacterImplantsRequest request,
-            @PathVariable UUID characterId,
-            Authentication auth
+        @RequestBody UpdateCharacterImplantsRequest request,
+        @PathVariable UUID characterId,
+        Authentication auth
     ) {
         characterService.updateCharacterImplants(request, characterId, auth);
     }
 
-    @DeleteMapping("{characterId}/implants/{implantId}")
-    public void deleteCharacterImplant(
-            @PathVariable UUID characterId,
-            @PathVariable UUID implantId,
-            Authentication auth
-    ) {
-        characterService.deleteCharacterImplant(characterId, implantId, auth);
-    }
+    //    @DeleteMapping("{characterId}/implants/{implantId}")
+    //    public void deleteCharacterImplant(
+    //            @PathVariable UUID characterId,
+    //            @PathVariable UUID implantId,
+    //            Authentication auth
+    //    ) {
+    //        characterService.deleteCharacterImplant(characterId, implantId, auth);
+    //    }
 
     @PutMapping("{characterId}/weapons")
     public void putCharacterWeapon(
-            @PathVariable UUID characterId,
-            @RequestBody UpdateCharacterWeaponRequest request,
-            Authentication auth
+        @PathVariable UUID characterId,
+        @RequestBody UpdateCharacterWeaponRequest request,
+        Authentication auth
     ) {
         characterService.putCharacterWeapon(request, characterId, auth);
     }
