@@ -359,19 +359,20 @@ public class CharacterService {
         }
 
         // Получение списка айди оружия из запроса
-        Collection<UUID> weaponIds = request.getWeaponIds(); // Предполагается, что в запросе есть метод getWeaponIds()
+        Collection<UUID> weaponIds = request.getWeaponIds();
 
-        // Найти все оружия по списку ID
-        List<Weapon> weapons = weaponRepo.findAllByIdIn(weaponIds);
-        if (weapons.isEmpty()) {
-            throw new ResponseStatusException(NOT_FOUND, "Оружие не найдено");
-        }
+        // Очистить всё оружие у персонажа
+        character.getWeapons().clear();
 
-        // Добавьте все найденные оружия к персонажу
-        for (Weapon weapon : weapons) {
-            if (!character.getWeapons().contains(weapon)) {
-                character.getWeapons().add(weapon);
+        // Только если weaponIds не пустой — добавить новое оружие
+        if (weaponIds != null && !weaponIds.isEmpty()) {
+            // Найти все оружия по списку ID
+            List<Weapon> weapons = weaponRepo.findAllByIdIn(weaponIds);
+            if (weapons.size() != weaponIds.size()) {
+                throw new ResponseStatusException(NOT_FOUND, "Оружие не найдено");
             }
+
+            character.getWeapons().addAll(weapons);
         }
 
         characterRepo.save(character);
@@ -461,35 +462,6 @@ public class CharacterService {
         }
         implants.remove(implant);
         characterRepo.save(character);
-    }
-
-    @Transactional
-    public void deleteCharacterWeapon(UUID weaponId, UUID characterId, Authentication auth) {
-        // Найти персонажа по ID
-        CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
-            new ResponseStatusException(NOT_FOUND, "Персонаж не найден"));
-
-        // Получить текущего пользователя
-        Object principal = auth.getPrincipal();
-        User user = (User) principal;
-        UUID userId = user.getId();
-
-        // Проверка прав доступа
-        if (!character.getOwnerId().equals(userId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Нельзя удалять оружие не своему персонажу!");
-        }
-
-        // Найти оружие по ID
-        Weapon weapon = weaponRepo.findById(weaponId).orElseThrow(() ->
-            new ResponseStatusException(NOT_FOUND, "Оружие не найдено"));
-
-        // Удалить оружие из списка персонажа
-        if (character.getWeapons().contains(weapon)) {
-            character.getWeapons().remove(weapon);
-            characterRepo.save(character);
-        } else {
-            throw new ResponseStatusException(BAD_REQUEST, "Этого оружия нет в списке вашего персонажа");
-        }
     }
 
     private void validate(SaveCharacterRequest request) {

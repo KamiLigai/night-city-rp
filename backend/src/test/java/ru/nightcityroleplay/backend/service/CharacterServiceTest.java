@@ -508,7 +508,7 @@ class CharacterServiceTest {
         Authentication auth = mock(Authentication.class);
         when(charRepo.findById(characterId)).thenReturn(Optional.empty());
         UpdateCharacterWeaponRequest request = new UpdateCharacterWeaponRequest();
-        request.setWeaponIds(List.of(weaponId));
+        request.setWeaponIds(Set.of(weaponId));
 
         //when
         Call call = () -> service.putCharacterWeapon(request, characterId, auth);
@@ -550,132 +550,74 @@ class CharacterServiceTest {
     }
 
     @Test
-    void deleteWeapon_weaponExists_success() {
+    void putCharacterWeapon_weaponNotFound_throw404() {
         // given
-        UUID weaponId = UUID.randomUUID();
-        UUID characterId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
+        var user = new User();
+        user.setId(UUID.randomUUID());
+        UUID characterId = randomUUID();
         Authentication auth = mock(Authentication.class);
-        User user = new User();
-        user.setId(userId);
+
+        // Настроим персонажа, принадлежащего этому пользователю
+        var character = new CharacterEntity()
+            .setOwnerId(user.getId())
+            .setWeapons(new ArrayList<>());
+
+        // Два ID — одно оружие есть, другое не найдено
+        UUID weaponId1 = randomUUID();
+        UUID weaponId2 = randomUUID();
+
+        UpdateCharacterWeaponRequest request = new UpdateCharacterWeaponRequest();
+        request.setWeaponIds(Set.of(weaponId1, weaponId2));
         when(auth.getPrincipal()).thenReturn(user);
-
-        // Инициализируем список оружий
-        CharacterEntity character = new CharacterEntity();
-        character.setOwnerId(userId);
-        character.setWeapons(new ArrayList<>()); // Инициализация списка, чтобы избежать NullPointerException
-
-        Weapon weapon = new Weapon();
-        weapon.setId(weaponId);
-        character.getWeapons().add(weapon);
-
         when(charRepo.findById(characterId)).thenReturn(Optional.of(character));
-        when(weaponRepo.findById(weaponId)).thenReturn(Optional.of(weapon));
+        // repo вернёт только одну сущность, вторая "пропала"
+        var weapon = new Weapon().setId(weaponId1);
+        when(weaponRepo.findAllByIdIn(List.of(weaponId1, weaponId2))).thenReturn(List.of(weapon));
 
         // when
-        service.deleteCharacterWeapon(weaponId, characterId, auth);
+        Call call = () -> service.putCharacterWeapon(request, characterId, auth);
 
         // then
-        assertThat(character.getWeapons()).doesNotContain(weapon);
-        verify(charRepo).save(character);
-    }
-
-    @Test
-    void deleteWeaponCharacter_characterNotExists_throw404() {
-        // given
-        UUID weaponId = UUID.randomUUID();
-        UUID characterId = UUID.randomUUID();
-        Authentication auth = mock(Authentication.class);
-        when(charRepo.findById(characterId)).thenReturn(Optional.empty());
-
-        // when / then
-        assertThatThrownBy(() -> service.deleteCharacterWeapon(weaponId, characterId, auth))
-            .isInstanceOf(ResponseStatusException.class)
-            .hasMessageContaining("Персонаж не найден")
-            .extracting(ResponseStatusException.class::cast)
-            .extracting(ErrorResponseException::getStatusCode)
-            .isEqualTo(HttpStatus.NOT_FOUND);
-    }
-
-    @Test
-    void deleteWeapon_unauthorized_throw403() {
-        // given
-        UUID weaponId = UUID.randomUUID();
-        UUID characterId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
-        Authentication auth = mock(Authentication.class);
-
-        User user = new User();
-        user.setId(userId);
-        when(auth.getPrincipal()).thenReturn(user);
-
-        CharacterEntity character = new CharacterEntity();
-        character.setOwnerId(UUID.randomUUID()); // другой владелец
-        when(charRepo.findById(characterId)).thenReturn(Optional.of(character));
-
-        // when / then
-        assertThatThrownBy(() -> service.deleteCharacterWeapon(weaponId, characterId, auth))
-            .isInstanceOf(ResponseStatusException.class)
-            .hasMessageContaining("Нельзя удалять оружие не своему персонажу!")
-            .extracting(ResponseStatusException.class::cast)
-            .extracting(ErrorResponseException::getStatusCode)
-            .isEqualTo(HttpStatus.FORBIDDEN);
-    }
-
-    @Test
-    void deleteWeapon_weaponNotExists_throw404() {
-        // given
-        UUID weaponId = UUID.randomUUID();
-        UUID characterId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
-        Authentication auth = mock(Authentication.class);
-        User user = new User();
-        user.setId(userId);
-        when(auth.getPrincipal()).thenReturn(user);
-
-        CharacterEntity character = new CharacterEntity();
-        character.setId(characterId); // Добавлено для соответствия
-        character.setOwnerId(userId);
-        character.setWeapons(new ArrayList<>());
-
-        when(charRepo.findById(characterId)).thenReturn(Optional.of(character));
-        when(weaponRepo.findById(weaponId)).thenReturn(Optional.empty()); // Ожидаем, что оружие не найдено
-
-        // when & then
-        assertThatThrownBy(() -> service.deleteCharacterWeapon(weaponId, characterId, auth))
+        assertThatThrownBy(call)
             .isInstanceOf(ResponseStatusException.class)
             .hasMessageContaining("Оружие не найдено")
             .extracting(ResponseStatusException.class::cast)
-            .extracting(ErrorResponseException::getStatusCode)
+            .extracting(ResponseStatusException::getStatusCode)
             .isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
-    void deleteWeapon_characterDontHaveWeapon_throw400() {
+    void putCharacterWeapon_successClearAndAdd() {
         // given
-        UUID weaponId = UUID.randomUUID();
-        UUID characterId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
+        var user = new User();
+        user.setId(UUID.randomUUID());
+        UUID characterId = randomUUID();
         Authentication auth = mock(Authentication.class);
 
-        User user = new User();
-        user.setId(userId);
+        Weapon oldWeapon = new Weapon().setId(randomUUID());
+        Weapon newWeapon1 = new Weapon().setId(randomUUID());
+        Weapon newWeapon2 = new Weapon().setId(randomUUID());
+
+        var character = new CharacterEntity()
+            .setOwnerId(user.getId())
+            .setWeapons(new ArrayList<>(List.of(oldWeapon)));
+
+        UpdateCharacterWeaponRequest request = new UpdateCharacterWeaponRequest();
+        request.setWeaponIds(Set.of(newWeapon1.getId(), newWeapon2.getId()));
+
         when(auth.getPrincipal()).thenReturn(user);
-
-        CharacterEntity character = new CharacterEntity();
-        character.setOwnerId(userId);
         when(charRepo.findById(characterId)).thenReturn(Optional.of(character));
-        when(weaponRepo.findById(weaponId)).thenReturn(Optional.of(new Weapon())); // оружие не в инвентаре
+        when(weaponRepo.findAllByIdIn(Set.of(newWeapon1.getId(), newWeapon2.getId())))
+            .thenReturn(List.of(newWeapon1, newWeapon2));
 
-        // when / then
-        assertThatThrownBy(() -> service.deleteCharacterWeapon(weaponId, characterId, auth))
-            .isInstanceOf(ResponseStatusException.class)
-            .hasMessageContaining("Этого оружия нет в списке вашего персонажа")
-            .extracting(ResponseStatusException.class::cast)
-            .extracting(ErrorResponseException::getStatusCode)
-            .isEqualTo(HttpStatus.BAD_REQUEST);
+        // when
+        service.putCharacterWeapon(request, characterId, auth);
+
+        // then
+        assertThat(character.getWeapons())
+            .containsExactlyInAnyOrder(newWeapon1, newWeapon2);
+        verify(charRepo).save(character);
     }
-
 
     @Test
     public void giveReputation_characterExists_success() {
