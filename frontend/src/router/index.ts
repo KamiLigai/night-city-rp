@@ -39,6 +39,16 @@ const router = createRouter({
             component: () => import('../views/characters/CharacterView.vue')
         },
         {
+            path: '/characters/:characterId/implants/update',
+            name: 'update-character-implants',
+            component: () => import('../views/characters/UpdateImplantsView.vue')
+        },
+        {
+            path: '/characters/:characterId/skills/update',
+            name: 'update-character-skills',
+            component: () => import('../views/characters/UpdateSkillsView.vue')
+        },
+        {
             path: '/characters/:characterId/weapons/update',
             name: 'update-character-weapons',
             component: () => import('../views/characters/UpdateWeaponsView.vue')
