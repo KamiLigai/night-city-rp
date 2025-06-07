@@ -23,7 +23,6 @@ public class CharacterImplantTest {
     BackendRemoteComponent backendRemote = AppContext.get(BackendRemoteComponent.class);
 
     @BeforeEach
-    @Test
     void setUserAdmin() {
         UserDto defaultAdmin = AppContext.get("defaultAdmin");
         backendRemote.setCurrentUser(defaultAdmin.id(), defaultAdmin.username(), defaultAdmin.username());
@@ -77,7 +76,7 @@ public class CharacterImplantTest {
         );
 
         // Добавить импланты персонажу
-        backendRemote.putCharacterImplant(
+        backendRemote.putCharacterImplants(
             UpdateCharacterImplantsRequest.builder()
                 .implantIds(Set.of(implant1.getId(), implant2.getId()))
                 .build(),
@@ -134,7 +133,7 @@ public class CharacterImplantTest {
         );
 
         // Пытаемся выдать имплант персонажу
-        HttpResponse response = backendRemote.putCharacterImplant(
+        HttpResponse response = backendRemote.putCharacterImplants(
             UpdateCharacterImplantsRequest.builder().implantIds(Set.of(implant.getId())).build(),
             characterId
         );
@@ -182,7 +181,7 @@ public class CharacterImplantTest {
         );
 
         // Пробуем добавить имплант
-        HttpResponse response = backendRemote.putCharacterImplant(
+        HttpResponse response = backendRemote.putCharacterImplants(
             UpdateCharacterImplantsRequest.builder().implantIds(Set.of(implant1.getId())).build(),
             characterId
         );

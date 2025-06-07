@@ -260,7 +260,7 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
         return toHttpResponse(response);
     }
 
-    public HttpResponse putCharacterImplant(UpdateCharacterImplantsRequest request, UUID characterId) {
+    public HttpResponse putCharacterImplants(UpdateCharacterImplantsRequest request, UUID characterId) {
         @Cleanup Response response = remote.updateCharacterImplants(request, characterId);
         return toHttpResponse(response);
     }
