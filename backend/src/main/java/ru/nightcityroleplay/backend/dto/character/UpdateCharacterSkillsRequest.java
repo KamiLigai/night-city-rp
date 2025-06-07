@@ -6,6 +6,6 @@ import java.util.List;
 import java.util.UUID;
 
 @Data
-public class UpdateCharacterSkillRequest {
+public class UpdateCharacterSkillsRequest {
     private List<UUID> skillIds;
 }

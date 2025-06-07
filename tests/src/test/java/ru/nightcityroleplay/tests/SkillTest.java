@@ -2,25 +2,26 @@ package ru.nightcityroleplay.tests;
 
 import io.qameta.allure.Description;
 import lombok.SneakyThrows;
+import org.jooq.DSLContext;
 import org.jooq.Result;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.nightcityroleplay.tests.component.AppContext;
 import ru.nightcityroleplay.tests.component.BackendRemoteComponent;
-import ru.nightcityroleplay.tests.dto.CreateSkillRequest;
-import ru.nightcityroleplay.tests.dto.HttpResponse;
-import ru.nightcityroleplay.tests.dto.SkillDto;
-import ru.nightcityroleplay.tests.dto.UserDto;
+import ru.nightcityroleplay.tests.dto.*;
 import ru.nightcityroleplay.tests.entity.tables.records.SkillsRecord;
 import ru.nightcityroleplay.tests.repo.SkillRepo;
 
+import java.util.List;
 import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
+import static ru.nightcityroleplay.tests.entity.Tables.SKILLS;
 
 public class SkillTest {
+    DSLContext dbContext = AppContext.get(DSLContext.class);
     BackendRemoteComponent backendRemote = AppContext.get(BackendRemoteComponent.class);
     SkillRepo skillRepo = AppContext.get(SkillRepo.class);
 
@@ -192,89 +193,79 @@ public class SkillTest {
         assertThat(skillDto.getTypeIsBattle()).isEqualTo(typeIsBattle);
     }
 
-    //todo Исправить Bulk
-//  void getSkillBulk_skillExists_success() {
-    //      // Создать навык
-    //      String skillName = "testName" + randomUUID();
-    //      String skillDescription = "testDescription" + randomUUID();
-    //      Integer skillLevel = 1;
-    //      String skillType = "testType" + randomUUID();
-    //      Integer skillCost = 100;
+    @Test
+    void getSkillBulk_skillExists_success() {
+        String skillName1 = "testName1" + randomUUID();
+        String skillFamily = UUID.randomUUID().toString();
+        String skillDescription = "Skill description example 1";
+        String skillClass = "solo";
+        Boolean typeIsBattle = true;
 
-    //      backendRemote.createSkill(
-    //          CreateSkillRequest.builder()
-    //              .name(skillName)
-    //              .description(skillDescription)
-    //              .level(skillLevel)
-    //              .type(skillType)
-    //              .cost(skillCost)
-    //              .build()
-    //      );
+        backendRemote.createSkill(
+            CreateSkillRequest.builder()
+                .skillFamily(skillFamily)
+                .name(skillName1)
+                .description(skillDescription)
+                .skillClass(skillClass)
+                .typeIsBattle(typeIsBattle)
+                .build()
+        );
+        String skillName2 = "testName2" + randomUUID();
+        String skillFamily2 = UUID.randomUUID().toString();
+        String skillDescription2 = "Skill description example 2";
+        String skillClass2 = "solo";
+        Boolean typeIsBattle2 = true;
 
-    //      String skillName2 = "testName" + randomUUID();
-    //      String skillDescription2 = "testDescription" + randomUUID();
-    //      Integer skillLevel2 = 1;
-    //      String skillType2 = "testType" + randomUUID();
-    //      Integer skillCost2 = 100;
+        backendRemote.createSkill(
+            CreateSkillRequest.builder()
+                .skillFamily(skillFamily2)
+                .name(skillName2)
+                .description(skillDescription2)
+                .skillClass(skillClass2)
+                .typeIsBattle(typeIsBattle2)
+                .build()
+        );
+        Result<SkillsRecord> skillsRecords = dbContext.select().from(SKILLS)
+            .where(SKILLS.NAME.in(skillName1, skillName2))
+            .fetchInto(SKILLS);
 
-    //      backendRemote.createSkill(
-    //          CreateSkillRequest.builder()
-    //              .name(skillName2)
-    //              .description(skillDescription2)
-    //              .level(skillLevel2)
-    //              .type(skillType2)
-    //              .cost(skillCost2)
-    //              .build()
-    //      );
+        assertThat(skillsRecords).hasSize(20);
+        List<UUID> listIds = skillsRecords.stream()
+            .map(SkillsRecord::getId)
+            .toList();
 
-    //      // Проверить создание навыка
-    //      Result<SkillsRecord> skillsRecords = dbContext.select().from(SKILLS)
-    //          .where(SKILLS.NAME.eq(skillName).or(SKILLS.NAME.eq(skillName2)))
-    //          .fetchInto(SKILLS);
+        IdsRequest idsRequest = new IdsRequest();
+        idsRequest.setIds(listIds);
 
-    //      assertThat(skillsRecords.size()).isEqualTo(2);
+        List<SkillDto> skillsBulk = backendRemote.getSkillsBulk(idsRequest);
+        assertThat(skillsBulk).hasSize(20);
+        assertThat(skillsBulk).extracting(SkillDto::getId).containsExactlyInAnyOrderElementsOf(listIds);
+    }
 
-    //      // Получить навыки
+    @Test
+    void getSkillIds_skillExists_success() {
+        String skillName = randomUUID().toString();
+        String skillFamily = randomUUID().toString();
+        String skillDescription = "Skill description example";
+        String skillClass = "solo";
+        Boolean typeIsBattle = true;
 
-    //      List<UUID> listIds = skillsRecords.stream()
-    //          .map(SkillsRecord::getId)
-    //          .toList();
+        backendRemote.createSkill(
+            CreateSkillRequest.builder()
+                .skillFamily(skillFamily)
+                .name(skillName)
+                .description(skillDescription)
+                .skillClass(skillClass)
+                .typeIsBattle(typeIsBattle)
+                .build()
+        );
 
-    //      IdsRequest idsRequest = new IdsRequest();
-    //      idsRequest.setIds(listIds);
-
-    //      List<SkillDto> skillsBulk = backendRemote.getSkillsBulk(idsRequest);
-
-    //      assertThat(skillsBulk.size()).isEqualTo(2);
-    //      assertThat(skillsBulk.get(0).getId()).isEqualTo(listIds.get(0));
-    //      assertThat(skillsBulk.get(1).getId()).isEqualTo(listIds.get(1));
-    //  }
-    //  @Test
-    //  void getSkillIds_skillExists_success() {
-    //      // Создать навык
-    //      String skillName = "testName" + randomUUID();
-    //      String skillDescription = "testDescription" + randomUUID();
-    //      Integer skillLevel = 1;
-    //      String skillType = "testType" + randomUUID();
-    //      Integer skillCost = 100;
-
-    //      backendRemote.createSkill(
-    //          CreateSkillRequest.builder()
-    //              .name(skillName)
-    //              .description(skillDescription)
-    //              .level(skillLevel)
-    //              .type(skillType)
-    //              .cost(skillCost)
-    //              .build()
-    //      );
-
-    //      // Получить все навыки
-    //      Result<SkillsRecord> skillsRecords = dbContext.select().from(SKILLS)
-    //          .fetchInto(SKILLS);
-
-    //      List<UUID> ids = backendRemote.getSkillIds();
-
-    //      assertThat(skillsRecords.size()).isEqualTo(ids.size());
-
+        List<UUID> skillIdsFromDb = dbContext.select(SKILLS.ID).from(SKILLS).fetchInto(UUID.class);
+        IdsRequest idsRequest = new IdsRequest(skillIdsFromDb);
+        List<SkillDto> skills = backendRemote.getSkillsBulk(idsRequest);
+        assertThat(skills).hasSize(skillIdsFromDb.size());
+    }
 }
+
+
 

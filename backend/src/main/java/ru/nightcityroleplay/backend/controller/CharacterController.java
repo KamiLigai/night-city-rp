@@ -67,7 +67,7 @@ public class CharacterController {
     @PutMapping("{characterId}/skills/force")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void updateCharacterSkill(
-        @RequestBody UpdateCharacterSkillRequest request,
+        @RequestBody UpdateCharacterSkillsRequest request,
         @PathVariable UUID characterId
     ) {
         characterService.updateCharacterSkill(request, characterId);
@@ -76,7 +76,7 @@ public class CharacterController {
     //todo Заменить UpdateCharacterSkillRequest.
     @PutMapping("{characterId}/skills/initial")
     public void selectInitialCharacterSkills(
-        @RequestBody UpdateCharacterSkillRequest request,
+        @RequestBody UpdateCharacterSkillsRequest request,
         @PathVariable UUID characterId,
         Authentication auth
     ) {
@@ -123,16 +123,8 @@ public class CharacterController {
     ) {
         characterService.putCharacterWeapon(request, characterId, auth);
     }
-
-    @DeleteMapping("{characterId}/weapons/{weaponId}")
-    public void deleteCharacterWeapon(
-        @PathVariable UUID characterId,
-        @PathVariable UUID weaponId,
-        Authentication auth
-    ) {
-        characterService.deleteCharacterWeapon(weaponId, characterId, auth);
-    }
 }
+
 
 
 

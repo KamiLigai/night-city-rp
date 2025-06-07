@@ -170,7 +170,7 @@ public class CharacterService {
     }
 
     @Transactional
-    public void updateCharacterSkill(UpdateCharacterSkillRequest request, UUID characterId) {
+    public void updateCharacterSkill(UpdateCharacterSkillsRequest request, UUID characterId) {
         log.info("Навыки персонажа {} обновляют ся", characterId);
         CharacterEntity character = characterRepo.findById(characterId).orElseThrow(() ->
             new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден"));
@@ -204,7 +204,7 @@ public class CharacterService {
     }
 
     @Transactional
-    public void selectInitialCharacterSkills(UpdateCharacterSkillRequest request,
+    public void selectInitialCharacterSkills(UpdateCharacterSkillsRequest request,
                                              UUID characterId, Authentication auth) {
         log.info("Персонаж {} выбирает стартовые навыки", characterId);
 

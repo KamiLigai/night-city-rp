@@ -238,7 +238,7 @@ class CharacterServiceTest {
     @Test
     void updateCharacterSkill_characterNotExists_throw404() {
         // given
-        var request = new UpdateCharacterSkillRequest();
+        var request = new UpdateCharacterSkillsRequest();
         UUID characterId = UUID.randomUUID();
 
         when(charRepo.findById(characterId)).thenReturn(Optional.empty());
