@@ -13,10 +13,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.ErrorResponseException;
 import org.springframework.web.server.ResponseStatusException;
 import ru.nightcityroleplay.backend.dto.*;
-import ru.nightcityroleplay.backend.entity.CharacterEntity;
-import ru.nightcityroleplay.backend.entity.Implant;
-import ru.nightcityroleplay.backend.entity.User;
-import ru.nightcityroleplay.backend.entity.Weapon;
+import ru.nightcityroleplay.backend.dto.character.*;
+import ru.nightcityroleplay.backend.dto.implants.*;
+import ru.nightcityroleplay.backend.entity.*;
 import ru.nightcityroleplay.backend.repo.CharacterRepository;
 import ru.nightcityroleplay.backend.repo.ImplantRepository;
 import ru.nightcityroleplay.backend.repo.SkillRepository;
@@ -53,7 +52,7 @@ class CharacterServiceTest {
         skillRepo = mock();
         implantRepo = mock();
 
-        service = new CharacterService(charRepo, characterStatsService, characterClassService, weaponRepo, skillRepo, implantRepo, characterStatsService);
+        service = new CharacterService(charRepo, characterStatsService, characterClassService, weaponRepo, skillRepo, implantRepo);
     }
 
     @Test
@@ -223,15 +222,12 @@ class CharacterServiceTest {
         var request = new UpdateCharacterRequest();
         UUID characterId = UUID.randomUUID();
         request.setAge(1);
-        request.setReputation(0);
         request.setName(randomUUID().toString());
-
-        Authentication auth = mock(Authentication.class);
 
         when(charRepo.findById(characterId)).thenReturn(Optional.empty());
 
         // then
-        assertThatThrownBy(() -> service.updateCharacter(request, characterId, auth))
+        assertThatThrownBy(() -> service.updateCharacter(request, characterId))
             .isInstanceOf(ResponseStatusException.class)
             .hasMessageContaining("Персонаж " + characterId + " не найден")
             .extracting(ResponseStatusException.class::cast)
@@ -240,21 +236,35 @@ class CharacterServiceTest {
     }
 
     @Test
-    void updateCharacterForbidden() {
+    void updateCharacterSkill_characterNotExists_throw404() {
         // given
-        var request = new UpdateCharacterRequest();
+        var request = new UpdateCharacterSkillsRequest();
         UUID characterId = UUID.randomUUID();
 
-        request.setAge(1);
-        request.setReputation(0);
-        request.setName(randomUUID().toString());
+        when(charRepo.findById(characterId)).thenReturn(Optional.empty());
+
+        // then
+        assertThatThrownBy(() -> service.updateCharacterSkill(request, characterId))
+            .isInstanceOf(ResponseStatusException.class)
+            .hasMessageContaining("Персонаж " + characterId + " не найден")
+            .extracting(ResponseStatusException.class::cast)
+            .extracting(ErrorResponseException::getStatusCode)
+            .isEqualTo(HttpStatus.NOT_FOUND);
+
+    }
+
+    @Test
+    void firstSelectCharacterSkill_unauthorized_throw403() {
+        // given
+        var request = new UpgradeCharacterSkillRequest();
+        UUID characterId = UUID.randomUUID();
 
         var oldCharacter = new CharacterEntity();
         oldCharacter.setId(characterId);
-        oldCharacter.setOwnerId(UUID.randomUUID()); // Должен отличаться от ID пользователя
+        oldCharacter.setOwnerId(UUID.randomUUID()); // Персонаж принадлежит другому пользователю
 
         var user = new User();
-        user.setId(UUID.randomUUID()); // Должен отличаться от ID владельца персонажа
+        user.setId(UUID.randomUUID()); // Не совпадает с ownerId персонажа
 
         Authentication auth = mock(Authentication.class);
         when(auth.getPrincipal()).thenReturn(user);
@@ -262,39 +272,19 @@ class CharacterServiceTest {
         when(charRepo.findById(characterId)).thenReturn(Optional.of(oldCharacter));
 
         // then
-        assertThatThrownBy(() -> service.updateCharacter(request, characterId, auth))
+        assertThatThrownBy(() -> service.upgradeCharacterSkill(request, characterId, auth))
             .isInstanceOf(ResponseStatusException.class)
-            .hasMessageContaining(("Изменить чужого персонажа вздумал? а ты хорош."))
+            .hasMessageContaining("Нельзя добавлять навык не своему персонажу!")
             .extracting(ResponseStatusException.class::cast)
-            .extracting(ErrorResponseException::getStatusCode)
+            .extracting(ResponseStatusException::getStatusCode)
             .isEqualTo(HttpStatus.FORBIDDEN);
-
     }
 
     @Test
-    void updateCharacterSkill_characterNotExists_throw404() {
+    void upgradeCharacterSkill_skillNotFound_throw404() {
         // given
-        var request = new UpdateCharacterSkillRequest();
-        UUID characterId = UUID.randomUUID();
-
-        Authentication auth = mock(Authentication.class);
-
-        when(charRepo.findById(characterId)).thenReturn(Optional.empty());
-
-        // then
-        assertThatThrownBy(() -> service.updateCharacterSkill(request, characterId, auth))
-            .isInstanceOf(ResponseStatusException.class)
-            .hasMessageContaining("Персонаж " + characterId + " не найден")
-            .extracting(ResponseStatusException.class::cast)
-            .extracting(ErrorResponseException::getStatusCode)
-            .isEqualTo(HttpStatus.NOT_FOUND);
-
-    }
-
-    @Test
-    void updateCharacterSkill_unauthorized_throw403() {
-        // given
-        var request = new UpdateCharacterSkillRequest();
+        var request = new UpgradeCharacterSkillRequest();
+        request.setSkillIds(List.of(UUID.randomUUID()));
         UUID characterId = UUID.randomUUID();
 
         var oldCharacter = new CharacterEntity();
@@ -302,20 +292,77 @@ class CharacterServiceTest {
         oldCharacter.setOwnerId(UUID.randomUUID());
 
         var user = new User();
-        user.setId(UUID.randomUUID());
+        user.setId(oldCharacter.getOwnerId());
 
         Authentication auth = mock(Authentication.class);
         when(auth.getPrincipal()).thenReturn(user);
 
         when(charRepo.findById(characterId)).thenReturn(Optional.of(oldCharacter));
+        when(skillRepo.findById(any(UUID.class))).thenReturn(Optional.empty()); // Навык не найден
 
         // then
-        assertThatThrownBy(() -> service.updateCharacterSkill(request, characterId, auth))
+        assertThatThrownBy(() -> service.upgradeCharacterSkill(request, characterId, auth))
             .isInstanceOf(ResponseStatusException.class)
-            .hasMessageContaining("Нельзя добавлять навык не своему персонажу!")
+            .hasMessageContaining("Навык с ID")
+            .hasMessageContaining("не найден")
             .extracting(ResponseStatusException.class::cast)
-            .extracting(ErrorResponseException::getStatusCode)
-            .isEqualTo(HttpStatus.FORBIDDEN);
+            .extracting(ResponseStatusException::getStatusCode)
+            .isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void upgradeCharacterSkill_insufficientBattlePoints_throw400() {
+        // given
+        var request = new UpgradeCharacterSkillRequest();
+        UUID skillId = UUID.randomUUID();
+        request.setSkillIds(List.of(skillId));
+
+        UUID characterId = UUID.randomUUID();
+
+        var character = new CharacterEntity();
+        character.setId(characterId);
+        character.setOwnerId(UUID.randomUUID());
+        character.setReputation(0);
+        character.setBattlePoints(10); // Недостаточно боевых очков
+
+        var user = new User();
+        user.setId(character.getOwnerId());
+
+        Authentication auth = mock(Authentication.class);
+        when(auth.getPrincipal()).thenReturn(user);
+
+        var currentSkill = new Skill();
+        currentSkill.setId(skillId);
+        currentSkill.setSkillFamily("long_blade");
+        currentSkill.setLevel(1); // Текущий уровень навыка
+        currentSkill.setReputationRequirement(0); // Требуемая репутация меньше текущей
+        currentSkill.setBattleCost(1);
+        currentSkill.setCivilCost(0);
+
+        var nextSkill = new Skill();
+        nextSkill.setId(UUID.randomUUID());
+        nextSkill.setSkillFamily("long_blade");
+        nextSkill.setLevel(currentSkill.getLevel()+1); // Следующий уровень навыка
+        nextSkill.setReputationRequirement(0); // Требуемая репутация меньше текущей
+        nextSkill.setBattleCost(20);
+        nextSkill.setCivilCost(0);
+
+
+        character.setSkills(new ArrayList<>()); // Персонаж уже обладает текущим навыком
+        character.getSkills().add(currentSkill);
+
+
+        when(charRepo.findById(characterId)).thenReturn(Optional.of(character));
+        when(skillRepo.findById(skillId)).thenReturn(Optional.of(currentSkill));
+        when(skillRepo.findBySkillFamilyAndLevel(any(), eq(2))).thenReturn(Optional.of(nextSkill));
+
+        // then
+        assertThatThrownBy(() -> service.upgradeCharacterSkill(request, characterId, auth))
+            .isInstanceOf(ResponseStatusException.class)
+            .hasMessageContaining("Недостаточно БО для выбранного уровня навыка")
+            .extracting(ResponseStatusException.class::cast)
+            .extracting(ResponseStatusException::getStatusCode)
+            .isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
     @Test
@@ -336,6 +383,76 @@ class CharacterServiceTest {
             .isEqualTo(HttpStatus.NOT_FOUND);
     }
 
+
+
+    @Test
+    void upgradeCharacterSkill_success() {
+        // given
+        UpgradeCharacterSkillRequest request = new UpgradeCharacterSkillRequest();
+        UUID skillId = UUID.randomUUID();
+
+        UUID characterId = UUID.randomUUID();
+        request.setSkillIds(new ArrayList<>());
+        request.getSkillIds().add(skillId);
+
+        var character = new CharacterEntity();
+        character.setId(characterId);
+        character.setOwnerId(UUID.randomUUID());
+        character.setReputation(40); // Репутация больше минимально необходимой
+        character.setBattlePoints(10); // Достаточно боевых очков
+        character.setCivilPoints(10); // Достаточно гражданских очков
+
+        int totalBattlePoints = 0;
+        int totalCivilPoints = 0;
+
+        var user = new User();
+        user.setId(character.getOwnerId());
+
+        var currentSkill = new Skill();
+        currentSkill.setId(skillId);
+        currentSkill.setSkillFamily("long_blade");
+        currentSkill.setLevel(1); // Текущий уровень навыка
+        currentSkill.setReputationRequirement(0); // Требуемая репутация меньше текущей
+        currentSkill.setBattleCost(1);
+        currentSkill.setCivilCost(0);
+
+        var nextSkill = new Skill();
+        nextSkill.setId(UUID.randomUUID());
+        nextSkill.setSkillFamily("long_blade");
+        nextSkill.setLevel(currentSkill.getLevel()+1); // Следующий уровень навыка
+        nextSkill.setReputationRequirement(0); // Требуемая репутация меньше текущей
+        nextSkill.setBattleCost(2);
+        nextSkill.setCivilCost(0);
+
+
+        character.setSkills(new ArrayList<>()); // Персонаж уже обладает текущим навыком
+        character.getSkills().add(currentSkill);
+
+
+        Authentication auth = mock(Authentication.class);
+        when(auth.getPrincipal()).thenReturn(user);
+
+        totalBattlePoints += character.getBattlePoints() - nextSkill.getBattleCost();
+        totalCivilPoints +=  character.getCivilPoints() - nextSkill.getCivilCost();
+
+        when(charRepo.findById(characterId)).thenReturn(Optional.of(character));
+        when(skillRepo.findById(skillId)).thenReturn(Optional.of(currentSkill));
+        when(skillRepo.findBySkillFamilyAndLevel("long_blade", 2)).thenReturn(Optional.of(nextSkill));
+
+        // when
+        service.upgradeCharacterSkill(request, characterId, auth);
+
+        // then
+        assertThat(character.getSkills()).contains(nextSkill);
+
+        // Проверяем, что боевые и гражданские очки скорректированы
+        assertThat(totalBattlePoints).isEqualTo(8);
+        assertThat(totalCivilPoints).isEqualTo(10 );
+
+        // Проверяем, что сущность персонажа сохранена
+        verify(charRepo).save(character);
+    }
+
     @Test
     void updatedCharacter_ownedByUser_success() {
         // given
@@ -345,7 +462,6 @@ class CharacterServiceTest {
         request.setAge(42);
         request.setHeight(180);
         request.setWeight(60);
-        request.setReputation(40);
         request.setOrganization("raven");
         request.setCharacterClass("Соло");
 
@@ -357,12 +473,12 @@ class CharacterServiceTest {
         CharacterEntity character = new CharacterEntity();
         character.setId(charId);
         character.setOwnerId(user.getId());
-        character.setName("old-name"); // старые данные
-        character.setAge(30); // старые данные
+        character.setName("old-name");
+        character.setAge(30);
         when(charRepo.findById(charId)).thenReturn(Optional.of(character));
 
         // when
-        service.updateCharacter(request, charId, auth);
+        service.updateCharacter(request, charId);
 
         // then
         ArgumentCaptor<CharacterEntity> charCaptor = ArgumentCaptor.forClass(CharacterEntity.class);
@@ -374,9 +490,9 @@ class CharacterServiceTest {
         assertThat(savedCharacter.getName()).isEqualTo(request.getName());
         assertThat(savedCharacter.getHeight()).isEqualTo(request.getHeight());
         assertThat(savedCharacter.getWeight()).isEqualTo(request.getWeight());
-        assertThat(savedCharacter.getAge()).isEqualTo(character.getAge());
-        assertThat(savedCharacter.getOrganization()).isEqualTo(character.getOrganization());
-        assertThat(savedCharacter.getCharacterClass()).isEqualTo(character.getCharacterClass());
+        assertThat(savedCharacter.getAge()).isEqualTo(request.getAge());
+        assertThat(savedCharacter.getOrganization()).isEqualTo(request.getOrganization());
+        assertThat(savedCharacter.getCharacterClass()).isEqualTo(request.getCharacterClass());
         assertThat(savedCharacter.getReputation()).isEqualTo(character.getReputation());
 
         verify(charRepo).findById(charId);

@@ -8,8 +8,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import ru.nightcityroleplay.backend.dto.CreateUserRequest;
-import ru.nightcityroleplay.backend.dto.CurrentUserDto;
+import ru.nightcityroleplay.backend.dto.user.CreateUserRequest;
+import ru.nightcityroleplay.backend.dto.user.CurrentUserDto;
 import ru.nightcityroleplay.backend.entity.User;
 import ru.nightcityroleplay.backend.repo.UserRepository;
 

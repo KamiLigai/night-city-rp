@@ -1,11 +1,12 @@
-package ru.nightcityroleplay.tests.dto;
+package ru.nightcityroleplay.backend.dto.skills;
+
 
 import lombok.Data;
 
 import java.util.UUID;
 
 @Data
-public class SkillDto {
+public class CreateSkillRequest {
 
     private UUID id;
     private String skillFamily;
@@ -18,4 +19,3 @@ public class SkillDto {
     private int civilCost;
     private int reputationRequirement;
 }
-

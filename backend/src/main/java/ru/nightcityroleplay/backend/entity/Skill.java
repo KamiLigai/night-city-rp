@@ -20,11 +20,15 @@ public class Skill {
     @Id
     @UuidGenerator
     private UUID id;
+    private String skillFamily;
     private String name;
     private String description;
+    private String skillClass;
+    private Boolean typeIsBattle;
     private int level;
-    private String type;
-    private int cost;
+    private int battleCost;
+    private int civilCost;
+    private int reputationRequirement;
     @ManyToMany(mappedBy = "skills")
     private List<CharacterEntity> characters;
 }

@@ -1,4 +1,4 @@
-package ru.nightcityroleplay.tests.dto;
+package ru.nightcityroleplay.backend.dto.skills;
 
 import lombok.Data;
 
@@ -18,4 +18,3 @@ public class SkillDto {
     private int civilCost;
     private int reputationRequirement;
 }
-

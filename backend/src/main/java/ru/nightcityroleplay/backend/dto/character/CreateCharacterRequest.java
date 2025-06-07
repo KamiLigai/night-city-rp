@@ -1,9 +1,10 @@
-package ru.nightcityroleplay.backend.dto;
+package ru.nightcityroleplay.backend.dto.character;
+
 
 import lombok.Data;
 
 @Data
-public class UpdateCharacterRequest implements SaveCharacterRequest {
+public class CreateCharacterRequest implements SaveCharacterRequest {
     private String name;
     private Integer height;
     private Integer weight;

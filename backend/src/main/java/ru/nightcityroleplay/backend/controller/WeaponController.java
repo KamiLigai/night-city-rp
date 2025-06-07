@@ -6,11 +6,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import ru.nightcityroleplay.backend.dto.CreateWeaponRequest;
-import ru.nightcityroleplay.backend.dto.CreateWeaponResponse;
+import ru.nightcityroleplay.backend.dto.weapons.CreateWeaponRequest;
+import ru.nightcityroleplay.backend.dto.weapons.CreateWeaponResponse;
 import ru.nightcityroleplay.backend.dto.IdsRequest;
-import ru.nightcityroleplay.backend.dto.UpdateWeaponRequest;
-import ru.nightcityroleplay.backend.dto.WeaponDto;
+import ru.nightcityroleplay.backend.dto.weapons.UpdateWeaponRequest;
+import ru.nightcityroleplay.backend.dto.weapons.WeaponDto;
 import ru.nightcityroleplay.backend.service.WeaponService;
 
 import java.util.List;
