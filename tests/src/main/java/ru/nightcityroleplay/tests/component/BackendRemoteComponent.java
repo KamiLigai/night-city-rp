@@ -141,13 +141,13 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
     }
 
     @SneakyThrows
-    public ImplantDto createImplant(CreateImplantRequest request) {
+    public CreateImplantResponse createImplant(CreateImplantRequest request) {
         @Cleanup Response response = remote.createImplant(request);
         if (!response.isSuccessful()) {
             fail("Не удалось создать имплант " + request.name() + ", " + response);
         }
         var jsonBody = response.body().string();
-        return objectMapper.readValue(jsonBody, ImplantDto.class);
+        return objectMapper.readValue(jsonBody, CreateImplantResponse.class);
     }
 
     public void deleteImplant(UUID implantid, boolean ignoreAssignments) {

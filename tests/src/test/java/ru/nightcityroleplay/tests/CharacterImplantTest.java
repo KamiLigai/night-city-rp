@@ -54,7 +54,7 @@ public class CharacterImplantTest {
         UUID characterId = charResult.get(0).getId();
 
         // Создать импланты и взять их id
-        ImplantDto implant1 = backendRemote.createImplant(
+        CreateImplantResponse implant1 = backendRemote.createImplant(
             CreateImplantRequest.builder()
                 .name("Имплант 1")
                 .implantType("Optic")
@@ -64,7 +64,7 @@ public class CharacterImplantTest {
                 .specialImplantPointsCost(0)
                 .build()
         );
-        ImplantDto implant2 = backendRemote.createImplant(
+        CreateImplantResponse implant2 = backendRemote.createImplant(
             CreateImplantRequest.builder()
                 .name("Имплант 2")
                 .implantType("Bio")
@@ -78,7 +78,7 @@ public class CharacterImplantTest {
         // Добавить импланты персонажу
         backendRemote.putCharacterImplants(
             UpdateCharacterImplantsRequest.builder()
-                .implantIds(Set.of(implant1.getId(), implant2.getId()))
+                .implantIds(Set.of(implant1.id(), implant2.id()))
                 .build(),
             characterId
         );
@@ -91,8 +91,7 @@ public class CharacterImplantTest {
         for (CharactersImplantsRecord rec : implants) {
             actualImplantIds.add(rec.getImplantId());
         }
-        assertThat(actualImplantIds).contains(implant1.getId(), implant2.getId());
-        assertThat(implants.size()).isEqualTo(2);
+        assertThat(actualImplantIds).containsExactlyInAnyOrder(implant1.id(), implant2.id());
     }
 
     @Test
@@ -121,7 +120,7 @@ public class CharacterImplantTest {
         UUID characterId = charResult.get(0).getId();
 
         // Создать имплант с высоким требованием по репутации и взять его id
-        ImplantDto implant = backendRemote.createImplant(
+        CreateImplantResponse implant = backendRemote.createImplant(
             CreateImplantRequest.builder()
                 .name("S-Hard-" + UUID.randomUUID())
                 .implantType("Neural")
@@ -134,7 +133,7 @@ public class CharacterImplantTest {
 
         // Пытаемся выдать имплант персонажу
         HttpResponse response = backendRemote.putCharacterImplants(
-            UpdateCharacterImplantsRequest.builder().implantIds(Set.of(implant.getId())).build(),
+            UpdateCharacterImplantsRequest.builder().implantIds(Set.of(implant.id())).build(),
             characterId
         );
 
@@ -169,7 +168,7 @@ public class CharacterImplantTest {
         UUID characterId = charResult.get(0).getId();
 
         // Создаём дорогой имплант
-        ImplantDto implant1 = backendRemote.createImplant(
+        CreateImplantResponse implant1 = backendRemote.createImplant(
             CreateImplantRequest.builder()
                 .name("Big-" + UUID.randomUUID())
                 .implantType("Bio")
@@ -182,7 +181,7 @@ public class CharacterImplantTest {
 
         // Пробуем добавить имплант
         HttpResponse response = backendRemote.putCharacterImplants(
-            UpdateCharacterImplantsRequest.builder().implantIds(Set.of(implant1.getId())).build(),
+            UpdateCharacterImplantsRequest.builder().implantIds(Set.of(implant1.id())).build(),
             characterId
         );
         assertThat(response.code()).isEqualTo(400);
