@@ -1,6 +1,5 @@
 package ru.nightcityroleplay.tests;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jooq.DSLContext;
 import org.jooq.Result;
 import org.junit.jupiter.api.AfterAll;
@@ -25,7 +24,6 @@ public class SkillTest {
 
     DSLContext dbContext = AppContext.get(DSLContext.class);
     BackendRemoteComponent backendRemote = AppContext.get(BackendRemoteComponent.class);
-    ObjectMapper objectMapper = AppContext.get(ObjectMapper.class);
 
     @BeforeEach
     void setUp() {

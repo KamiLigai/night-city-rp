@@ -141,13 +141,13 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
     }
 
     @SneakyThrows
-    public void createImplant(CreateImplantRequest request) {
+    public CreateImplantResponse createImplant(CreateImplantRequest request) {
         @Cleanup Response response = remote.createImplant(request);
         if (!response.isSuccessful()) {
             fail("Не удалось создать имплант " + request.name() + ", " + response);
         }
         var jsonBody = response.body().string();
-        objectMapper.readValue(jsonBody, CreateImplantRequest.class);
+        return objectMapper.readValue(jsonBody, CreateImplantResponse.class);
     }
 
     public void deleteImplant(UUID implantid, boolean ignoreAssignments) {
@@ -257,6 +257,11 @@ public record BackendRemoteComponent(BackendRemote remote, ObjectMapper objectMa
 
     public HttpResponse putCharacterWeapon(UpdateCharacterWeaponRequest request, UUID characterId) {
         @Cleanup Response response = remote.putCharacterWeapon(request, characterId);
+        return toHttpResponse(response);
+    }
+
+    public HttpResponse putCharacterImplants(UpdateCharacterImplantsRequest request, UUID characterId) {
+        @Cleanup Response response = remote.updateCharacterImplants(request, characterId);
         return toHttpResponse(response);
     }
 }
