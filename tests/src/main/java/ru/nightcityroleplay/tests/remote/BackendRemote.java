@@ -186,7 +186,6 @@ public class BackendRemote {
         return call.execute();
     }
 
-    //todo исправить bulk
     @SneakyThrows
     public Response getSkillsBulk(IdsRequest request) {
         byte[] body = objectMapper.writeValueAsBytes(request);
