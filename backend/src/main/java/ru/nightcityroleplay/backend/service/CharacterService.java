@@ -130,7 +130,7 @@ public class CharacterService {
     public CharacterDto getCharacter(UUID characterId) {
         Optional<CharacterEntity> byId = characterRepo.findById(characterId);
         if (byId.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Персонаж " + characterId + " не найден");
+            throw new ResponseStatusException(NOT_FOUND, "Персонаж " + characterId + " не найден");
         }
         return toDto(byId.get());
     }
