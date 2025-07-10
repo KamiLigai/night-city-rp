@@ -300,12 +300,13 @@ public class ImplantTest {
         ImplantDto implantDto = backendRemote.getImplant(implantRecord.get(0).getId());
 
         assertThat(implantRecord).hasSize(1);
-        assertThat(implantDto.name()).isEqualTo(implantRecord.get(0).getName());
-        assertThat(implantDto.implantType()).isEqualTo(implantRecord.get(0).getImplantType());
-        assertThat(implantDto.description()).isEqualTo(implantRecord.get(0).getDescription());
-        assertThat(implantDto.reputationRequirement()).isEqualTo(implantRecord.get(0).getReputationRequirement());
-        assertThat(implantDto.implantPointsCost()).isEqualTo(implantRecord.get(0).getImplantPointsCost());
-        assertThat(implantDto.specialImplantPointsCost()).isEqualTo(implantRecord.get(0).getSpecialImplantPointsCost());
+        assertThat(implantDto.getName()).isEqualTo(implantRecord.get(0).getName());
+        assertThat(implantDto.getImplantType()).isEqualTo(implantRecord.get(0).getImplantType());
+        assertThat(implantDto.getDescription()).isEqualTo(implantRecord.get(0).getDescription());
+        assertThat(implantDto.getReputationRequirement()).isEqualTo(implantRecord.get(0).getReputationRequirement());
+        assertThat(implantDto.getImplantPointsCost()).isEqualTo(implantRecord.get(0).getImplantPointsCost());
+        assertThat(implantDto.getSpecialImplantPointsCost()).isEqualTo(implantRecord.get(0).getSpecialImplantPointsCost());
+
     }
 
     @Test
@@ -388,12 +389,12 @@ public class ImplantTest {
         ImplantDto updatedImplantDto = backendRemote.getImplant(implantRecord.get(0).getId());
 
         // Проверить изменения
-        assertThat(updatedImplantDto.name()).isEqualTo(updatedImplantName);
-        assertThat(updatedImplantDto.description()).isEqualTo(updatedDescription);
-        assertThat(updatedImplantDto.reputationRequirement()).isEqualTo(100);
-        assertThat(updatedImplantDto.implantPointsCost()).isEqualTo(3);
-        assertThat(updatedImplantDto.specialImplantPointsCost()).isEqualTo(0);
-        assertThat(updatedImplantDto.implantType()).isEqualTo("NeuralLink");
+        assertThat(updatedImplantDto.getName()).isEqualTo(updatedImplantName);
+        assertThat(updatedImplantDto.getDescription()).isEqualTo(updatedDescription);
+        assertThat(updatedImplantDto.getReputationRequirement()).isEqualTo(100);
+        assertThat(updatedImplantDto.getImplantPointsCost()).isEqualTo(3);
+        assertThat(updatedImplantDto.getSpecialImplantPointsCost()).isEqualTo(0);
+        assertThat(updatedImplantDto.getImplantType()).isEqualTo("NeuralLink");
     }
 
     @Test
