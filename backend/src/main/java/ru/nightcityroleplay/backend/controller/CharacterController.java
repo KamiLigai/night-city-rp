@@ -108,11 +108,11 @@ public class CharacterController {
 
     @DeleteMapping("{characterId}/implants/{implantId}")
     public void deleteCharacterImplant(
-        @PathVariable UUID characterId,
+        @RequestBody UpdateCharacterImplantsRequest request,
         @PathVariable UUID implantId,
         Authentication auth
     ) {
-        characterService.deleteCharacterImplant(characterId, implantId, auth);
+        characterService.updateCharacterImplants(request, implantId, auth);
     }
 
     @PutMapping("{characterId}/weapons")
