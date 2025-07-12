@@ -3,12 +3,8 @@ package ru.nightcityroleplay.backend.dto.skills;
 
 import lombok.Data;
 
-import java.util.UUID;
-
 @Data
 public class CreateSkillRequest {
-
-    private UUID id;
     private String skillFamily;
     private String name;
     private String description;

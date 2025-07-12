@@ -57,13 +57,11 @@ public class ImplantController {
         implantService.deleteImplant(implantId, ignoreAssignments);
     }
 
-    // Получение списка всех ID имплантов
     @GetMapping("/ids")
     public List<UUID> getImplantIds() {
         return implantService.getAllImplantIds();
     }
 
-    // Получение деталей имплантов по запросу с несколькими ID
     @PostMapping("/get-bulk")
     public List<ImplantDto> getBulkImplants(@RequestBody List<UUID> implantIds) {
         return implantService.getBulkImplants(implantIds);
