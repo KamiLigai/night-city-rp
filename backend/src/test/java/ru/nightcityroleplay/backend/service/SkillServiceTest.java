@@ -217,7 +217,7 @@ class SkillServiceTest {
         // then
         assertThatThrownBy(() -> service.deleteSkillsBySkillFamilyId(skillFamilyIds))
             .isInstanceOf(ResponseStatusException.class)
-            .hasMessageContaining("Навык a не найден")
+            .hasMessageContaining("Навык " + a +" не найден")
             .extracting(ResponseStatusException.class::cast)
             .extracting(ResponseStatusException::getStatusCode)
             .isEqualTo(HttpStatus.NOT_FOUND);
@@ -237,7 +237,7 @@ class SkillServiceTest {
         // then
         assertThatThrownBy(() -> service.deleteSkillsBySkillFamilyId(skillFamilyId))
             .isInstanceOf(ResponseStatusException.class)
-            .hasMessageContaining("Этот навык a есть как минимум у одного персонажа!")
+            .hasMessageContaining("Этот навык есть как минимум у одного персонажа!")
             .extracting(ResponseStatusException.class::cast)
             .extracting(ResponseStatusException::getStatusCode)
             .isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
