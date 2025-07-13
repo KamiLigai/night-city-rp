@@ -21,6 +21,7 @@ public class Skill {
     @UuidGenerator
     private UUID id;
     private String skillFamily;
+    private UUID skillFamilyId;
     private String name;
     private String description;
     private String skillClass;

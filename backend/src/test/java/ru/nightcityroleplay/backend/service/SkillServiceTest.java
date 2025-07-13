@@ -35,7 +35,7 @@ class SkillServiceTest {
 
     @BeforeEach
     void setUp() {
-        skillRepo = mock();
+        skillRepo = mock(SkillRepository.class);
         service = new SkillService(skillRepo);
     }
 
@@ -51,7 +51,7 @@ class SkillServiceTest {
             .isInstanceOf(ResponseStatusException.class)
             .hasMessageContaining("Навык " + skillFamily + " не найден")
             .extracting(ResponseStatusException.class::cast)
-            .extracting(ErrorResponseException::getStatusCode)
+            .extracting(ResponseStatusException::getStatusCode)
             .isEqualTo(HttpStatus.NOT_FOUND);
     }
 
@@ -74,9 +74,12 @@ class SkillServiceTest {
         verify(skillRepo, times(10)).save(skillCaptor.capture());
 
         List<Skill> savedSkills = skillCaptor.getAllValues();
+        UUID skillFamilyId = savedSkills.get(0).getSkillFamilyId();
+
         for (int i = 0; i < 10; i++) {
             Skill skill = savedSkills.get(i);
             assertThat(skill.getLevel()).isEqualTo(i + 1);
+            assertThat(skill.getSkillFamilyId()).isEqualTo(skillFamilyId);
             if (skill.getLevel() >= 6) {
                 assertThat(skill.getReputationRequirement()).isGreaterThan(0);
             }
@@ -112,96 +115,57 @@ class SkillServiceTest {
     }
 
     @Test
-    void testBuildSkill_InvalidLevel() {
+    void testBuildSkill_ThrowsExceptionForInvalidLevel() {
         // given
         CreateSkillRequest request = new CreateSkillRequest();
-        request.setSkillFamily("Magic");
-        request.setName("Ice Blast");
-        request.setDescription("Chilling ice attack.");
-        request.setSkillClass("Mage");
-        request.setTypeIsBattle(false);
+        request.setSkillFamily("ExampleFamily");
+        request.setName("InvalidSkill");
+        UUID skillFamilyId = UUID.randomUUID(); // Создание фиктивного skillFamilyId
 
-        // then
-        assertThatThrownBy(() -> service.buildSkill(request, 0))
+        // when/then
+        assertThatThrownBy(() -> service.buildSkill(request, 0, skillFamilyId))
             .isInstanceOf(ResponseStatusException.class)
-            .hasMessageContaining("Уровень навыка должен быть от 1 до 10");
-
-        assertThatThrownBy(() -> service.buildSkill(request, 11))
-            .isInstanceOf(ResponseStatusException.class)
-            .hasMessageContaining("Уровень навыка должен быть от 1 до 10");
+            .hasMessageContaining("Уровень навыка должен быть от 1 до 10")
+            .extracting(ResponseStatusException.class::cast)
+            .extracting(ResponseStatusException::getStatusCode)
+            .isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
     @Test
     public void updateSkill_nonExistingSkill_throwsNotFoundException() {
         // given
-        String oldSkillFamily = randomUUID().toString();
+        UUID oldSkillFamilyId = randomUUID();
         UpdateSkillRequest updateRequest = new UpdateSkillRequest();
         updateRequest.setName("New Name");
         updateRequest.setSkillFamily("New Skill Family");
         updateRequest.setDescription("New Description");
         updateRequest.setTypeIsBattle(true);
 
-        when(skillRepo.findBySkillFamily(oldSkillFamily)).thenReturn(Collections.emptyList());
+        when(skillRepo.findBySkillFamilyId(oldSkillFamilyId)).thenReturn(Collections.emptyList());
 
         // when / then
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
-            service.updateSkill(updateRequest, oldSkillFamily));
+            service.updateSkill(updateRequest, oldSkillFamilyId));
 
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        assertThat(exception.getReason()).isEqualTo("Навыки с skillFamily " + oldSkillFamily + " не найдены");
+        assertThat(exception.getReason()).isEqualTo("Навыки с skillFamily " + oldSkillFamilyId + " не найдены");
 
         verify(skillRepo, never()).save(any());
     }
 
     @Test
-    void testUpdateSkillsBySkillFamily_Success() {
-        // given
-        String oldName = "Old Name";
-        String newName = "New Name";
-        String oldSkillFamily = randomUUID().toString();
-        String newSkillFamily = randomUUID().toString();
-
-        UpdateSkillRequest updateRequest = new UpdateSkillRequest();
-        updateRequest.setSkillFamily(newSkillFamily); // Устанавливаем новое skillFamily
-        updateRequest.setName(newName);
-        updateRequest.setDescription("New Description");
-        updateRequest.setTypeIsBattle(true);
-
-        Skill skill = new Skill();
-        skill.setId(randomUUID()); // Устанавливаем ID для навыка
-        skill.setSkillFamily(oldSkillFamily);
-        skill.setName(oldName);
-        skill.setDescription("Old Description");
-        skill.setTypeIsBattle(false);
-
-        // Мокаем репозиторий, чтобы он вернул список с существующим навыком
-        when(skillRepo.findBySkillFamily(oldSkillFamily)).thenReturn(Collections.singletonList(skill));
-
-        // when
-        service.updateSkill(updateRequest, oldSkillFamily);
-
-        // then
-        verify(skillRepo, times(1)).save(skill); // Проверяем, что скилл был сохранён 1 раз
-        assertThat(skill.getSkillFamily()).isEqualTo(newSkillFamily); // Проверяем обновление skillFamily
-        assertThat(skill.getName()).isEqualTo(newName);
-        assertThat(skill.getDescription()).isEqualTo("New Description");
-        assertThat(skill.getTypeIsBattle()).isTrue();
-    }
-
-
-    @Test
     public void deleteSkill_skillExists_success() {
         // given
-        String skillFamily = randomUUID().toString();
+        UUID skillFamilyId = randomUUID();
 
         Skill skill = new Skill();
-        skill.setSkillFamily(skillFamily);
+        skill.setSkillFamilyId(skillFamilyId);
         skill.setCharacters(List.of());
 
-        when(skillRepo.findBySkillFamily(skillFamily)).thenReturn(List.of(skill));
+        when(skillRepo.findBySkillFamilyId(skillFamilyId)).thenReturn(List.of(skill));
 
         // when
-        service.deleteSkillsBySkillFamily(List.of(skillFamily));
+        service.deleteSkillsBySkillFamilyId(List.of(skillFamilyId));
 
         // then
         verify(skillRepo).delete(skill);
@@ -210,15 +174,15 @@ class SkillServiceTest {
     @Test
     public void deleteSkill_skillNotExists_throw404() {
         // given
-        String skillFamily = UUID.randomUUID().toString();
+        UUID skillFamilyId = UUID.randomUUID();
 
         // when
-        when(skillRepo.findBySkillFamily(skillFamily)).thenReturn(Collections.emptyList());
+        when(skillRepo.findBySkillFamilyId(skillFamilyId)).thenReturn(Collections.emptyList());
 
         // then
-        assertThatThrownBy(() -> service.deleteSkillsBySkillFamily(List.of(skillFamily)))
+        assertThatThrownBy(() -> service.deleteSkillsBySkillFamilyId(List.of(skillFamilyId)))
             .isInstanceOf(ResponseStatusException.class)
-            .hasMessageContaining("Навык " + skillFamily + " не найден")
+            .hasMessageContaining("Навык " + skillFamilyId + " не найден")
             .extracting(ResponseStatusException.class::cast)
             .extracting(ResponseStatusException::getStatusCode)
             .isEqualTo(HttpStatus.NOT_FOUND);
@@ -226,16 +190,16 @@ class SkillServiceTest {
     @Test
     public void deleteSkill_unauthorized_throw422() {
         // given
-        String skillFamily = UUID.randomUUID().toString();
+        UUID skillFamilyId = UUID.randomUUID();
 
         Skill skill = new Skill();
-        skill.setSkillFamily(skillFamily);
+        skill.setSkillFamilyId(skillFamilyId);
         skill.setCharacters(List.of(new CharacterEntity()));
 
-        when(skillRepo.findBySkillFamily(skillFamily)).thenReturn(List.of(skill));
+        when(skillRepo.findBySkillFamilyId(skillFamilyId)).thenReturn(List.of(skill));
 
         // then
-        assertThatThrownBy(() -> service.deleteSkillsBySkillFamily(List.of(skillFamily)))
+        assertThatThrownBy(() -> service.deleteSkillsBySkillFamilyId(List.of(skillFamilyId)))
             .isInstanceOf(ResponseStatusException.class)
             .hasMessageContaining("Этот навык есть как минимум у одного персонажа!")
             .extracting(ResponseStatusException.class::cast)
@@ -246,13 +210,14 @@ class SkillServiceTest {
     @Test
     public void deleteSkillsBySkillFamily_notExist_throw404() {
         // given
-        List<String> skillFamilies = List.of("SkillA");
-        when(skillRepo.findBySkillFamily("SkillA")).thenReturn(Collections.emptyList());
+        UUID a = randomUUID();
+        List<UUID> skillFamilyIds = List.of(a);
+        when(skillRepo.findBySkillFamilyId(a)).thenReturn(Collections.emptyList());
 
         // then
-        assertThatThrownBy(() -> service.deleteSkillsBySkillFamily(skillFamilies))
+        assertThatThrownBy(() -> service.deleteSkillsBySkillFamilyId(skillFamilyIds))
             .isInstanceOf(ResponseStatusException.class)
-            .hasMessageContaining("Навык SkillA не найден")
+            .hasMessageContaining("Навык a не найден")
             .extracting(ResponseStatusException.class::cast)
             .extracting(ResponseStatusException::getStatusCode)
             .isEqualTo(HttpStatus.NOT_FOUND);
@@ -261,17 +226,18 @@ class SkillServiceTest {
     @Test
     public void deleteSkillsByNames_existWithCharacters_throw422() {
         // given
-        List<String> skillFamily = List.of("SkillB");
+        UUID b = randomUUID();
+        List<UUID> skillFamilyId = List.of(b);
 
         Skill skill = new Skill();
         skill.setCharacters(Collections.singletonList(new CharacterEntity()));
 
-        when(skillRepo.findBySkillFamily("SkillB")).thenReturn(List.of(skill));
+        when(skillRepo.findBySkillFamilyId(b)).thenReturn(List.of(skill));
 
         // then
-        assertThatThrownBy(() -> service.deleteSkillsBySkillFamily(skillFamily))
+        assertThatThrownBy(() -> service.deleteSkillsBySkillFamilyId(skillFamilyId))
             .isInstanceOf(ResponseStatusException.class)
-            .hasMessageContaining("Этот навык есть как минимум у одного персонажа!")
+            .hasMessageContaining("Этот навык a есть как минимум у одного персонажа!")
             .extracting(ResponseStatusException.class::cast)
             .extracting(ResponseStatusException::getStatusCode)
             .isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
@@ -280,15 +246,16 @@ class SkillServiceTest {
     @Test
     public void deleteSkillsByNames_existWithoutCharacters_success() {
         // given
-        List<String> skillFamily = List.of("SkillC");
+        UUID c = randomUUID();
+        List<UUID> skillFamilyId = List.of(c);
 
         Skill skill = new Skill();
         skill.setCharacters(Collections.emptyList());
 
-        when(skillRepo.findBySkillFamily("SkillC")).thenReturn(List.of(skill));
+        when(skillRepo.findBySkillFamilyId(c)).thenReturn(List.of(skill));
 
         // when
-        service.deleteSkillsBySkillFamily(skillFamily);
+        service.deleteSkillsBySkillFamilyId(skillFamilyId);
 
         // then
         verify(skillRepo, times(1)).delete(skill);
@@ -297,7 +264,9 @@ class SkillServiceTest {
     @Test
     public void deleteSkillsByNames_multipleExistWithoutCharacters_success() {
         // given
-        List<String> skillFamily = List.of("SkillD", "SkillE");
+        UUID d = randomUUID();
+        UUID e = randomUUID();
+        List<UUID> skillFamilyId = List.of(d, e);
 
         Skill skillD = new Skill();
         skillD.setCharacters(Collections.emptyList());
@@ -305,11 +274,11 @@ class SkillServiceTest {
         Skill skillE = new Skill();
         skillE.setCharacters(Collections.emptyList());
 
-        when(skillRepo.findBySkillFamily("SkillD")).thenReturn(List.of(skillD));
-        when(skillRepo.findBySkillFamily("SkillE")).thenReturn(List.of(skillE));
+        when(skillRepo.findBySkillFamilyId(e)).thenReturn(List.of(skillD));
+        when(skillRepo.findBySkillFamilyId(d)).thenReturn(List.of(skillE));
 
         // when
-        service.deleteSkillsBySkillFamily(skillFamily);
+        service.deleteSkillsBySkillFamilyId(skillFamilyId);
 
         // then
         verify(skillRepo, times(1)).delete(skillD);

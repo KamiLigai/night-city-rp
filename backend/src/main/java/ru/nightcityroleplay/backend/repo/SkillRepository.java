@@ -14,6 +14,8 @@ public interface SkillRepository extends JpaRepository<Skill, UUID> {
 
     List<Skill> findBySkillFamily(String skillFamily);
 
+    List<Skill> findBySkillFamilyId(UUID skillFamilyId);
+
     @Query("select s.id from Skill s")
     List<UUID> findAllSkillIds();
 

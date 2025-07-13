@@ -8,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import ru.nightcityroleplay.backend.dto.*;
+import ru.nightcityroleplay.backend.dto.IdsRequest;
 import ru.nightcityroleplay.backend.dto.skills.CreateSkillRequest;
 import ru.nightcityroleplay.backend.dto.skills.CreateSkillResponse;
 import ru.nightcityroleplay.backend.dto.skills.SkillDto;
@@ -37,6 +37,7 @@ public class SkillService {
         SkillDto skillDto = new SkillDto();
         skillDto.setId(skill.getId());
         skillDto.setSkillFamily(skill.getSkillFamily());
+        skillDto.setSkillFamilyId(skill.getSkillFamilyId());
         skillDto.setName(skill.getName());
         skillDto.setDescription(skill.getDescription());
         skillDto.setSkillClass(skill.getSkillClass());
@@ -54,10 +55,12 @@ public class SkillService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Название навыка не может быть пустым.");
         }
 
+        UUID skillFamilyId = UUID.randomUUID();
+
         List<CreateSkillResponse> responses = new ArrayList<>();
 
         for (int level = 1; level <= 10; level++) {
-            Skill skill = buildSkill(baseRequest, level);
+            Skill skill = buildSkill(baseRequest, level, skillFamilyId);
             skill = skillRepo.save(skill);
             log.info("Навык {} уровня {} был создан", skill.getId(), level);
             responses.add(new CreateSkillResponse(skill.getId()));
@@ -65,10 +68,11 @@ public class SkillService {
         return responses;
     }
 
-    Skill buildSkill(CreateSkillRequest request, int level) {
+    Skill buildSkill(CreateSkillRequest request, int level, UUID skillFamilyId) {
         Skill skill = new Skill();
         skill.setId(UUID.randomUUID());
         skill.setSkillFamily(request.getSkillFamily());
+        skill.setSkillFamilyId(skillFamilyId);
         skill.setName(request.getName());
         skill.setDescription(request.getDescription());
         skill.setSkillClass(request.getSkillClass());
@@ -136,14 +140,15 @@ public class SkillService {
         }
     }
 
-    @Transactional
-    public void updateSkill(UpdateSkillRequest updateRequest, String oldSkillFamily) {
-        log.info("Навыки с названием {} обновляются на новое название {}", oldSkillFamily, updateRequest.getName());
 
-        List<Skill> skills = skillRepo.findBySkillFamily(oldSkillFamily);
+    @Transactional
+    public void updateSkill(UpdateSkillRequest updateRequest, UUID oldSkillFamilyId) {
+        log.info("Навыки с названием {} обновляются на новое название {}", oldSkillFamilyId, updateRequest.getName());
+
+        List<Skill> skills = skillRepo.findBySkillFamilyId(oldSkillFamilyId);
 
         if (skills.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Навыки с skillFamily " + oldSkillFamily
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Навыки с skillFamily " + oldSkillFamilyId
                 + " не найдены");
         }
 
@@ -158,11 +163,11 @@ public class SkillService {
     }
 
     @Transactional
-    public void deleteSkillsBySkillFamily(List<String> skillFamilies) {
-        for (String skillFamily : skillFamilies) {
-            List<Skill> skills = skillRepo.findBySkillFamily(skillFamily);
+    public void deleteSkillsBySkillFamilyId(List<UUID> skillFamilyIds) {
+        for (UUID skillFamilyId : skillFamilyIds) {
+            List<Skill> skills = skillRepo.findBySkillFamilyId(skillFamilyId);
             if (skills == null || skills.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Навык " + skillFamily + " не найден");
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Навык " + skillFamilyId + " не найден");
             }
             for (Skill skill : skills) {
                 if (!skill.getCharacters().isEmpty()) {
@@ -170,7 +175,7 @@ public class SkillService {
                         "Этот навык есть как минимум у одного персонажа!");
                 }
                 skillRepo.delete(skill);
-                log.info("Навык {} удалён", skillFamily);
+                log.info("Навык {} удалён", skillFamilyId);
             }
         }
     }

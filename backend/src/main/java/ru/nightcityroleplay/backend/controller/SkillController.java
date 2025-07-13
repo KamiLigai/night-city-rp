@@ -31,20 +31,20 @@ public class SkillController {
         return skillService.createSkillFamily(request);
     }
 
-    @PutMapping("{oldSkillFamily}")
+    @PutMapping("{oldSkillFamilyId}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public String updateSkillsBySkillFamily(
+    public String updateSkillsBySkillFamilyId(
         @RequestBody UpdateSkillRequest updateRequest,
-        @PathVariable String oldSkillFamily
+        @PathVariable UUID oldSkillFamilyId
     ) {
-        skillService.updateSkill(updateRequest, oldSkillFamily);
+        skillService.updateSkill(updateRequest, oldSkillFamilyId);
         return "Навыки успешно обновлены";
     }
 
-    @DeleteMapping("/{skillFamily}")
+    @DeleteMapping("/{skillFamilyId}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void deleteSkillsByName(@PathVariable String skillFamily) {
-        skillService.deleteSkillsBySkillFamily(List.of(skillFamily));
+    public void deleteSkillsBySkillFamilyId(@PathVariable UUID skillFamilyId) {
+        skillService.deleteSkillsBySkillFamilyId(List.of(skillFamilyId));
     }
 
     @GetMapping

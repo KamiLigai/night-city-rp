@@ -16,6 +16,11 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
+                  name: skill_family_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
                   name: skill_class
                   type: varchar
                   constraints:
