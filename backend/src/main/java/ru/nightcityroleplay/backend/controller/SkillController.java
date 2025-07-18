@@ -72,3 +72,4 @@ public class SkillController {
         return skillService.getSkillsBulk(request);
     }
 }
+
