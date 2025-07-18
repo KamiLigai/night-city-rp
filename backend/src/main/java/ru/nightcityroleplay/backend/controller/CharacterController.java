@@ -54,7 +54,7 @@ public class CharacterController {
     }
 
     @PostMapping("{characterId}/reputation/give")
-    @Operation(summary = "Get a product by id", description = "Returns a product as per the id")
+    @Operation(summary = "Начислить репутацию персонажу", description = "Добавляет репутацию персонажу по его ID")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void giveReputation(
         @RequestBody GiveReputationRequest request,
@@ -73,7 +73,6 @@ public class CharacterController {
         characterService.updateCharacterSkill(request, characterId);
     }
 
-    //todo Заменить UpdateCharacterSkillRequest.
     @PutMapping("{characterId}/skills/initial")
     public void selectInitialCharacterSkills(
         @RequestBody UpdateCharacterSkillsRequest request,

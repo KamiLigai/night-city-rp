@@ -25,9 +25,9 @@ public class SkillController {
         this.skillService = skillService;
     }
 
-    @PostMapping()
+    @PostMapping("/CreateFamily")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public List<CreateSkillResponse> createSkill(@RequestBody CreateSkillRequest request) {
+    public List<CreateSkillResponse> createSkillFamily(@RequestBody CreateSkillRequest request) {
         return skillService.createSkillFamily(request);
     }
 
