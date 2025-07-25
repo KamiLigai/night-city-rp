@@ -57,7 +57,7 @@ public class CharacterImplantTest {
         CreateImplantResponse implant1 = backendRemote.createImplant(
             CreateImplantRequest.builder()
                 .name("Имплант 1")
-                .implantType("Optic")
+                .implantType("OPTICAL_SYSTEM")
                 .description("desc1")
                 .reputationRequirement(0)
                 .implantPointsCost(1)
@@ -67,7 +67,7 @@ public class CharacterImplantTest {
         CreateImplantResponse implant2 = backendRemote.createImplant(
             CreateImplantRequest.builder()
                 .name("Имплант 2")
-                .implantType("Bio")
+                .implantType("FRONTAL_LOBE")
                 .description("desc2")
                 .reputationRequirement(40)
                 .implantPointsCost(2)
@@ -123,7 +123,7 @@ public class CharacterImplantTest {
         CreateImplantResponse implant = backendRemote.createImplant(
             CreateImplantRequest.builder()
                 .name("S-Hard-" + UUID.randomUUID())
-                .implantType("Neural")
+                .implantType("FRONTAL_LOBE")
                 .description("desc")
                 .reputationRequirement(10)
                 .implantPointsCost(1)
@@ -171,7 +171,7 @@ public class CharacterImplantTest {
         CreateImplantResponse implant1 = backendRemote.createImplant(
             CreateImplantRequest.builder()
                 .name("Big-" + UUID.randomUUID())
-                .implantType("Bio")
+                .implantType("OPERATING_SYSTEM")
                 .description("expensive")
                 .reputationRequirement(0)
                 .implantPointsCost(100)
