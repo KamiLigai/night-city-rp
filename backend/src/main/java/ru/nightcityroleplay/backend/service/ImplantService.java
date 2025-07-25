@@ -57,12 +57,6 @@ public class ImplantService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                 "Имя импланта не может быть пустым.");
         }
-        if (request.getImplantType() == null || request.getImplantType().isBlank()) {
-            log.info("Ошибка: Тип импланта не может быть пустым. Пользователь: {}",
-                auth.getName());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "Тип импланта не может быть пустым.");
-        }
         if (request.getDescription() == null || request.getDescription().isBlank()) {
             log.info("Ошибка: Описание не может быть пустым. Пользователь: {}",
                 auth.getName());
@@ -92,7 +86,7 @@ public class ImplantService {
         Implant implant = new Implant();
         implant.setId(UUID.randomUUID());
         implant.setName(request.getName());
-        implant.setImplantType(ImplantType.valueOf(request.getImplantType()));
+        implant.setImplantType(request.getImplantType());
         implant.setDescription(request.getDescription());
         implant.setReputationRequirement(request.getReputationRequirement());
         implant.setImplantPointsCost(request.getImplantPointsCost());
@@ -149,10 +143,6 @@ public class ImplantService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                 "Имя импланта не должно быть пустым");
         }
-        if (request.getImplantType() == null || request.getImplantType().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "Тип импланта не должен быть пустым");
-        }
         if (request.getDescription() == null || request.getDescription().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                 "Описание не должно быть пустым");
@@ -163,7 +153,7 @@ public class ImplantService {
         );
         // Обновление существующего импланта с указанными характеристиками
         existingImplant.setName(request.getName());
-        existingImplant.setImplantType(ImplantType.valueOf(request.getImplantType()));
+        existingImplant.setImplantType(request.getImplantType());
         existingImplant.setDescription(request.getDescription());
         existingImplant.setReputationRequirement(request.getReputationRequirement());
         existingImplant.setImplantPointsCost(request.getImplantPointsCost());

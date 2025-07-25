@@ -81,7 +81,7 @@ public class ImplantsTest {
         Implant implant = new Implant();
         implant.setId(implantId);
         implant.setName("Клинки Богомолла TEST");
-        implant.setImplantType(ARMS);
+        implant.setImplantType( "ARMS");
         implant.setDescription("Боевой кибернетический имплант, смертоносные клинки которого исходят из предплечья, что позволяет использовать их как оружие ближнего боя.\n" +
             "\n" +
             "Уровень Пробивной мощности: 3");
