@@ -43,7 +43,7 @@ public class ImplantsTest {
         // given
         var request = new CreateImplantRequest();
         request.setName("Клинки Богомолла TEST");
-        request.setImplantType("ARMS");
+        request.setImplantType(ImplantType.valueOf("ARMS"));
         request.setDescription("Боевой кибернетический имплант, смертоносные клинки которого исходят из предплечья," +
             " что позволяет использовать их как оружие ближнего боя.\n" +
             "\n" +
@@ -81,7 +81,7 @@ public class ImplantsTest {
         Implant implant = new Implant();
         implant.setId(implantId);
         implant.setName("Клинки Богомолла TEST");
-        implant.setImplantType( "ARMS");
+        implant.setImplantType(ImplantType.valueOf("ARMS"));
         implant.setDescription("Боевой кибернетический имплант, смертоносные клинки которого исходят из предплечья, что позволяет использовать их как оружие ближнего боя.\n" +
             "\n" +
             "Уровень Пробивной мощности: 3");
@@ -99,7 +99,7 @@ public class ImplantsTest {
         assertThat(result).isNotNull();
         assertThat(result.getId()).isEqualTo(implantId);
         assertThat(result.getName()).isEqualTo("Клинки Богомолла TEST");
-        assertThat(result.getImplantType()).isEqualTo("ARMS");
+        assertThat(result.getImplantType()).isEqualTo(ImplantType.valueOf("ARMS"));
         assertThat(result.getDescription()).isEqualTo("Боевой кибернетический имплант, смертоносные " +
             "клинки которого исходят из предплечья, что позволяет использовать их как оружие ближнего боя.\n" +
             "\n" +
@@ -119,7 +119,7 @@ public class ImplantsTest {
 
         UpdateImplantRequest request = new UpdateImplantRequest();
         request.setName("Новый Имплант");
-        request.setImplantType("ARMS");
+        request.setImplantType(ImplantType.valueOf("ARMS"));
         request.setDescription("Описание");
         request.setReputationRequirement(40);
         request.setImplantPointsCost(3);
@@ -132,7 +132,7 @@ public class ImplantsTest {
 
         // then
         assertEquals("Новый Имплант", existingImplant.getName());
-        assertEquals("ARMS", existingImplant.getImplantType());
+        assertEquals(ImplantType.valueOf("ARMS"), existingImplant.getImplantType());
         assertEquals("Описание", existingImplant.getDescription());
         assertEquals(40, existingImplant.getReputationRequirement());
         assertEquals(3, existingImplant.getImplantPointsCost());
@@ -146,7 +146,7 @@ public class ImplantsTest {
         // given
         var request = new UpdateImplantRequest();
         request.setName("Valid Name");
-        request.setImplantType("ARMS");
+        request.setImplantType(ImplantType.valueOf("ARMS"));
         request.setDescription("Valid Description");
         request.setReputationRequirement(10);
         request.setImplantPointsCost(20);

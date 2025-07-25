@@ -94,7 +94,7 @@ public class ImplantTest {
 
         // Создать имплант
         String implantName = randomUUID().toString();
-        String implantType = "Оптика";
+        String implantType = "OPTICAL_SYSTEM";
         String description = "йцуйцуйцу";
         int reputationRequirement = 100;
         int implantPointsCost = 2;
@@ -145,8 +145,8 @@ public class ImplantTest {
 
     private static Stream<Arguments> implantDataProvider() {
         return Stream.of(
-            Arguments.of("", "Оптика", 2, 0, 100, "Имя импланта не может быть пустым."),
-            Arguments.of("Кироши v.2", "Оптика", -2, 0, 100, "Стоимость очков импланта не может быть отрицательной.")
+            Arguments.of("", "OPTICAL_SYSTEM", 2, 0, 100, "Имя импланта не может быть пустым."),
+            Arguments.of("Кироши v.2", "OPTICAL_SYSTEM", -2, 0, 100, "Стоимость очков импланта не может быть отрицательной.")
         );
     }
 
