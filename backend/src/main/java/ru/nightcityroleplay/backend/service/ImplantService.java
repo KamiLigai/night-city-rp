@@ -89,7 +89,7 @@ public class ImplantService {
                 "Стоимость особых имплантных очков не может быть отрицательной.");
         }
 
-        // Создание импланта
+        // Создание импланта.
         Implant implant = new Implant();
         implant.setId(UUID.randomUUID());
         implant.setName(request.getName());

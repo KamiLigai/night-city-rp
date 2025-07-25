@@ -6,9 +6,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import ru.nightcityroleplay.backend.dto.CreateUserRequest;
-import ru.nightcityroleplay.backend.dto.CurrentUserDto;
-import ru.nightcityroleplay.backend.dto.UserDto;
+import ru.nightcityroleplay.backend.dto.user.CreateUserRequest;
+import ru.nightcityroleplay.backend.dto.user.CurrentUserDto;
+import ru.nightcityroleplay.backend.dto.user.UserDto;
 import ru.nightcityroleplay.backend.service.UserService;
 
 import java.util.UUID;

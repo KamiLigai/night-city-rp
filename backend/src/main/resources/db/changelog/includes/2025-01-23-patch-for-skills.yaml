@@ -1,0 +1,56 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2025-01-23-patch-for-skills.yaml
+      author: kokoligai
+      changes:
+        - delete:
+            tableName: characters_skills
+        - delete:
+            tableName: skills
+        - addColumn:
+            tableName: skills
+            columns:
+              - column:
+                  name: skill_family
+                  type: varchar
+                  constraints:
+                    nullable: false
+              - column:
+                  name: skill_family_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: skill_class
+                  type: varchar
+                  constraints:
+                    nullable: false
+              - column:
+                  name: type_is_battle
+                  type: bool
+                  constraints:
+                    nullable: false
+              - column:
+                  name: battle_cost
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: civil_cost
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: reputation_requirement
+                  type: integer
+                  constraints:
+                    nullable: false
+        - dropColumn:
+            columnName: type
+            tableName: skills
+        - dropColumn:
+            columnName: cost
+            tableName: skills
+        - dropUniqueConstraint:
+            constraintName: skills_name_key
+            tableName: skills

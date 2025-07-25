@@ -3,8 +3,13 @@ package ru.nightcityroleplay.backend.controller;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import ru.nightcityroleplay.backend.dto.*;
+import ru.nightcityroleplay.backend.dto.IdsRequest;
+import ru.nightcityroleplay.backend.dto.skills.CreateSkillRequest;
+import ru.nightcityroleplay.backend.dto.skills.CreateSkillResponse;
+import ru.nightcityroleplay.backend.dto.skills.SkillDto;
+import ru.nightcityroleplay.backend.dto.skills.UpdateSkillRequest;
 import ru.nightcityroleplay.backend.service.SkillService;
 
 import java.util.List;
@@ -20,9 +25,26 @@ public class SkillController {
         this.skillService = skillService;
     }
 
-    @PostMapping
-    public CreateSkillResponse createSkill(@RequestBody CreateSkillRequest request) {
-        return skillService.createSkill(request);
+    @PostMapping("/CreateFamily")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public List<CreateSkillResponse> createSkillFamily(@RequestBody CreateSkillRequest request) {
+        return skillService.createSkillFamily(request);
+    }
+
+    @PutMapping("{oldSkillFamilyId}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public String updateSkillsBySkillFamilyId(
+        @RequestBody UpdateSkillRequest updateRequest,
+        @PathVariable UUID oldSkillFamilyId
+    ) {
+        skillService.updateSkill(updateRequest, oldSkillFamilyId);
+        return "Навыки успешно обновлены";
+    }
+
+    @DeleteMapping("/{skillFamilyId}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public void deleteSkillsBySkillFamilyId(@PathVariable UUID skillFamilyId) {
+        skillService.deleteSkillsBySkillFamilyId(List.of(skillFamilyId));
     }
 
     @GetMapping
@@ -30,9 +52,14 @@ public class SkillController {
         return skillService.getSkillPage(pageable);
     }
 
-    @GetMapping("{skillId}")
-    public SkillDto getSkill(@PathVariable UUID skillId) {
-        return skillService.getSkill(skillId);
+    @GetMapping("/unique")
+    public Page<SkillDto> getUniqueSkills(Pageable pageable) {
+        return skillService.getUniqueSkillPage(pageable);
+    }
+
+    @GetMapping("{skillFamily}")
+    public SkillDto getSkill(@PathVariable String skillFamily) {
+        return skillService.getSkill(skillFamily);
     }
 
     @GetMapping("ids")
@@ -44,14 +71,5 @@ public class SkillController {
     public List<SkillDto> getSkillsBulk(@RequestBody IdsRequest request) {
         return skillService.getSkillsBulk(request);
     }
-
-    @PutMapping("{skillId}")
-    public void updateSkill(@RequestBody UpdateSkillRequest request, @PathVariable UUID skillId) {
-        skillService.updateSkill(request, skillId);
-    }
-
-    @DeleteMapping("{skillId}")
-    public void deleteSkill(@PathVariable UUID skillId) {
-        skillService.deleteSkill(skillId);
-    }
 }
+

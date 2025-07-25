@@ -1,17 +1,13 @@
-package ru.nightcityroleplay.backend.dto;
+package ru.nightcityroleplay.backend.dto.implants;
 
 import lombok.Data;
 
-import java.util.UUID;
-
 @Data
-public class ImplantDto {
-    private UUID id;
+public class UpdateImplantRequest {
     private String name;
-    private ImplType implantType;
+    private String implantType;
     private String description;
     private int reputationRequirement;
     private int implantPointsCost;
     private int specialImplantPointsCost;
 }
-

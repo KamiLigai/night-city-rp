@@ -109,7 +109,7 @@
                 <directory>${basedir}/src/main/resources</directory>
             </resource>
             <resource>
-                <directory>${project.build.directory}/generated-resources/jooq</directory>
+                <directory>${basedir}/target/generated-resources/jooq</directory>
             </resource>
         </resources>
         <plugins>

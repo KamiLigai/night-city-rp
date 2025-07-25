@@ -214,7 +214,7 @@ public class WeaponTest {
     @Test
     @Description("""
         Дано: Оружие.
-        Действие: Получить персонажа методом GET /weapons/{id}.
+        Действие: Получить Оружие методом GET /weapons/{id}.
         Ожидается: Получены данные Оружия.
         """)
     void getWeapon() {

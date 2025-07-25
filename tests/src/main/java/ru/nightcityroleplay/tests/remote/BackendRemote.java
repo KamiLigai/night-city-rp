@@ -187,40 +187,6 @@ public class BackendRemote {
     }
 
     @SneakyThrows
-    public Response createSkill(CreateSkillRequest request) {
-        byte[] body = objectMapper.writeValueAsBytes(request);
-        Request httpRequest = new Request.Builder()
-            .url(baseUrl + "skills")
-            .post(RequestBody.create(body, APP_JSON))
-            .header(AUTHORIZATION, getBasicAuthorization(username, password))
-            .build();
-        Call call = client.newCall(httpRequest);
-        return call.execute();
-    }
-
-    @SneakyThrows
-    public Response getSkill(UUID skillId) {
-        Request httpRequest = new Request.Builder()
-            .url(baseUrl + "skills/" + skillId)
-            .get()
-            .header(AUTHORIZATION, getBasicAuthorization(username, password))
-            .build();
-        Call call = client.newCall(httpRequest);
-        return call.execute();
-    }
-
-    @SneakyThrows
-    public Response getSkillIds() {
-        Request httpRequest = new Request.Builder()
-            .url(baseUrl + "skills/ids")
-            .get()
-            .header(AUTHORIZATION, getBasicAuthorization(username, password))
-            .build();
-        Call call = client.newCall(httpRequest);
-        return call.execute();
-    }
-
-    @SneakyThrows
     public Response getSkillsBulk(IdsRequest request) {
         byte[] body = objectMapper.writeValueAsBytes(request);
         Request httpRequest = new Request.Builder()
@@ -307,6 +273,40 @@ public class BackendRemote {
         Request httpRequest = new Request.Builder()
             .url(baseUrl + "characters/" + characterId + "/implants")
             .put(RequestBody.create(body, APP_JSON))
+            .header(AUTHORIZATION, getBasicAuthorization(username, password))
+            .build();
+        Call call = client.newCall(httpRequest);
+        return call.execute();
+    }
+
+    @SneakyThrows
+    public Response createSkill(CreateSkillRequest request) {
+        byte[] body = objectMapper.writeValueAsBytes(request);
+        Request httpRequest = new Request.Builder()
+            .url(baseUrl + "skills")
+            .post(RequestBody.create(body, APP_JSON))
+            .header(AUTHORIZATION, getBasicAuthorization(username, password))
+            .build();
+        Call call = client.newCall(httpRequest);
+        return call.execute();
+    }
+
+    @SneakyThrows
+    public Response deleteSkill(String skillFamily) {
+        Request httpRequest = new Request.Builder()
+            .url(baseUrl + "skills/" + skillFamily)
+            .delete()
+            .header(AUTHORIZATION, getBasicAuthorization(username, password))
+            .build();
+        Call call = client.newCall(httpRequest);
+        return call.execute();
+    }
+
+    @SneakyThrows
+    public Response getSkill(String skillFamily) {
+        Request httpRequest = new Request.Builder()
+            .url(baseUrl + "skills/" + skillFamily)
+            .get()
             .header(AUTHORIZATION, getBasicAuthorization(username, password))
             .build();
         Call call = client.newCall(httpRequest);
