@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class UpdateImplantRequest {
     private String name;
-    private String implantType;
+    private ImplantType implantType;
     private String description;
     private int reputationRequirement;
     private int implantPointsCost;

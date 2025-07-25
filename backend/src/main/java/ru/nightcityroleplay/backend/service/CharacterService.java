@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import ru.nightcityroleplay.backend.dto.*;
 import ru.nightcityroleplay.backend.dto.character.*;
+import ru.nightcityroleplay.backend.dto.implants.ImplantType;
 import ru.nightcityroleplay.backend.dto.implants.ImplantDto;
 import ru.nightcityroleplay.backend.entity.*;
 import ru.nightcityroleplay.backend.repo.CharacterRepository;
@@ -388,22 +389,26 @@ public class CharacterService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Вы не можете добавлять импланты чужому персонажу");
         }
 
-        // Собираем импланты и проверяем доступные ресурсы
-        List<Implant> implantsToAdd = validateAndCollectImplants(request, character);
+        Map<ImplantType, List<Implant>> implantsToAdd = validateAndCollectImplants(request, character);
 
-        // Обновляем характеристики персонажа и сохраняем
-        character.getImplants().addAll(implantsToAdd);
+        for (List<Implant> implantList : implantsToAdd.values()) {
+            character.getImplants().addAll(implantList);
+        }
         characterRepo.save(character);
     }
 
-    // Проверяет импланты и возвращает список имплантов, которые можно добавить
-    private List<Implant> validateAndCollectImplants(
+    private Map<ImplantType, List<Implant>> validateAndCollectImplants(
         UpdateCharacterImplantsRequest request,
         CharacterEntity character
     ) throws ResponseStatusException {
-        List<Implant> implants = new ArrayList<>();
+        Map<ImplantType, List<Implant>> implantMap = new HashMap<>();
         int totalImplantPointsCost = 0;
         int totalSpecialImplantPointsCost = 0;
+        Map<ImplantType, Integer> currentImplantTypeCounts = new HashMap<>();
+        for (Implant existing : character.getImplants()) {
+            ImplantType type = existing.getImplantType();
+            currentImplantTypeCounts.put(type, currentImplantTypeCounts.getOrDefault(type, 0) + 1);
+        }
 
         for (UUID implantId : request.getImplantIds()) {
             Implant implant = implantRepo.findById(implantId).orElseThrow(() ->
@@ -415,8 +420,21 @@ public class CharacterService {
                 );
             }
 
-            // Добавляем имплант в список проверенных
-            implants.add(implant);
+            ImplantType type = implant.getImplantType();
+            if (type == null) {
+                throw new ResponseStatusException(
+                    BAD_REQUEST, "Тип импланта не определён для импланта с ID " + implantId
+                );
+            }
+            int newCount = currentImplantTypeCounts.getOrDefault(type, 0)
+                + implantMap.getOrDefault(type, new ArrayList<>()).size() + 1;
+            if (newCount > type.getLimit()) {
+                throw new ResponseStatusException(
+                    BAD_REQUEST, "Лимит имплантов типа " + type.name() + " превышен"
+                );
+            }
+            implantMap.computeIfAbsent(type, k -> new ArrayList<>()).add(implant);
+
             totalImplantPointsCost += implant.getImplantPointsCost();
             totalSpecialImplantPointsCost += implant.getSpecialImplantPointsCost();
         }
@@ -430,8 +448,9 @@ public class CharacterService {
             throw new ResponseStatusException(BAD_REQUEST, "Недостаточно ОИ* для специальных имплантов");
         }
 
-        return implants;
+        return implantMap;
     }
+
 
     private void validate(SaveCharacterRequest request) {
         if (request.getAge() == null || request.getAge() <= 0) {

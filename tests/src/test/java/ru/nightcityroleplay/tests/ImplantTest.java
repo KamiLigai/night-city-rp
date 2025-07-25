@@ -45,7 +45,7 @@ public class ImplantTest {
     void createImplant_validData_success() {
         // Создать имплант
         String implantName = randomUUID().toString();
-        String implantType = "Оптика";
+        String implantType = "OPTICAL_SYSTEM";
         String description = "йцуйцуйцу";
         int reputationRequirement = 100;
         int implantPointsCost = 2;
@@ -94,7 +94,7 @@ public class ImplantTest {
 
         // Создать имплант
         String implantName = randomUUID().toString();
-        String implantType = "Оптика";
+        String implantType = "OPTICAL_SYSTEM";
         String description = "йцуйцуйцу";
         int reputationRequirement = 100;
         int implantPointsCost = 2;
@@ -145,8 +145,8 @@ public class ImplantTest {
 
     private static Stream<Arguments> implantDataProvider() {
         return Stream.of(
-            Arguments.of("", "Оптика", 2, 0, 100, "Имя импланта не может быть пустым."),
-            Arguments.of("Кироши v.2", "Оптика", -2, 0, 100, "Стоимость очков импланта не может быть отрицательной.")
+            Arguments.of("", "OPTICAL_SYSTEM", 2, 0, 100, "Имя импланта не может быть пустым."),
+            Arguments.of("Кироши v.2", "OPTICAL_SYSTEM", -2, 0, 100, "Стоимость очков импланта не может быть отрицательной.")
         );
     }
 
@@ -162,7 +162,7 @@ public class ImplantTest {
         backendRemote.createImplant(
             CreateImplantRequest.builder()
                 .name(implantName)
-                .implantType("Optics_Kiroshi")
+                .implantType("OPTICAL_SYSTEM")
                 .description("Description text")
                 .reputationRequirement(100)
                 .implantPointsCost(3)
@@ -194,7 +194,7 @@ public class ImplantTest {
         backendRemote.createImplant(
             CreateImplantRequest.builder()
                 .name(implantName)
-                .implantType("Optics_Kiroshi")
+                .implantType("OPTICAL_SYSTEM")
                 .description("Description text")
                 .reputationRequirement(100)
                 .implantPointsCost(3)
@@ -226,7 +226,7 @@ public class ImplantTest {
         backendRemote.createImplant(
             CreateImplantRequest.builder()
                 .name(implantName)
-                .implantType("Optics_Kiroshi")
+                .implantType("OPTICAL_SYSTEM")
                 .description("Description text")
                 .reputationRequirement(100)
                 .implantPointsCost(3)
@@ -279,7 +279,7 @@ public class ImplantTest {
     void getImplant_whenDataIsValid_success() {
         // Создать имплант
         String implantName = randomUUID().toString();
-        String implantType = "Optics";
+        String implantType = "OPTICAL_SYSTEM";
         String description = "Description text";
         int reputationRequirement = 100;
         int implantPointsCost = 3;
@@ -318,7 +318,7 @@ public class ImplantTest {
     void getImplantAssignmentsCount_whenDataIsValid_success() {
         // Создать имплант
         String implantName = randomUUID().toString();
-        String implantType = "Optics";
+        String implantType = "OPTICAL_SYSTEM";
         String description = "TestStatus";
         int reputationRequirement = 100;
         int implantPointsCost = 3;
@@ -353,7 +353,7 @@ public class ImplantTest {
     void updateImplant_whenDataIsValid_success() {
         // Создать имплант
         String implantName = randomUUID().toString();
-        String implantType = "Optics1";
+        String implantType = "OPTICAL_SYSTEM";
         String description = "Initial Description";
         int reputationRequirement = 1001;
         int implantPointsCost = 3;
@@ -377,7 +377,7 @@ public class ImplantTest {
         String updatedDescription = "Updated Description";
         backendRemote.updateImplant(implantRecord.get(0).getId(), UpdateImplantRequest.builder()
             .name(updatedImplantName)
-            .implantType("NeuralLink")
+            .implantType("IMMUNE_SYSTEM")
             .description(updatedDescription)
             .reputationRequirement(100)
             .implantPointsCost(3)
@@ -394,7 +394,7 @@ public class ImplantTest {
         assertThat(updatedImplantDto.getReputationRequirement()).isEqualTo(100);
         assertThat(updatedImplantDto.getImplantPointsCost()).isEqualTo(3);
         assertThat(updatedImplantDto.getSpecialImplantPointsCost()).isEqualTo(0);
-        assertThat(updatedImplantDto.getImplantType()).isEqualTo("NeuralLink");
+        assertThat(updatedImplantDto.getImplantType()).isEqualTo("IMMUNE_SYSTEM");
     }
 
     @Test
@@ -409,7 +409,7 @@ public class ImplantTest {
             randomUUID(),
             UpdateImplantRequest.builder()
                 .name("Some Name")
-                .implantType("NeuralLink")
+                .implantType("SKIN")
                 .description("Some Description")
                 .reputationRequirement(100)
                 .implantPointsCost(10)
@@ -431,7 +431,7 @@ public class ImplantTest {
     void updateImplant_withBadRequest_throw400() {
         // Создать имплант
         String implantName = randomUUID().toString();
-        String implantType = "NeuralLink";
+        String implantType = "SKIN";
         String description = "Test";
         int reputationRequirement = 100;
         int implantPointsCost = 5;

@@ -760,6 +760,7 @@ class CharacterServiceTest {
         implant.setId(UUID.randomUUID());
         implant.setReputationRequirement(1);
         implant.setImplantPointsCost(1000);
+        implant.setImplantType(ImplantType.valueOf("ARMS"));
 
         UpdateCharacterImplantsRequest request = new UpdateCharacterImplantsRequest();
         request.setImplantIds(List.of(implant.getId()));

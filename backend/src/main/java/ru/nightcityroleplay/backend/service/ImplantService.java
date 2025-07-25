@@ -9,10 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import ru.nightcityroleplay.backend.dto.implants.CreateImplantRequest;
-import ru.nightcityroleplay.backend.dto.implants.CreateImplantResponse;
-import ru.nightcityroleplay.backend.dto.implants.ImplantDto;
-import ru.nightcityroleplay.backend.dto.implants.UpdateImplantRequest;
+import ru.nightcityroleplay.backend.dto.implants.*;
 import ru.nightcityroleplay.backend.entity.Implant;
 import ru.nightcityroleplay.backend.repo.ImplantRepository;
 
@@ -48,6 +45,7 @@ public class ImplantService {
         return implantDto;
     }
 
+
     @Transactional
     public CreateImplantResponse createImplant(CreateImplantRequest request, Authentication auth) {
         log.info("Админ {} пытается создать имплант с именем {}", auth.getName(), request.getName());
@@ -58,12 +56,6 @@ public class ImplantService {
                 auth.getName());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                 "Имя импланта не может быть пустым.");
-        }
-        if (request.getImplantType() == null || request.getImplantType().isBlank()) {
-            log.info("Ошибка: Тип импланта не может быть пустым. Пользователь: {}",
-                auth.getName());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "Тип импланта не может быть пустым.");
         }
         if (request.getDescription() == null || request.getDescription().isBlank()) {
             log.info("Ошибка: Описание не может быть пустым. Пользователь: {}",
@@ -150,10 +142,6 @@ public class ImplantService {
         if (request.getName() == null || request.getName().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                 "Имя импланта не должно быть пустым");
-        }
-        if (request.getImplantType() == null || request.getImplantType().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "Тип импланта не должен быть пустым");
         }
         if (request.getDescription() == null || request.getDescription().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
