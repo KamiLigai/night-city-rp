@@ -1,9 +1,9 @@
-package ru.nightcityroleplay.backend.dto;
+package ru.nightcityroleplay.backend.dto.implants;
 
 import lombok.Getter;
 
 @Getter
-public enum ImplType {
+public enum ImplantType {
     FRONTAL_LOBE("Лобная доля", 3),
     OPTICAL_SYSTEM("Оптическая система", 1),
     CIRCULATORY_SYSTEM("Кровеносная система", 3),
@@ -20,7 +20,7 @@ public enum ImplType {
     private final String displayName;
     private final int limit;
 
-    ImplType(String displayName, int limit) {
+    ImplantType(String displayName, int limit) {
         this.displayName = displayName;
         this.limit = limit;
     }

@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import ru.nightcityroleplay.backend.dto.*;
 import ru.nightcityroleplay.backend.dto.character.*;
+import ru.nightcityroleplay.backend.dto.implants.ImplantType;
 import ru.nightcityroleplay.backend.dto.implants.ImplantDto;
 import ru.nightcityroleplay.backend.entity.*;
 import ru.nightcityroleplay.backend.repo.CharacterRepository;
@@ -388,7 +389,7 @@ public class CharacterService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Вы не можете добавлять импланты чужому персонажу");
         }
 
-        Map<ImplType, List<Implant>> implantsToAdd = validateAndCollectImplants(request, character);
+        Map<ImplantType, List<Implant>> implantsToAdd = validateAndCollectImplants(request, character);
 
         for (List<Implant> implantList : implantsToAdd.values()) {
             character.getImplants().addAll(implantList);
@@ -396,16 +397,16 @@ public class CharacterService {
         characterRepo.save(character);
     }
 
-    private Map<ImplType, List<Implant>> validateAndCollectImplants(
+    private Map<ImplantType, List<Implant>> validateAndCollectImplants(
         UpdateCharacterImplantsRequest request,
         CharacterEntity character
     ) throws ResponseStatusException {
-        Map<ImplType, List<Implant>> implantMap = new HashMap<>();
+        Map<ImplantType, List<Implant>> implantMap = new HashMap<>();
         int totalImplantPointsCost = 0;
         int totalSpecialImplantPointsCost = 0;
-        Map<ImplType, Integer> currentImplantTypeCounts = new HashMap<>();
+        Map<ImplantType, Integer> currentImplantTypeCounts = new HashMap<>();
         for (Implant existing : character.getImplants()) {
-            ImplType type = existing.getImplantType();
+            ImplantType type = existing.getImplantType();
             currentImplantTypeCounts.put(type, currentImplantTypeCounts.getOrDefault(type, 0) + 1);
         }
 
@@ -419,7 +420,7 @@ public class CharacterService {
                 );
             }
 
-            ImplType type = implant.getImplantType();
+            ImplantType type = implant.getImplantType();
             if (type == null) {
                 throw new ResponseStatusException(
                     BAD_REQUEST, "Тип импланта не определён для импланта с ID " + implantId

@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
-import ru.nightcityroleplay.backend.dto.ImplType;
+import ru.nightcityroleplay.backend.dto.implants.ImplantType;
 
 import java.util.List;
 import java.util.UUID;
@@ -19,7 +19,7 @@ public class Implant {
     private UUID id;
     private String name;
     @Enumerated(EnumType.STRING)
-    private ImplType implantType;
+    private ImplantType implantType;
     private String description;
     private int reputationRequirement;
     private int implantPointsCost;

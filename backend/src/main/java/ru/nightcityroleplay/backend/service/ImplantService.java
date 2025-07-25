@@ -9,7 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import ru.nightcityroleplay.backend.dto.*;
+import ru.nightcityroleplay.backend.dto.implants.*;
 import ru.nightcityroleplay.backend.entity.Implant;
 import ru.nightcityroleplay.backend.repo.ImplantRepository;
 
@@ -37,7 +37,6 @@ public class ImplantService {
         ImplantDto implantDto = new ImplantDto();
         implantDto.setId(implant.getId());
         implantDto.setName(implant.getName());
-        // Преобразуем ImplType в строку с помощью метода `.name()`
         implantDto.setImplantType(implant.getImplantType());
         implantDto.setDescription(implant.getDescription());
         implantDto.setReputationRequirement(implant.getReputationRequirement());
@@ -93,7 +92,7 @@ public class ImplantService {
         Implant implant = new Implant();
         implant.setId(UUID.randomUUID());
         implant.setName(request.getName());
-        implant.setImplantType(ImplType.valueOf(request.getImplantType()));
+        implant.setImplantType(ImplantType.valueOf(request.getImplantType()));
         implant.setDescription(request.getDescription());
         implant.setReputationRequirement(request.getReputationRequirement());
         implant.setImplantPointsCost(request.getImplantPointsCost());
@@ -164,7 +163,7 @@ public class ImplantService {
         );
         // Обновление существующего импланта с указанными характеристиками
         existingImplant.setName(request.getName());
-        existingImplant.setImplantType(ImplType.valueOf(request.getImplantType()));
+        existingImplant.setImplantType(ImplantType.valueOf(request.getImplantType()));
         existingImplant.setDescription(request.getDescription());
         existingImplant.setReputationRequirement(request.getReputationRequirement());
         existingImplant.setImplantPointsCost(request.getImplantPointsCost());

@@ -8,7 +8,7 @@ import java.util.UUID;
 public class ImplantDto {
     private UUID id;
     private String name;
-    private ImplType implantType;
+    private ImplantType implantType;
     private String description;
     private int reputationRequirement;
     private int implantPointsCost;
