@@ -1,4 +1,4 @@
-package ru.nightcityroleplay.tests.dto;
+package ru.nightcityroleplay.backend.dto.skills;
 
 import lombok.Data;
 
@@ -9,6 +9,7 @@ public class SkillDto {
 
     private UUID id;
     private String skillFamily;
+    private UUID skillFamilyId;
     private String name;
     private String description;
     private String skillClass;
@@ -18,4 +19,3 @@ public class SkillDto {
     private int civilCost;
     private int reputationRequirement;
 }
-

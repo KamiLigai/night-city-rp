@@ -1,4 +1,4 @@
-package ru.nightcityroleplay.backend.dto;
+package ru.nightcityroleplay.backend.dto.character;
 
 public interface SaveCharacterRequest {
 
@@ -6,7 +6,7 @@ public interface SaveCharacterRequest {
 
     String getName();
 
-    Integer getReputation();
+
 
 
 }
